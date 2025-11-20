@@ -9,6 +9,7 @@ build/
 gradlew.bat
 gradlew
 .gradle
+./temp
 
 ### STS ###
 .apt_generated

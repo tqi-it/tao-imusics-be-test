@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import redis.clients.jedis.Jedis
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
@@ -23,13 +22,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
-class IngestaoInicialTest {
+class DownloadUploadS3Test {
 
     /**
      * Objetivo: Classe de teste para validação do fluxo do projeto analytics (im-symphonia-analytics)
      * Pré Condição:
      *  - Subir localmente o projeto im-symphonia-analytics (Comando: make start)
      *  - Verificar em qual porta ele subiu para passa na váriavel BASE_URL
+     *  Tarefa: TPF-67
      */
 
     companion object {
@@ -52,10 +52,6 @@ class IngestaoInicialTest {
         val bucketS3 = System.getenv("AWS_S3_BUCKET_NAME")
         val regionS3 = System.getenv("AWS_S3_REGION_NAME")
         val prefixS3 = "tao-im-symphonia-dev-files/analytics-trends/fuga/"
-
-        // Redis
-        val redisHost = System.getenv("REDIS_HOST")
-        val redisPort = System.getenv("REDIS_PORT")
 
 
         val expectedPlayers = listOf(
@@ -107,7 +103,7 @@ class IngestaoInicialTest {
     }
 
     @Test
-    @Tag("smokeTests") // usando startDate e endDate
+    @Tag("smokeTests")
     fun `CN1 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3`() {
         // 🔹 Corpo com período definido
         val requestBody = """
@@ -198,11 +194,11 @@ class IngestaoInicialTest {
 
 
     @Test
-    @Tag("smokeTests") // Usando 2 dias para frente
+    @Tag("smokeTests") // TODO: Processo esta falhando (500) nao deveria ser um 200 com o error "Unknown error occurred" correto
     fun `CN2 - Validar ingestão quando não possui arquivos para baixar`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(2).format(formatter)
+        val date = LocalDate.now().format(formatter)
 
         // 🔹 Corpo com período definido
         val requestBody = """
@@ -213,7 +209,7 @@ class IngestaoInicialTest {
         """.trimIndent()
 
         // 🔹 Fazer chamada ao /start-process
-        val startResponse = RestAssured.given()
+        val startResponse = given()
             .contentType(ContentType.JSON)
             .header("origin", "http://localhost")
             .header("authorization", "Bearer $token")
@@ -231,20 +227,34 @@ class IngestaoInicialTest {
             .pollInterval(2, TimeUnit.SECONDS)
             .untilCallTo {
 
-                val response = given()
+                val resp = given()
                     .contentType(ContentType.JSON)
                     .header("origin", "http://localhost")
                     .header("authorization", "Bearer $token")
                     .get("/process-status")
                     .then()
+                    .log().all()
                     .extract()
 
-                val error = response.jsonPath().getString("error")
-                println("⏳ Status atual -> error: $error")
-                // esta é a expressão que o Awaitility captura
-                error
-            } matches { errorValue ->
-            errorValue == "FUGA has no analytics to download for the requested period"
+                val error = resp.jsonPath().getString("error") ?: ""
+                val currentStep = resp.jsonPath().getString("current_step") ?: ""
+                val message = resp.jsonPath().getString("message") ?: ""
+                val status = resp.jsonPath().getString("status") ?: ""
+
+                println("⏳ Campos obtidos →")
+                println("   error: $error")
+                println("   current_step: $currentStep")
+                println("   message: $message")
+                println("   status: $status")
+
+                StatusResponseFields(error, currentStep, message, status)
+
+            } matches { result ->
+            val r = result as StatusResponseFields
+            r.error.contains("Unknown error occurred", ignoreCase = true) &&
+                    r.status.equals("failed", ignoreCase = true) &&
+                    r.currentStep.equals("Validação de datas", ignoreCase = true) &&
+                    r.message.equals("Falha na validação de datas", ignoreCase = true)
         }
 
 
@@ -252,11 +262,11 @@ class IngestaoInicialTest {
 
 
     @Test
-    @Tag("smokeTests") // Usando 2 dias para frente
+    @Tag("smokeTests")  /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
     fun `CN3 - Validar ingestão quando já possui um processamento sendo realizado`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(2).format(formatter)
+        val date = LocalDate.now().plusDays(-2).format(formatter)
 
         // 🔹 Corpo com período definido
         val requestBody = """
@@ -274,13 +284,16 @@ class IngestaoInicialTest {
                 .contentType(ContentType.JSON)
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
+                .log().all()
                 .body(requestBody)
                 .post("/start-process")
                 .then()
+                .log().all()
                 .extract()
 
             val statusCode = resposta.statusCode()
             val success = resposta.jsonPath().getBoolean("success")
+            val error = resposta.jsonPath().getBoolean("error")
 
             if (tentativa == 0) {
                 // 🟢 PRIMEIRA EXECUÇÃO — Espera 200
@@ -299,6 +312,7 @@ class IngestaoInicialTest {
                     statusCode,
                     "Segunda execução deveria retornar 409, mas retornou $statusCode"
                 )
+                assertEquals( error, "Process already running" )
                 assertFalse(success, "Segunda execução deveria retornar success=false")
                 println("✔️ Tentativa 2 Bloqueada como esperado: status=$statusCode success=$success")
             }
@@ -306,39 +320,11 @@ class IngestaoInicialTest {
             Thread.sleep(1000)
         }
 
-
-        Awaitility.await()
-            .atMost(30, TimeUnit.SECONDS)
-            .pollInterval(2, TimeUnit.SECONDS)
-            .until {
-
-                val response = given()
-                    .contentType(ContentType.JSON)
-                    .header("origin", "http://localhost")
-                    .header("authorization", "Bearer $token")
-                    .get("/process-status")
-                    .then()
-                    .extract()
-
-                val error = response.jsonPath().getString("error")
-                val message = response.jsonPath().getString("message")
-
-                println("⏳ Status atual → error: $error | message: $message")
-
-                // ❗ Aqui você retorna APENAS uma condição para parar o Awaitility
-                // Por exemplo, até o status deixar de ser 'running'
-                val status = response.jsonPath().getString("status")
-
-                status != "running"  // só para parar o loop quando finalizar
-            }
-
-
-
     }
 
 
     @Test
-    @Tag("smokeTests") // DateTime()-3 conforme esperado do /start-process
+    @Tag("smokeTests") /* DateTime()-3 conforme esperado do /start-process */
     fun `CN4 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3 sem passar data`() {
 
         // 🔹 Fazer chamada ao /start-process
@@ -419,6 +405,227 @@ class IngestaoInicialTest {
 
     }
 
+    @Test
+    @Tag("smokeTests")
+    fun `CN5 - Validar ingestão com datas inválidas`() {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val now = LocalDate.now().format(formatter)
+        val future = LocalDate.now().plusDays(5).format(formatter)
+        val datePlusDays2 = LocalDate.now().plusDays(2).format(formatter)
+        val dateMinusDays1 = LocalDate.now().minusDays(1).format(formatter)
+
+        // 🔥 MAPA DE CENÁRIOS → mensagem esperada
+        val cenarios = listOf(
+            // Data no futuro
+            Triple(future, future, "Data inicial ($future) não pode ser futura. Data atual: $now"),
+
+            // Data inexistente
+            Triple("2025-13-30", "2025-13-30", "Formato de data inválido para data-inicio: 2025-13-30"),
+            Triple("2025-12-40", "2025-12-40", "Formato de data inválido para data-inicio: 2025-12-40"),
+
+            // Formatos incorretos
+            Triple("25-01-2025", "25-01-2025", "Formato de data inválido para data-inicio: 25-01-2025"),
+            Triple("2025/01/25", "2025/01/25", "Formato de data inválido para data-inicio: 2025/01/25"),
+            Triple("25/01/2025", "25/01/2025", "Formato de data inválido para data-inicio: 25/01/2025"),
+
+
+            // start-date > end-date
+            Triple(datePlusDays2, dateMinusDays1,
+                "Data inicial ($datePlusDays2) não pode ser maior que data final ($dateMinusDays1)"
+            ),
+
+            // Range grande // TODO: Hoje pode aceitar um periodo longo por se tratar de reprocessamento
+            //Triple("2000-01-01", "2050-01-01", "Data final (2050-01-01) não pode ser futura. Data atual: 2025-11-19")
+        )
+
+        cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
+
+            println("\n🔎 Testando cenário inválido")
+            println("   ➤ start-date=$startDate")
+            println("   ➤ end-date=$endDate")
+            println("   ➤ Esperado: \"$mensagemEsperada\"")
+
+            val requestBody = """
+            {
+              "start-date": "$startDate",
+              "end-date": "$endDate"
+            }
+        """.trimIndent()
+
+            // Requisição ao start-process
+            val startResponse = given()
+                .contentType(ContentType.JSON)
+                .log().all()
+                .header("origin", "http://localhost")
+                .header("authorization", "Bearer $token")
+                .body(requestBody)
+                .post("/start-process")
+                .then()
+                .log().all()
+                .extract()
+
+            val statusCode = startResponse.statusCode()
+            println("➡ Status HTTP start-process: $statusCode")
+
+            // Para APIs mal feitas que retornam 400 ou 500 mesmo com erro TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
+            assertTrue(statusCode in listOf(400))
+
+            // 🔥 Aguardar mensagem de erro específica no /process-status
+            Awaitility.await()
+                .atMost(15, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .untilCallTo {
+
+                    val resp = given()
+                        .contentType(ContentType.JSON)
+                        .header("origin", "http://localhost")
+                        .header("authorization", "Bearer $token")
+                        .get("/process-status")
+                        .then()
+                        .extract()
+
+                    val error = resp.jsonPath().getString("error") ?: ""
+                    val currentStep = resp.jsonPath().getString("current_step") ?: ""
+                    val message = resp.jsonPath().getString("message") ?: ""
+                    val status = resp.jsonPath().getString("status") ?: ""
+
+                    println("⏳ Campos obtidos →")
+                    println("   error: $error")
+                    println("   current_step: $currentStep")
+                    println("   message: $message")
+                    println("   status: $status")
+
+                    StatusResponseFields(error, currentStep, message, status)
+
+                } matches { result ->
+
+                val r = result as StatusResponseFields
+                r.error.contains(mensagemEsperada, ignoreCase = true) &&
+                        r.status.equals("failed", ignoreCase = true) &&
+                        r.currentStep.equals("Validação de datas", ignoreCase = true) && //contains
+                        r.message.equals("Falha na validação de datas", ignoreCase = true) //isNotBlank
+            }
+
+
+            println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+        }
+    }
+
+    @Test
+    @Tag("smokeTests") // TODO: Processo esta retornando 200 nao 400 verificar mensagens de falhas após ajuste
+    fun `CN6 - Erro no Processamento`() {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val now = LocalDate.now().format(formatter)
+
+        // 🔥 MAPA DE CENÁRIOS → mensagem esperada
+        val cenarios = listOf(
+
+            // Config FUGA inválida (Alterar no analytics a config FUGA_USER)
+            Triple(now, now, "Test"),
+
+            // Config S3 inválida (Alterar no analytics a config AWS_ACCESS_KEY_ID)
+            Triple(now, now, "Test"),
+
+            /// Pasta /tmp invalida  (Alterar no analytics a config DOWNLOADS_FOLDER)
+            Triple(now, now, "Test"),
+
+            // Erro descompactar
+                //Triple(future, future, ""),
+            // Erro Upload S3
+                //Triple(future, future, ""),
+            // Erro Download Fuga
+                //Triple(future, future, ""),
+
+
+        )
+
+        cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
+
+            println("\n🔎 Testando cenário inválido")
+            println("   ➤ start-date=$now")
+            println("   ➤ end-date=$now")
+            println("   ➤ Esperado: \"$mensagemEsperada\"")
+
+            val requestBody = """
+            {
+              "start-date": "$now",
+              "end-date": "$now"
+            }
+        """.trimIndent()
+
+            // Requisição ao start-process
+            val startResponse = given()
+                .contentType(ContentType.JSON)
+                .log().all()
+                .header("origin", "http://localhost")
+                .header("authorization", "Bearer $token")
+                .body(requestBody)
+                .post("/start-process")
+                .then()
+                .log().all()
+                .extract()
+
+            val statusCode = startResponse.statusCode()
+            println("➡ Status HTTP start-process: $statusCode")
+
+            // TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
+            assertTrue(statusCode in listOf(400))
+
+            // 🔥 Aguardar mensagem de erro específica no /process-status
+            Awaitility.await()
+                .atMost(15, TimeUnit.SECONDS)
+                .pollInterval(2, TimeUnit.SECONDS)
+                .untilCallTo {
+
+                    val resp = given()
+                        .contentType(ContentType.JSON)
+                        .header("origin", "http://localhost")
+                        .header("authorization", "Bearer $token")
+                        .get("/process-status")
+                        .then()
+                        .extract()
+
+                    val error = resp.jsonPath().getString("error") ?: ""
+                    val currentStep = resp.jsonPath().getString("current_step") ?: ""
+                    val message = resp.jsonPath().getString("message") ?: ""
+                    val status = resp.jsonPath().getString("status") ?: ""
+
+                    println("⏳ Campos obtidos →")
+                    println("   error: $error")
+                    println("   current_step: $currentStep")
+                    println("   message: $message")
+                    println("   status: $status")
+
+                    StatusResponseFields(error, currentStep, message, status)
+
+                } matches { result ->
+
+                val r = result as StatusResponseFields
+                r.error.contains(mensagemEsperada, ignoreCase = true) &&
+                        r.status.equals("failed", ignoreCase = true) &&
+                        r.currentStep.equals("Validação de configuração", ignoreCase = true) && //contains
+                        r.message.equals("Falha na validação de configuração", ignoreCase = true) //isNotBlank
+            }
+
+            println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+        }
+    }
+
+
+
+
+
+    /**
+     * Campos com retorno de Falhas
+     */
+    data class StatusResponseFields(
+        val error: String,
+        val currentStep: String,
+        val message: String,
+        val status: String
+    )
 
 
     /**
@@ -787,18 +994,6 @@ class IngestaoInicialTest {
         println("  De: ${original.name}")
         println("  Para: ${renomeado.name}")
     }
-
-
-    /**
-     *Função Test Redis
-     */
-    fun criarClienteRedis(): Jedis {
-        val host = System.getenv("$redisHost") ?: "localhost"
-        val port = System.getenv("$redisPort")?.toInt() ?: 6379
-        return Jedis(host, port)
-        // Se usar pass jedis.auth(System.getenv("REDIS_PASSWORD"))
-    }
-
 
 
 }
