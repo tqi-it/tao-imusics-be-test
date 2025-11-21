@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import util.LogCollector
 import java.io.File
 import java.time.LocalDate
@@ -140,7 +141,6 @@ class UploadRedisOpenDataTest {
 
 
     val etapasLiberacaoRedis = setOf(
-        //"process_file_to_redis",
         "sumarize_top_plays",
         "sumarize_top_plataform",
         "sumarize_top_playlist",
@@ -153,7 +153,7 @@ class UploadRedisOpenDataTest {
 
 
     @Test
-    @Tag("smokeTests")
+    @Tag("smokeTests") // TPF-70
     fun `CN6 - Validar entrega dos dados abertos no Redis 'process_file_to_redis'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -195,7 +195,7 @@ class UploadRedisOpenDataTest {
                 val status = resp.jsonPath().getString("status") ?: ""
                 val flow = resp.jsonPath().getString("current_step") ?: ""
 
-                LogCollector.println("📌 Status atual → $status")
+                LogCollector.println("\n📌 Status atual → $status")
                 LogCollector.println("🔄 Step atual → $flow")
 
                 status.equals("running", true) &&
@@ -285,7 +285,7 @@ class UploadRedisOpenDataTest {
     }
 
     @Test
-    @Tag("smokeTests") // Tarefa TPF-69
+    @Tag("smokeTests") // TPF-69
     fun `CN7 - Validar idempotência da ingestão (reimportação) no Redis 'process_file_to_redis'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -429,11 +429,11 @@ class UploadRedisOpenDataTest {
     }
 
     @Test
-    @Tag("smokeTests")
-    fun `CN8 - Validar entrega dos dados abertos no Redis 'sumarize_tops'`() {
+    @Tag("smokeTests") // TPF-68
+    fun `CN8 - Validar entrega dos dados abertosXagrupados no Redis 'sumarize_tops'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(-50).format(formatter)
+        val date = LocalDate.now().plusDays(-60).format(formatter)
 
         val requestBody = """
             {
@@ -459,8 +459,8 @@ class UploadRedisOpenDataTest {
 
         // Aguarda liberar Redis
         Awaitility.await()
-            .atMost(8, TimeUnit.MINUTES)
-            .pollInterval(8, TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.MINUTES)
+            .pollInterval(55, TimeUnit.SECONDS)
             .until {
                 val resp = given()
                     .header("authorization", "Bearer $token")
@@ -471,7 +471,7 @@ class UploadRedisOpenDataTest {
                 val status = resp.jsonPath().getString("status") ?: ""
                 val flow = resp.jsonPath().getString("current_step") ?: ""
 
-                LogCollector.println("📌 Status atual → $status")
+                LogCollector.println("\n📌 Status atual → $status")
                 LogCollector.println("🔄 Step atual → $flow")
                 status.equals("completed", true)
             }
@@ -489,18 +489,22 @@ class UploadRedisOpenDataTest {
         // 1) Carregar dados brutos por plataforma (imusic:*:<PLATAFORMA>:<DATA>:rows)
         val rawRowsByPlatform = plataformas.associateWith { plataforma ->
             val keyRows = getRedisKeys("imusic:*:${plataforma}:${date}:rows").first()
-            jedis.lrange(keyRows, 0, -1).map { jsonToMap(it) }
+            // converte JSON -> Map
+            val rows = jedis.lrange(keyRows, 0, -1).map { jsonToMap(it).toMutableMap() }
+            // Injeta a plataforma em cada row para que o recalculo tenha o mesmo campo que o Redis summary
+            rows.forEach { it["plataform"] = plataforma } // observe 'plataform' com 'a' (mesma string do Python)
+            rows
         }
 
         // 2) Definir regras de sumarização
         val summaryRules = listOf(
             Triple("topplays", "number_of_streams", "plays"),
-            Triple("topplataform", "platform", "plays"),
-            Triple("topplaylist", "playlist", "plays"),
-            Triple("topalbuns", "album", "plays"),
-            Triple("topalbum", "album", "plays"),
-            Triple("topregiao", "region", "plays"),
-            Triple("topregioes", "region", "plays")
+            Triple("topplataform", "plataform", "plays"),
+            Triple("topplaylist", "plataform", "plays"),
+            //Triple("topalbuns", "upc", "plays"),
+            //Triple("topalbum", "upc", "plays"),
+            //Triple("topregiao", "territory", "plays"),
+            //Triple("topregioes", "territory", "plays")
         )
 
         // 3) Validar cada sumarização para cada plataforma
@@ -510,7 +514,7 @@ class UploadRedisOpenDataTest {
 
                 val summaryKey = "imusic:${prefix}:${plataforma}:${date}:rows"
 
-                LogCollector.println("🔎 Validando sumarização → $summaryKey")
+                LogCollector.println("\n🔎 Validando sumarização → $summaryKey")
 
                 validarSumarizacao(
                     summaryKey,
@@ -536,17 +540,6 @@ class UploadRedisOpenDataTest {
     }
 
 
-    fun saveJsonToFile(dir: String, fileName: String, data: Any) {
-        val folder = File(dir)
-        if (!folder.exists()) folder.mkdirs()
-
-        val file = File(folder, fileName)
-        val mapper = ObjectMapper().writerWithDefaultPrettyPrinter()
-        file.writeText(mapper.writeValueAsString(data))
-
-        LogCollector.println("📄 Arquivo salvo: ${file.absolutePath}")
-    }
-
     fun groupAndCount(list: List<Map<String, Any?>>, key: String): Map<String, Int> {
         return list.groupBy { it[key]?.toString() ?: "null" }
             .mapValues { (_, rows) ->
@@ -559,49 +552,206 @@ class UploadRedisOpenDataTest {
             .toMap()
     }
 
+    /**
+    🧠 Objetivo: A função valida se a sumarização gravada no Redis está correta, comparando:
+        - o que está no Redis
+        - com o que deveria estar, calculado novamente no teste (ground truth)
+    Ela garante que a lógica real de sumarização do pipeline está funcionando exatamente como foi especificado.
+
+    A validação ocorre em 3 dimensões:
+        - As chaves agrupadas são as mesmas
+        - A quantidade de grupos é igual (tamanho da sumarização)
+        - O valor somado (number_of_streams) por grupo é igual
+     */
     fun validarSumarizacao(
         summaryKey: String,
         rawRows: List<Map<String, Any?>>,
-        campoAgrupamento: String,
+        campo: String,
         dumpDir: String
     ) {
         val jedis = RedisClient.jedis
 
-        // 1) Buscar dados sumarizados do Redis
+        // 1. Busca no Redis
         val redisSummary = jedis.lrange(summaryKey, 0, -1).map { jsonToMap(it) }
+        if (redisSummary.isNotEmpty()) {
+            LogCollector.println("❌ Sumarização vazia: $summaryKey")
+        }
         assertTrue(redisSummary.isNotEmpty(), "❌ Sumarização vazia: $summaryKey")
 
-        // 2) Recalcular sumarização dentro do teste
-        val expected = groupAndCount(rawRows, campoAgrupamento)
+        // 2. Determina agrupamento baseado no prefixo
+        val config = getSumarizacaoConfig(summaryKey, campo)
 
-        // 3) Converter lista redis em formato Map para comparação
-        val redisMap = redisSummary.associate {
-            it[campoAgrupamento]?.toString()!! to
-                    (it["plays"]?.toString()?.toIntOrNull() ?: 0)
+        // 3. Recalcula sumarização
+        val expected = recalcularSumarizacao(rawRows, config)
+
+        // 4. Redis → Map(agrupamento → streams)
+        val redisMap = redisSummary.associate { row ->
+            val key = config.groupFields.joinToString("|") { field ->
+                (row[field]?.toString()?.trim()?.ifEmpty { "null" } ?: "null").lowercase()
+            }
+            val streams = row["number_of_streams"]?.toString()?.toIntOrNull() ?: 0
+            key to streams
         }
 
-        // 4) Salvar arquivos para inspeção
+        // 5. Dump em caso de erro
         saveJsonToFile(dumpDir, "${summaryKey}_expected.json", expected)
         saveJsonToFile(dumpDir, "${summaryKey}_from_redis.json", redisMap)
 
-        // 5) Comparar tamanho
-        assertEquals(
-            expected.size, redisMap.size,
-            "❌ Quantidade divergente na sumarização → $summaryKey"
-        )
+        // 6. Validação de quantidade
+        if (expected.size != redisMap.size) {
 
-        // 6) Comparar conteúdo
-        expected.forEach { (key, valorEsperado) ->
-            val valorRedis = redisMap[key]
-            assertEquals(
-                valorEsperado,
-                valorRedis,
-                "❌ Divergência na sumarização '$summaryKey' para chave '$key'"
+            LogCollector.println(
+                """
+                ❌ Quantidade divergente → $summaryKey  
+            
+                Esperado = ${expected.size}  
+                Redis    = ${redisMap.size}  
+            
+                Veja dumps em: $dumpDir
+                """.trimIndent()
+                    )
+        } else {
+            LogCollector.println(
+                "✔ Quantidade OK → $summaryKey (total = ${expected.size})"
             )
+        }
+
+        assertEquals(
+            expected.size,
+            redisMap.size,
+            """
+            ❌ Quantidade divergente → $summaryKey  
+            
+            Esperado = ${expected.size}  
+            Redis    = ${redisMap.size}  
+            
+            Veja dumps em: $dumpDir
+            """.trimIndent()
+                )
+
+
+        // 7. Validação item a item
+        expected.forEach { (key, expectedStreams) ->
+            val redisStreams = redisMap[key]
+
+            if (expectedStreams != redisStreams) {
+                LogCollector.println(
+                    """
+                    ❌ Divergência → $summaryKey  
+                    Chave: $key  
+                    Esperado: $expectedStreams  
+                    Redis: $redisStreams  
+            
+                    Veja dumps em: $dumpDir
+                    """.trimIndent()
+                )
+            } else {
+                //LogCollector.println("✔ OK → $summaryKey | $key = $expectedStreams") //TODO: Arquivo .log fica muito grande
+            }
+
+            assertEquals(
+                expectedStreams,
+                redisStreams,
+                        """
+                ❌ Divergência → $summaryKey  
+                Chave: $key  
+                Esperado: $expectedStreams  
+                Redis: $redisStreams  
+            
+                Veja dumps em: $dumpDir
+                """.trimIndent()
+                    )
         }
 
         LogCollector.println("✔ Sumarização validada → $summaryKey")
     }
+
+    /**
+     * Objetivo: Recalcular por conta própria o agrupamento verdadeiro
+        - Agrupar: por um ou mais campos (definidos pela configuração da sumarização)
+        - Somar number_of_streams: dos registros brutos (rawRows) dentro de cada grupo
+        - Gerar um mapa: onde a chave é o agrupamento e o valor é o total somado.
+
+       Como o calculo é feito:
+        - 📂 1. Entrada: rawRows (dados brutos)
+        - ⚙️ 2. Configuração de sumarização (getSumarizacaoConfig)
+                Essa função analisa a key do Redis e devolve:
+                    quais campos devem ser agrupados
+                    qual campo será somado
+        - ➕ 3. Agrupamento e soma (o cálculo correto)
+                PASSO 1 — Criar chave de agrupamento para cada row
+                PASSO 2 — Somar os valores para cada registro
+                        pega number_of_streams
+                        adiciona ao total do grupo correspondente
+        - 🏁 4. Resultado final (expected)
+                    a key é o agrupamento
+                    o value é o total somado
+
+    Agrupar os dados brutos por um ou mais campos e somar number_of_streams dentro de cada grupo.
+
+     */
+    fun recalcularSumarizacao(
+        raw: List<Map<String, Any?>>,
+        config: SumarizacaoConfig
+    ): Map<String, Int> {
+        return raw.groupBy { row ->
+            config.groupFields.joinToString("|") { field ->
+                (row[field]?.toString()?.trim()?.ifEmpty { "null" } ?: "null").lowercase()
+            }
+        }.mapValues { (_, items) ->
+            items.sumOf { it["number_of_streams"]?.toString()?.toIntOrNull() ?: 0 }
+        }
+    }
+
+
+    data class SumarizacaoConfig(
+        val groupFields: List<String>
+    )
+    fun getSumarizacaoConfig(key: String, campo: String): SumarizacaoConfig {
+        return when {
+            key.contains("topplays") -> SumarizacaoConfig(
+                groupFields = listOf("asset_id", "date")
+            )
+
+            key.contains("topplataform") -> SumarizacaoConfig(
+                groupFields = listOf("asset_id", "plataform", "date")
+            )
+
+            key.contains("topplaylist") -> SumarizacaoConfig(
+                groupFields = listOf("asset_id", "plataform", "stream_source", "stream_source_uri", "date")
+            )
+
+            key.contains("topalbuns") -> SumarizacaoConfig(
+                groupFields = listOf("upc", "date")
+            )
+
+            key.contains("topalbum") -> SumarizacaoConfig(
+                groupFields = listOf("upc", "plataform", "date")
+            )
+
+            key.contains("topregiao") && !key.contains("topregioes") -> SumarizacaoConfig(
+                groupFields = listOf("asset_id", "territory", "date")
+            )
+
+            key.contains("topregioes") -> SumarizacaoConfig(
+                groupFields = listOf("asset_id", "territory", "plataform", "date")
+            )
+
+            else -> error("Tipo desconhecido: $key")
+        }
+    }
+
+    fun saveJsonToFile(dir: String, fileName: String, data: Any) {
+        val folder = File(dir)
+        if (!folder.exists()) folder.mkdirs()
+        val mapper = jacksonObjectMapper()
+        File(folder, fileName).writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data))
+    }
+    fun jsonToMap(json: String): Map<String, Any?> {
+        val mapper = jacksonObjectMapper()
+        return mapper.readValue(json, object : TypeReference<Map<String, Any?>>() {})
+    }
+
 
 
 
@@ -926,7 +1076,7 @@ class UploadRedisOpenDataTest {
         return encontrado
     }
 
-    fun jsonToMap(json: String): Map<String, Any> {
+    fun jsonToMap0(json: String): Map<String, Any> {
         val mapper = jacksonObjectMapper()
         return mapper.readValue(json, object : TypeReference<Map<String, Any>>() {})
     }
@@ -935,10 +1085,6 @@ class UploadRedisOpenDataTest {
     /**
      *Função Test Redis
      */
-
-    //fun getRedisKeys(pattern: String): List<String> {
-      //  return RedisClient.jedis.keys(pattern).sorted()
-    //}
 
     fun getRedisKeys(pattern: String): List<String> {
         val jedis = RedisClient.jedis

@@ -16,6 +16,7 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
+import util.LogCollector
 import java.io.File
 import java.time.Duration
 import java.time.LocalDate
@@ -40,8 +41,8 @@ class DownloadUploadS3Test {
         /**
          * Parâmetros do CN1
          */
-        private var startDate ="2025-11-15"
-        private var endDate ="2025-11-15"
+        private var startDate ="2025-11-10"
+        private var endDate ="2025-11-10"
         val tmpDirLocal = File("/tmp")
 
         // Parâmetros dos testes caminho feliz
@@ -103,7 +104,7 @@ class DownloadUploadS3Test {
     }
 
     @Test
-    @Tag("smokeTests")
+    @Tag("smokeTests") // TPF-70
     fun `CN1 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3`() {
         // 🔹 Corpo com período definido
         val requestBody = """
@@ -129,7 +130,7 @@ class DownloadUploadS3Test {
 
         // 🔹 Caso já exista processo rodando (409 por exemplo)
         if (statusCode == 409 || statusCode == 400) {
-            println("Processo já está em execução. Código: $statusCode")
+            LogCollector.println("Processo já está em execução. Código: $statusCode")
             assertTrue(statusCode == 409 || statusCode == 400)
             return
         }
@@ -144,7 +145,7 @@ class DownloadUploadS3Test {
         var finalStatus = ""
         val start = System.currentTimeMillis()
 
-        println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
+        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
         do {
             Thread.sleep(15000) // aguarda 15 segundos
 
@@ -160,7 +161,7 @@ class DownloadUploadS3Test {
             val running = statusResponse.jsonPath().getString("is_running")
             val descFlow = statusResponse.jsonPath().getString("message")
             finalStatus = statusResponse.jsonPath().getString("status")
-            println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
+            LogCollector.println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
 
             // sai do loop quando o processo terminar
             if (finalStatus.equals("completed", ignoreCase = true)) break
@@ -175,8 +176,8 @@ class DownloadUploadS3Test {
 
         // 🔹 Validação final
         assertEquals("completed", finalStatus.lowercase(), "Processo não chegou ao status 'concluido'")
-        println("✔ Processo finalizado com sucesso! Status = $finalStatus")
-        println("────────────────────────────────────────────")
+        LogCollector.println("✔ Processo finalizado com sucesso! Status = $finalStatus")
+        LogCollector.println("────────────────────────────────────────────")
 
         // 🔹 Tempo do teste
         calcDateTime()
@@ -194,7 +195,7 @@ class DownloadUploadS3Test {
 
 
     @Test
-    @Tag("smokeTests") // TODO: Processo esta falhando (500) nao deveria ser um 200 com o error "Unknown error occurred" correto
+    @Tag("smokeTests") // TPF-67 TODO: Processo esta falhando (500) nao deveria ser um 200 com o error "Unknown error occurred" correto
     fun `CN2 - Validar ingestão quando não possui arquivos para baixar`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -220,7 +221,7 @@ class DownloadUploadS3Test {
             .extract()
         val statusStart = startResponse.jsonPath().getBoolean("success")
         assertTrue(statusStart)
-        println("Status process: $statusStart")
+        LogCollector.println("Status process: $statusStart")
 
         Awaitility.await()
             .atMost(10, TimeUnit.SECONDS)
@@ -241,11 +242,11 @@ class DownloadUploadS3Test {
                 val message = resp.jsonPath().getString("message") ?: ""
                 val status = resp.jsonPath().getString("status") ?: ""
 
-                println("⏳ Campos obtidos →")
-                println("   error: $error")
-                println("   current_step: $currentStep")
-                println("   message: $message")
-                println("   status: $status")
+                LogCollector.println("⏳ Campos obtidos →")
+                LogCollector.println("   error: $error")
+                LogCollector.println("   current_step: $currentStep")
+                LogCollector.println("   message: $message")
+                LogCollector.println("   status: $status")
 
                 StatusResponseFields(error, currentStep, message, status)
 
@@ -262,7 +263,7 @@ class DownloadUploadS3Test {
 
 
     @Test
-    @Tag("smokeTests")  /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
+    @Tag("smokeTests")  // TPF-67 /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
     fun `CN3 - Validar ingestão quando já possui um processamento sendo realizado`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -278,7 +279,7 @@ class DownloadUploadS3Test {
 
         repeat(2) { tentativa ->
             val numero = tentativa + 1
-            println("Executando start-process tentativa $numero")
+            LogCollector.println("Executando start-process tentativa $numero")
 
             val resposta = RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -303,7 +304,7 @@ class DownloadUploadS3Test {
                     "Primeira execução deveria retornar 200 OK"
                 )
                 assertTrue(success, "Primeira execução deveria retornar success=true")
-                println("✔️ Tentativa 1 OK: status=$statusCode success=$success")
+                LogCollector.println("✔️ Tentativa 1 OK: status=$statusCode success=$success")
 
             } else {
                 // 🔴 SEGUNDA EXECUÇÃO — Espera 409 (já tem processo rodando)
@@ -314,7 +315,7 @@ class DownloadUploadS3Test {
                 )
                 assertEquals( error, "Process already running" )
                 assertFalse(success, "Segunda execução deveria retornar success=false")
-                println("✔️ Tentativa 2 Bloqueada como esperado: status=$statusCode success=$success")
+                LogCollector.println("✔️ Tentativa 2 Bloqueada como esperado: status=$statusCode success=$success")
             }
 
             Thread.sleep(1000)
@@ -324,7 +325,7 @@ class DownloadUploadS3Test {
 
 
     @Test
-    @Tag("smokeTests") /* DateTime()-3 conforme esperado do /start-process */
+    @Tag("smokeTests") // TPF-70 /* DateTime()-3 conforme esperado do /start-process */
     fun `CN4 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3 sem passar data`() {
 
         // 🔹 Fazer chamada ao /start-process
@@ -342,7 +343,7 @@ class DownloadUploadS3Test {
 
         // 🔹 Caso já exista processo rodando (409 por exemplo)
         if (statusCode == 409 || statusCode == 400) {
-            println("Processo já está em execução. Código: $statusCode")
+            LogCollector.println("Processo já está em execução. Código: $statusCode")
             assertTrue(statusCode == 409 || statusCode == 400)
             return
         }
@@ -357,7 +358,7 @@ class DownloadUploadS3Test {
         var finalStatus = ""
         val start = System.currentTimeMillis()
 
-        println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
+        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
         do {
             Thread.sleep(15000) // aguarda 15 segundos
 
@@ -373,7 +374,7 @@ class DownloadUploadS3Test {
             val running = statusResponse.jsonPath().getString("is_running")
             val descFlow = statusResponse.jsonPath().getString("message")
             finalStatus = statusResponse.jsonPath().getString("status")
-            println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
+            LogCollector.println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
 
             // sai do loop quando o processo terminar
             if (finalStatus.equals("completed", ignoreCase = true)) break
@@ -388,7 +389,7 @@ class DownloadUploadS3Test {
 
         // 🔹 Validação final
         assertEquals("completed", finalStatus.lowercase(), "Processo não chegou ao status 'concluido'")
-        println("✔ Processo finalizado com sucesso! Status = $finalStatus")
+        LogCollector.println("✔ Processo finalizado com sucesso! Status = $finalStatus")
 
         // 🔹 Tempo do teste
         calcDateTime()
@@ -406,7 +407,7 @@ class DownloadUploadS3Test {
     }
 
     @Test
-    @Tag("smokeTests")
+    @Tag("smokeTests") // TPF-67
     fun `CN5 - Validar ingestão com datas inválidas`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -441,10 +442,10 @@ class DownloadUploadS3Test {
 
         cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
 
-            println("\n🔎 Testando cenário inválido")
-            println("   ➤ start-date=$startDate")
-            println("   ➤ end-date=$endDate")
-            println("   ➤ Esperado: \"$mensagemEsperada\"")
+            LogCollector.println("\n🔎 Testando cenário inválido")
+            LogCollector.println("   ➤ start-date=$startDate")
+            LogCollector.println("   ➤ end-date=$endDate")
+            LogCollector.println("   ➤ Esperado: \"$mensagemEsperada\"")
 
             val requestBody = """
             {
@@ -466,7 +467,7 @@ class DownloadUploadS3Test {
                 .extract()
 
             val statusCode = startResponse.statusCode()
-            println("➡ Status HTTP start-process: $statusCode")
+            LogCollector.println("➡ Status HTTP start-process: $statusCode")
 
             // Para APIs mal feitas que retornam 400 ou 500 mesmo com erro TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
             assertTrue(statusCode in listOf(400))
@@ -490,11 +491,11 @@ class DownloadUploadS3Test {
                     val message = resp.jsonPath().getString("message") ?: ""
                     val status = resp.jsonPath().getString("status") ?: ""
 
-                    println("⏳ Campos obtidos →")
-                    println("   error: $error")
-                    println("   current_step: $currentStep")
-                    println("   message: $message")
-                    println("   status: $status")
+                    LogCollector.println("⏳ Campos obtidos →")
+                    LogCollector.println("   error: $error")
+                    LogCollector.println("   current_step: $currentStep")
+                    LogCollector.println("   message: $message")
+                    LogCollector.println("   status: $status")
 
                     StatusResponseFields(error, currentStep, message, status)
 
@@ -508,12 +509,12 @@ class DownloadUploadS3Test {
             }
 
 
-            println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
         }
     }
 
     @Test
-    @Tag("smokeTests") // TODO: Processo esta retornando 200 nao 400 verificar mensagens de falhas após ajuste
+    @Tag("smokeTests") // TPF-67 TODO: Processo esta retornando 200 nao 400 verificar mensagens de falhas após ajuste
     fun `CN6 - Erro no Processamento`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -543,10 +544,10 @@ class DownloadUploadS3Test {
 
         cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
 
-            println("\n🔎 Testando cenário inválido")
-            println("   ➤ start-date=$now")
-            println("   ➤ end-date=$now")
-            println("   ➤ Esperado: \"$mensagemEsperada\"")
+            LogCollector.println("\n🔎 Testando cenário inválido")
+            LogCollector.println("   ➤ start-date=$now")
+            LogCollector.println("   ➤ end-date=$now")
+            LogCollector.println("   ➤ Esperado: \"$mensagemEsperada\"")
 
             val requestBody = """
             {
@@ -568,7 +569,7 @@ class DownloadUploadS3Test {
                 .extract()
 
             val statusCode = startResponse.statusCode()
-            println("➡ Status HTTP start-process: $statusCode")
+            LogCollector.println("➡ Status HTTP start-process: $statusCode")
 
             // TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
             assertTrue(statusCode in listOf(400))
@@ -592,11 +593,11 @@ class DownloadUploadS3Test {
                     val message = resp.jsonPath().getString("message") ?: ""
                     val status = resp.jsonPath().getString("status") ?: ""
 
-                    println("⏳ Campos obtidos →")
-                    println("   error: $error")
-                    println("   current_step: $currentStep")
-                    println("   message: $message")
-                    println("   status: $status")
+                    LogCollector.println("⏳ Campos obtidos →")
+                    LogCollector.println("   error: $error")
+                    LogCollector.println("   current_step: $currentStep")
+                    LogCollector.println("   message: $message")
+                    LogCollector.println("   status: $status")
 
                     StatusResponseFields(error, currentStep, message, status)
 
@@ -609,7 +610,7 @@ class DownloadUploadS3Test {
                         r.message.equals("Falha na validação de configuração", ignoreCase = true) //isNotBlank
             }
 
-            println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
         }
     }
 
@@ -637,7 +638,7 @@ class DownloadUploadS3Test {
     ) {
         assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
 
-        println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 1: Validando deleção dos arquivos no /tmp...")
+        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 1: Validando deleção dos arquivos no /tmp...")
         val start = System.currentTimeMillis()
         var arquivosFiltrados: List<String>
 
@@ -651,13 +652,13 @@ class DownloadUploadS3Test {
                 }
             }
             if (arquivosFiltrados.isEmpty()) {
-                println("\n✅ Diretório limpo: Nenhum arquivo de players encontrado no /tmp !")
+                LogCollector.println("\n✅ Diretório limpo: Nenhum arquivo de players encontrado no /tmp !")
                 break
             }
 
             // Ainda existem arquivos → loga quais são
-            println("⚠️ Arquivos de players ainda encontrados no /tmp:")
-            arquivosFiltrados.forEach { println(" - $it") }
+            LogCollector.println("⚠️ Arquivos de players ainda encontrados no /tmp:")
+            arquivosFiltrados.forEach { LogCollector.println(" - $it") }
 
             // Checa timeout
             val elapsed = (System.currentTimeMillis() - start) / 1000
@@ -671,13 +672,13 @@ class DownloadUploadS3Test {
 
         // Impressão final dos arquivos que foram detectados (e que sumiram)
         if (arquivosFiltrados.isEmpty()) {
-            println("\uD83D\uDCC2 Nenhum arquivo foi encontrado!!!")
+            LogCollector.println("\uD83D\uDCC2 Nenhum arquivo foi encontrado!!!")
         } else {
-            arquivosFiltrados.forEach { println(" - $it") }
+            arquivosFiltrados.forEach { LogCollector.println(" - $it") }
         }
 
-        println("✔ Processo concluído: diretório /tmp está limpo.")
-        println("\n────────────────────────────────────────────")
+        LogCollector.println("✔ Processo concluído: diretório /tmp está limpo.")
+        LogCollector.println("\n────────────────────────────────────────────")
     }
 
 
@@ -729,17 +730,17 @@ class DownloadUploadS3Test {
 
         // Agrupa por data para impressão
         val agrupadoPorData = arquivosOrdenados.groupBy { extrairData(it) }
-        println("\uD83D\uDD75\uFE0F\u200D♂PASSO 3: Validação de arquivos gerados...\n📂 Lista de arquivos encontrados no /tmp:")
+        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂PASSO 3: Validação de arquivos gerados...\n📂 Lista de arquivos encontrados no /tmp:")
         agrupadoPorData.forEach { (data, lista) ->
-            println("📅 $data")
+            LogCollector.println("📅 $data")
             lista.forEach { nome ->
                 val player = expectedPlayers.firstOrNull { nome.startsWith(it) }
                 val icon = playerIcons[player] ?: "📁"
-                println("   $icon  $nome")
+                LogCollector.println("   $icon  $nome")
             }
         }
         val dias = inicio.datesUntil(fim.plusDays(1)).toList()
-        println("\uD83D\uDCC2 Lista de arquivos não encontrados no /tmp:")
+        LogCollector.println("\uD83D\uDCC2 Lista de arquivos não encontrados no /tmp:")
         dias.forEach { dia ->
             val dataStr = dia.format(dateFormatter)
             expectedPlayers.forEach { player ->
@@ -752,9 +753,9 @@ class DownloadUploadS3Test {
                 }
 
                 if (encontrado) {
-                    //println("✅ Encontrado → $player ($dataStr)")
+                    //LogCollector.println("✅ Encontrado → $player ($dataStr)")
                 } else {
-                    println("❌ NÃO ENCONTRADO → $player ($dataStr)")
+                    LogCollector.println("❌ NÃO ENCONTRADO → $player ($dataStr)")
                 }
 
                 // Comentado para nao quebrar o teste pois no dia pode ainda nao ter arquivo no diretorio de origem
@@ -765,8 +766,8 @@ class DownloadUploadS3Test {
                 )*/
             }
         }
-        println("✔ Arquivos validados com sucesso: todos os players e datas encontrados no /tmp")
-        println("\n────────────────────────────────────────────")
+        LogCollector.println("✔ Arquivos validados com sucesso: todos os players e datas encontrados no /tmp")
+        LogCollector.println("\n────────────────────────────────────────────")
     }
 
     /**
@@ -774,11 +775,11 @@ class DownloadUploadS3Test {
      */
     fun capturaDateTime() {
         start = java.time.Instant.now()
-        println("⏱ Timer iniciado...")
+        LogCollector.println("⏱ Timer iniciado...")
     }
     fun calcDateTime() {
         if (start == null) {
-            println("⚠ O timer não foi iniciado! Chame capturaDateTime() antes.")
+            LogCollector.println("⚠ O timer não foi iniciado! Chame capturaDateTime() antes.")
             return
         }
         val end = java.time.Instant.now()
@@ -788,13 +789,13 @@ class DownloadUploadS3Test {
         val segundos = duration.seconds % 60
         val mmss = String.format("%02d:%02d", minutos, segundos)
 
-        println(
+        LogCollector.println(
             "⏱ Tempo total do teste: " +
                     "${duration.toMillis()} ms " +
                     "(${duration.seconds} segundos) — " +
                     "$mmss (MM:SS)"
         )
-        println("\n────────────────────────────────────────────")
+        LogCollector.println("\n────────────────────────────────────────────")
 
     }
 
@@ -829,7 +830,7 @@ class DownloadUploadS3Test {
      */
     fun validarTsvDescompactadosNoTmp(filesGz: List<String>) {
 
-        println("🕵️‍♂ PASSO 4: Validando arquivos .tsv.gz e seus .tsv correspondentes...")
+        LogCollector.println("🕵️‍♂ PASSO 4: Validando arquivos .tsv.gz e seus .tsv correspondentes...")
         val allFiles = tmpDirLocal.listFiles()
             ?.map { it.name }
             ?: emptyList()
@@ -846,18 +847,18 @@ class DownloadUploadS3Test {
             val existeTsv = allFiles.contains(expectedTsv)
 
             if (existeTsv) {
-                println("✔️  OK → $gzName possui o correspondente $expectedTsv")
+                LogCollector.println("✔️  OK → $gzName possui o correspondente $expectedTsv")
             } else {
-                println("❌ ERRO → $gzName NÃO possui o arquivo descompactado $expectedTsv")
+                LogCollector.println("❌ ERRO → $gzName NÃO possui o arquivo descompactado $expectedTsv")
                 erros++
             }
         }
 
-        println("\n📄 Total de arquivos .tsv.gz encontrados: ${filesGz.size}")
-        println("⚠️ Total de erros: $erros")
+        LogCollector.println("\n📄 Total de arquivos .tsv.gz encontrados: ${filesGz.size}")
+        LogCollector.println("⚠️ Total de erros: $erros")
 
         assertTrue(erros == 0, "Foram encontrados $erros arquivos .tsv.gz sem existir um .tsv!")
-        println("\n────────────────────────────────────────────")
+        LogCollector.println("\n────────────────────────────────────────────")
     }
 
 
@@ -868,7 +869,7 @@ class DownloadUploadS3Test {
 
     fun validarArquivosNoS3(prefix: String) {
 
-        println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 5: Validando arquivos /tmp ↔ S3 (somente arquivos presentes no /tmp)")
+        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 5: Validando arquivos /tmp ↔ S3 (somente arquivos presentes no /tmp)")
         val s3 = criarClienteS3()
 
         // 1️⃣ Carrega TODOS os arquivos do S3 sob o prefixo
@@ -889,20 +890,20 @@ class DownloadUploadS3Test {
             ?.associateBy { it.name }
             ?: emptyMap()
 
-        println("📂 /tmp → ${tmpFiles.size} arquivos .tsv.gz encontrados")
-        println("📂 S3   → ${s3FilesMap.size} arquivos .tsv.gz encontrados\n")
+        LogCollector.println("📂 /tmp → ${tmpFiles.size} arquivos .tsv.gz encontrados")
+        LogCollector.println("📂 S3   → ${s3FilesMap.size} arquivos .tsv.gz encontrados\n")
 
         var erros = 0
 
         // 3️⃣ Para cada arquivo do /tmp, validar no S3
         tmpFiles.forEach { (fileName, fileObj) ->
 
-            println("➡ Validando arquivo: $fileName")
+            LogCollector.println("➡ Validando arquivo: $fileName")
 
             val s3Key = s3FilesMap[fileName]
 
             if (s3Key == null) {
-                println("❌ ERRO → Arquivo $fileName não existe no S3")
+                LogCollector.println("❌ ERRO → Arquivo $fileName não existe no S3")
                 erros++
                 return@forEach
             }
@@ -916,9 +917,9 @@ class DownloadUploadS3Test {
             val tamanhoTmp = fileObj.length()
 
             if (tamanhoS3 == tamanhoTmp) {
-                println("   ✔ OK → arquivo encontrado e tamanho igual ($tamanhoTmp bytes)\n")
+                LogCollector.println("   ✔ OK → arquivo encontrado e tamanho igual ($tamanhoTmp bytes)\n")
             } else {
-                println("""
+                LogCollector.println("""
                 ❌ ERRO → Arquivos diferentes!
                 - Nome: $fileName
                 - Tamanho S3 : $tamanhoS3
@@ -928,13 +929,13 @@ class DownloadUploadS3Test {
             }
         }
 
-        println("⚠️ Total de erros: $erros\n")
+        LogCollector.println("⚠️ Total de erros: $erros\n")
         assertTrue(erros == 0, "Foram encontrados $erros arquivos inválidos ou ausentes no S3!")
     }
     fun listarArquivosS3(prefix: String): List<String> {
         val bucket = bucketS3 ?: error("AWS_S3_BUCKET_NAME não definida")
         val prefixReal = detectarPrefixReal(bucket, prefix)
-        println("📌 Prefix real detectado no S3 → $prefixReal")
+        LogCollector.println("📌 Prefix real detectado no S3 → $prefixReal")
         val s3 = criarClienteS3()
         val req = ListObjectsV2Request.builder()
             .bucket(bucket)
@@ -990,9 +991,9 @@ class DownloadUploadS3Test {
         val ok = original.renameTo(renomeado)
         assertTrue(ok, "Falha ao renomear arquivo ${original.name}")
 
-        println("🔄 Arquivo renomeado:")
-        println("  De: ${original.name}")
-        println("  Para: ${renomeado.name}")
+        LogCollector.println("🔄 Arquivo renomeado:")
+        LogCollector.println("  De: ${original.name}")
+        LogCollector.println("  Para: ${renomeado.name}")
     }
 
 

@@ -1,0 +1,189 @@
+⏱ Timer iniciado...
+🕵️‍♂ PASSO 1: Validando deleção dos arquivos no /tmp...
+⚠️ Arquivos de players ainda encontrados no /tmp:
+ - iMusics_Deezer_1005754664561_2025-09-21.tsv.gz
+ - iMusics_SoundCloud_1005765663047_2025-09-21.tsv
+ - iMusics_Spotify_1005761167494_2025-09-21.tsv
+ - iMusics_Youtube_1005765046180_2025-09-21.tsv.gz
+ - iMusics_Deezer_1005754664561_2025-09-21.tsv
+ - iMusics_Youtube_1005765046180_2025-09-21.tsv
+ - iMusics_SoundCloud_1005765663047_2025-09-21.tsv.gz
+ - iMusics_iTunes_1005760349997_2025-09-21.tsv.gz
+ - iMusics_iTunes_1005760349997_2025-09-21.tsv
+ - iMusics_Spotify_1005761167494_2025-09-21.tsv.gz
+ - iMusics_Amazon_1005755418596_2025-09-21.tsv.gz
+ - iMusics_Pandora_1005762199047_2025-09-21.tsv
+ - iMusics_TikTok_1005753877936_2025-09-21.tsv.gz
+ - iMusics_Amazon_1005755418596_2025-09-21.tsv
+ - iMusics_Pandora_1005762199047_2025-09-21.tsv.gz
+ - iMusics_TikTok_1005753877936_2025-09-21.tsv
+
+✅ Diretório limpo: Nenhum arquivo de players encontrado no /tmp !
+📂 Nenhum arquivo foi encontrado!!!
+✔ Processo concluído: diretório /tmp está limpo.
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 2: Consultando status do processamento...
+🔄 Flow: Buscando dados de analytics em FUGA Trends
+📌 Status Atual: running
+
+🔄 Flow: Buscando dados de analytics em FUGA Trends
+📌 Status Atual: running
+
+🔄 Flow: Buscando dados de analytics em FUGA Trends
+📌 Status Atual: running
+
+🔄 Flow: Buscando dados de analytics em FUGA Trends
+📌 Status Atual: running
+
+🔄 Flow: Buscando dados de analytics em FUGA Trends
+📌 Status Atual: running
+
+🔄 Flow: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+📌 Status Atual: running
+
+🔄 Flow: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+📌 Status Atual: running
+
+🔄 Flow: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+📌 Status Atual: running
+
+🔄 Flow: Processando arquivo 5/8: iMusics_Deezer_1006285570781_2025-11-10.tsv
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top plays no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top plays no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top plataform no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top plataform no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top plataform no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top playlist no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top playlist no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top playlist no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top albus no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top albus no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top album no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top album no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top album no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regiao no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regiao no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regiao no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regioes no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regioes no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regioes no Redis
+📌 Status Atual: running
+
+🔄 Flow: Sumarizando top regioes no Redis
+📌 Status Atual: running
+
+🔄 Flow: Processo completado com sucesso
+📌 Status Atual: completed
+
+✔ Processo finalizado com sucesso! Status = completed
+────────────────────────────────────────────
+⏱ Tempo total do teste: 454160 ms (454 segundos) — 07:34 (MM:SS)
+
+────────────────────────────────────────────
+🕵️‍♂PASSO 3: Validação de arquivos gerados...
+📂 Lista de arquivos encontrados no /tmp:
+📅 2025-11-10
+   🛒  iMusics_Amazon_1006286651710_2025-11-10.tsv.gz
+   🛒  iMusics_Amazon_1006286651710_2025-11-10.tsv
+   📻  iMusics_Deezer_1006285570781_2025-11-10.tsv.gz
+   📻  iMusics_Deezer_1006285570781_2025-11-10.tsv
+   📡  iMusics_Pandora_1006298290931_2025-11-10.tsv.gz
+   📡  iMusics_Pandora_1006298290931_2025-11-10.tsv
+   ☁️  iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz
+   ☁️  iMusics_SoundCloud_1006304643949_2025-11-10.tsv
+   🎵  iMusics_Spotify_1006296016047_2025-11-10.tsv.gz
+   🎵  iMusics_Spotify_1006296016047_2025-11-10.tsv
+   🎬  iMusics_TikTok_1006283308038_2025-11-10.tsv.gz
+   🎬  iMusics_TikTok_1006283308038_2025-11-10.tsv
+   ▶️  iMusics_Youtube_1006303214081_2025-11-10.tsv.gz
+   ▶️  iMusics_Youtube_1006303214081_2025-11-10.tsv
+   🍎  iMusics_iTunes_1006294715957_2025-11-10.tsv.gz
+   🍎  iMusics_iTunes_1006294715957_2025-11-10.tsv
+📂 Lista de arquivos não encontrados no /tmp:
+✔ Arquivos validados com sucesso: todos os players e datas encontrados no /tmp
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 4: Validando arquivos .tsv.gz e seus .tsv correspondentes...
+✔️  OK → iMusics_Amazon_1006286651710_2025-11-10.tsv.gz possui o correspondente iMusics_Amazon_1006286651710_2025-11-10.tsv
+✔️  OK → iMusics_Deezer_1006285570781_2025-11-10.tsv.gz possui o correspondente iMusics_Deezer_1006285570781_2025-11-10.tsv
+✔️  OK → iMusics_Pandora_1006298290931_2025-11-10.tsv.gz possui o correspondente iMusics_Pandora_1006298290931_2025-11-10.tsv
+✔️  OK → iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz possui o correspondente iMusics_SoundCloud_1006304643949_2025-11-10.tsv
+✔️  OK → iMusics_Spotify_1006296016047_2025-11-10.tsv.gz possui o correspondente iMusics_Spotify_1006296016047_2025-11-10.tsv
+✔️  OK → iMusics_TikTok_1006283308038_2025-11-10.tsv.gz possui o correspondente iMusics_TikTok_1006283308038_2025-11-10.tsv
+✔️  OK → iMusics_Youtube_1006303214081_2025-11-10.tsv.gz possui o correspondente iMusics_Youtube_1006303214081_2025-11-10.tsv
+✔️  OK → iMusics_iTunes_1006294715957_2025-11-10.tsv.gz possui o correspondente iMusics_iTunes_1006294715957_2025-11-10.tsv
+
+📄 Total de arquivos .tsv.gz encontrados: 8
+⚠️ Total de erros: 0
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 5: Validando arquivos /tmp ↔ S3 (somente arquivos presentes no /tmp)
+📌 Prefix real detectado no S3 → tao-im-symphonia-dev-files/analytics-trends/fuga/
+📂 /tmp → 8 arquivos .tsv.gz encontrados
+📂 S3   → 146 arquivos .tsv.gz encontrados
+
+➡ Validando arquivo: iMusics_Pandora_1006298290931_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (24472 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006285570781_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1845984 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (200161 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006303214081_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4419246 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006286651710_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3021691 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006283308038_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3060200 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006296016047_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (306288936 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006294715957_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (358684 bytes)
+
+⚠️ Total de erros: 0
+
