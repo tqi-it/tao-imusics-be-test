@@ -9,7 +9,10 @@ build/
 gradlew.bat
 gradlew
 .gradle
-./temp
+.temp
+.temp/redis-dump/
+.temp/summary-dump/
+.temp/test-results/
 
 ### STS ###
 .apt_generated
