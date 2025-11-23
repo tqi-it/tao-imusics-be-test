@@ -1,5 +1,6 @@
 package `analytics-process`
 
+import io.github.cdimascio.dotenv.dotenv
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType
@@ -12,10 +13,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
+import util.EnvLoader
 import util.LogCollector
 import java.io.File
 import java.time.Duration
@@ -41,18 +45,20 @@ class DownloadUploadS3Test {
         /**
          * Parâmetros do CN1
          */
-        private var startDate ="2025-11-10"
-        private var endDate ="2025-11-10"
-        val tmpDirLocal = File("/tmp")
+        private var startDate ="2025-09-28"
+        private var endDate ="2025-09-28"
+        val tmpDirLocal = File(EnvLoader.get("DIR_TEMP"))
 
         // Parâmetros dos testes caminho feliz
         val timeoutFull = Duration.ofMinutes(15) // tempo máximo total do teste
-        //val delayResquest = Thread.sleep(15000) // aguarda 15 segundos
 
         // S3
-        val bucketS3 = System.getenv("AWS_S3_BUCKET_NAME")
-        val regionS3 = System.getenv("AWS_S3_REGION_NAME")
-        val prefixS3 = "tao-im-symphonia-dev-files/analytics-trends/fuga/"
+        val bucketS3 = EnvLoader.get("AWS_S3_BUCKET_NAME")
+        val regionS3 = EnvLoader.get("AWS_S3_REGION_NAME")
+        val region = EnvLoader.get("AWS_S3_REGION_NAME")
+        val key = EnvLoader.get("AWS_ACCESS_KEY_ID")
+        val secret = EnvLoader.get("AWS_SECRET_ACCESS_KEY")
+        val prefixS3 = EnvLoader.get("AWS_S3_FILE_PREFIX")
 
 
         val expectedPlayers = listOf(
@@ -79,8 +85,8 @@ class DownloadUploadS3Test {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            RestAssured.baseURI = BASE_URL
 
+            RestAssured.baseURI = BASE_URL
             val loginBody = """
                 {
                   "grant_type": "client_credentials",
@@ -102,6 +108,7 @@ class DownloadUploadS3Test {
             assertNotNull(token, "Token não deve ser nulo")
         }
     }
+
 
     @Test
     @Tag("smokeTests") // TPF-70
@@ -195,7 +202,7 @@ class DownloadUploadS3Test {
 
 
     @Test
-    @Tag("smokeTests") // TPF-67 TODO: Processo esta falhando (500) nao deveria ser um 200 com o error "Unknown error occurred" correto
+    @Tag("smokeTests") // TPF-67
     fun `CN2 - Validar ingestão quando não possui arquivos para baixar`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -235,12 +242,15 @@ class DownloadUploadS3Test {
                     .get("/process-status")
                     .then()
                     .log().all()
+                    .statusCode(HttpStatus.SC_OK)
                     .extract()
+
 
                 val error = resp.jsonPath().getString("error") ?: ""
                 val currentStep = resp.jsonPath().getString("current_step") ?: ""
                 val message = resp.jsonPath().getString("message") ?: ""
                 val status = resp.jsonPath().getString("status") ?: ""
+                val httpStatus = resp.statusCode()
 
                 LogCollector.println("⏳ Campos obtidos →")
                 LogCollector.println("   error: $error")
@@ -248,26 +258,50 @@ class DownloadUploadS3Test {
                 LogCollector.println("   message: $message")
                 LogCollector.println("   status: $status")
 
-                StatusResponseFields(error, currentStep, message, status)
+                val resultMessage = resp.jsonPath().getString("result.message") // <-- CORRETO
+                val resultStatus = resp.jsonPath().getString("result.status")
+                val resultStart = resp.jsonPath().getString("result.start_date")
+                val resultEnd = resp.jsonPath().getString("result.end_date")
+
+                StatusResponseFields(
+                    error = error,
+                    currentStep = currentStep,
+                    message = message,
+                    status = status,
+                    httpStatus = httpStatus,
+                    result = ResultFields(
+                        message = resultMessage,
+                        status = resultStatus,
+                        startDate = resultStart,
+                        endDate = resultEnd
+                    )
+                )
 
             } matches { result ->
             val r = result as StatusResponseFields
-            r.error.contains("Unknown error occurred", ignoreCase = true) &&
-                    r.status.equals("failed", ignoreCase = true) &&
-                    r.currentStep.equals("Validação de datas", ignoreCase = true) &&
-                    r.message.equals("Falha na validação de datas", ignoreCase = true)
+            val httpOk = r.httpStatus == 200
+            val noError = r.error.isNullOrBlank()
+            val statusCompleted = r.status.equals("completed", ignoreCase = true)
+            val stepFinished = r.currentStep.equals("Finalizado", ignoreCase = true)
+            val resultMessageOk =
+                r.result?.message?.equals(
+                    "FUGA não tem dados de analytics para o período solicitado",
+                    ignoreCase = true
+                ) ?: false
+
+            noError && statusCompleted && stepFinished && resultMessageOk
         }
 
 
     }
 
 
-    @Test
+    @Test //TODO: esta reornando 200 ao invez de 409
     @Tag("smokeTests")  // TPF-67 /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
     fun `CN3 - Validar ingestão quando já possui um processamento sendo realizado`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(-2).format(formatter)
+        val date = LocalDate.now().plusDays(-5).format(formatter)
 
         // 🔹 Corpo com período definido
         val requestBody = """
@@ -281,7 +315,7 @@ class DownloadUploadS3Test {
             val numero = tentativa + 1
             LogCollector.println("Executando start-process tentativa $numero")
 
-            val resposta = RestAssured.given()
+            val resposta = given()
                 .contentType(ContentType.JSON)
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
@@ -294,7 +328,7 @@ class DownloadUploadS3Test {
 
             val statusCode = resposta.statusCode()
             val success = resposta.jsonPath().getBoolean("success")
-            val error = resposta.jsonPath().getBoolean("error")
+            val error = resposta.jsonPath().getString("error")
 
             if (tentativa == 0) {
                 // 🟢 PRIMEIRA EXECUÇÃO — Espera 200
@@ -305,7 +339,7 @@ class DownloadUploadS3Test {
                 )
                 assertTrue(success, "Primeira execução deveria retornar success=true")
                 LogCollector.println("✔️ Tentativa 1 OK: status=$statusCode success=$success")
-
+                Thread.sleep(3000)
             } else {
                 // 🔴 SEGUNDA EXECUÇÃO — Espera 409 (já tem processo rodando)
                 assertEquals(
@@ -317,8 +351,6 @@ class DownloadUploadS3Test {
                 assertFalse(success, "Segunda execução deveria retornar success=false")
                 LogCollector.println("✔️ Tentativa 2 Bloqueada como esperado: status=$statusCode success=$success")
             }
-
-            Thread.sleep(1000)
         }
 
     }
@@ -468,14 +500,12 @@ class DownloadUploadS3Test {
 
             val statusCode = startResponse.statusCode()
             LogCollector.println("➡ Status HTTP start-process: $statusCode")
-
-            // Para APIs mal feitas que retornam 400 ou 500 mesmo com erro TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
-            assertTrue(statusCode in listOf(400))
+            assertTrue(statusCode in listOf(200))
 
             // 🔥 Aguardar mensagem de erro específica no /process-status
             Awaitility.await()
-                .atMost(15, TimeUnit.SECONDS)
-                .pollInterval(2, TimeUnit.SECONDS)
+                .atMost(1, TimeUnit.MINUTES)
+                .pollInterval(5, TimeUnit.SECONDS)
                 .untilCallTo {
 
                     val resp = given()
@@ -490,6 +520,7 @@ class DownloadUploadS3Test {
                     val currentStep = resp.jsonPath().getString("current_step") ?: ""
                     val message = resp.jsonPath().getString("message") ?: ""
                     val status = resp.jsonPath().getString("status") ?: ""
+                    val httpStatus = resp.statusCode()
 
                     LogCollector.println("⏳ Campos obtidos →")
                     LogCollector.println("   error: $error")
@@ -497,16 +528,39 @@ class DownloadUploadS3Test {
                     LogCollector.println("   message: $message")
                     LogCollector.println("   status: $status")
 
-                    StatusResponseFields(error, currentStep, message, status)
+                    val resultMessage = resp.jsonPath().getString("result.message")
+                    val resultStatus = resp.jsonPath().getString("result.status")
+                    val resultStart = resp.jsonPath().getString("result.start_date")
+                    val resultEnd = resp.jsonPath().getString("result.end_date")
+
+                    StatusResponseFields(
+                        error = error,
+                        currentStep = currentStep,
+                        message = message,
+                        status = status,
+                        httpStatus = httpStatus,
+                        result = ResultFields(
+                            message = resultMessage,
+                            status = resultStatus,
+                            startDate = resultStart,
+                            endDate = resultEnd
+                        )
+                    )
 
                 } matches { result ->
-
                 val r = result as StatusResponseFields
-                r.error.contains(mensagemEsperada, ignoreCase = true) &&
-                        r.status.equals("failed", ignoreCase = true) &&
-                        r.currentStep.equals("Validação de datas", ignoreCase = true) && //contains
-                        r.message.equals("Falha na validação de datas", ignoreCase = true) //isNotBlank
+                val noError = r.error.isNullOrBlank()
+                val statusCompleted = r.status.equals("completed", ignoreCase = true)
+                val stepFinished = r.currentStep.equals("Finalizado", ignoreCase = true)
+                val resultMessageOk =
+                    r.result?.message?.equals(
+                        "FUGA não tem dados de analytics para o período solicitado",
+                        ignoreCase = true
+                    ) ?: false
+
+                noError && statusCompleted && stepFinished && resultMessageOk
             }
+
 
 
             LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
@@ -518,19 +572,19 @@ class DownloadUploadS3Test {
     fun `CN6 - Erro no Processamento`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val now = LocalDate.now().format(formatter)
+        val now = LocalDate.now().plusDays(-2).format(formatter)
 
         // 🔥 MAPA DE CENÁRIOS → mensagem esperada
         val cenarios = listOf(
 
             // Config FUGA inválida (Alterar no analytics a config FUGA_USER)
-            Triple(now, now, "Test"),
+            //Triple("failed", "download_fuga_trends", "'token'"),
 
-            // Config S3 inválida (Alterar no analytics a config AWS_ACCESS_KEY_ID)
-            Triple(now, now, "Test"),
+            // Config S3 inválida (Alterar no analytics a config AWS_S3_ENDPOINT_URL)
+            //Triple("failed", "pipeline", "Invalid endpoint: https://tao-im-symphonia-dev-files.s3.us-east-1.amazonaws.com_"),
 
-            /// Pasta /tmp invalida  (Alterar no analytics a config DOWNLOADS_FOLDER)
-            Triple(now, now, "Test"),
+            /// Pasta /tmp invalida  (Alterar no analytics a config DOWNLOADS_FOLDER=/tmp_TEST/)
+            Triple("failed", "clean_old_files", "The directory /tmp_TEST/ was not found."),
 
             // Erro descompactar
                 //Triple(future, future, ""),
@@ -542,19 +596,19 @@ class DownloadUploadS3Test {
 
         )
 
-        cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
+        cenarios.forEach { (status, current_step, error) ->
 
             LogCollector.println("\n🔎 Testando cenário inválido")
             LogCollector.println("   ➤ start-date=$now")
             LogCollector.println("   ➤ end-date=$now")
-            LogCollector.println("   ➤ Esperado: \"$mensagemEsperada\"")
+            LogCollector.println("   ➤ Esperado: \"$error\"")
 
             val requestBody = """
-            {
-              "start-date": "$now",
-              "end-date": "$now"
-            }
-        """.trimIndent()
+                    {
+                      "start-date": "$now",
+                      "end-date": "$now"
+                    }
+                """.trimIndent()
 
             // Requisição ao start-process
             val startResponse = given()
@@ -570,14 +624,12 @@ class DownloadUploadS3Test {
 
             val statusCode = startResponse.statusCode()
             LogCollector.println("➡ Status HTTP start-process: $statusCode")
-
-            // TODO: Não deveria retornar só 400 para todas falhas e deixar 500 para erro do servidor?
-            assertTrue(statusCode in listOf(400))
+            assertTrue(statusCode in listOf(200)) // Processo assincrono
 
             // 🔥 Aguardar mensagem de erro específica no /process-status
             Awaitility.await()
-                .atMost(15, TimeUnit.SECONDS)
-                .pollInterval(2, TimeUnit.SECONDS)
+                .atMost(2, TimeUnit.MINUTES)
+                .pollInterval(10, TimeUnit.SECONDS)
                 .untilCallTo {
 
                     val resp = given()
@@ -586,12 +638,14 @@ class DownloadUploadS3Test {
                         .header("authorization", "Bearer $token")
                         .get("/process-status")
                         .then()
+                        .log().all()
                         .extract()
 
                     val error = resp.jsonPath().getString("error") ?: ""
                     val currentStep = resp.jsonPath().getString("current_step") ?: ""
                     val message = resp.jsonPath().getString("message") ?: ""
                     val status = resp.jsonPath().getString("status") ?: ""
+                    val httpStatus = resp.statusCode()
 
                     LogCollector.println("⏳ Campos obtidos →")
                     LogCollector.println("   error: $error")
@@ -599,34 +653,63 @@ class DownloadUploadS3Test {
                     LogCollector.println("   message: $message")
                     LogCollector.println("   status: $status")
 
-                    StatusResponseFields(error, currentStep, message, status)
+                    val resultMessage = resp.jsonPath().getString("result.message")
+                    val resultStatus = resp.jsonPath().getString("result.status")
+                    val resultStart = resp.jsonPath().getString("result.start_date")
+                    val resultEnd = resp.jsonPath().getString("result.end_date")
+
+                    StatusResponseFields(
+                        error = error,
+                        currentStep = currentStep,
+                        message = message,
+                        status = status,
+                        httpStatus = httpStatus,
+                        result = ResultFields(
+                            message = resultMessage,
+                            status = resultStatus,
+                            startDate = resultStart,
+                            endDate = resultEnd
+                        )
+                    )
 
                 } matches { result ->
 
                 val r = result as StatusResponseFields
-                r.error.contains(mensagemEsperada, ignoreCase = true) &&
-                        r.status.equals("failed", ignoreCase = true) &&
-                        r.currentStep.equals("Validação de configuração", ignoreCase = true) && //contains
-                        r.message.equals("Falha na validação de configuração", ignoreCase = true) //isNotBlank
+                val httpOk = r.httpStatus == 500
+                val errorMatches =
+                    r.error?.contains(error, ignoreCase = true) ?: false
+                    r.status.equals(status, ignoreCase = true) &&
+                        r.currentStep.equals(current_step, ignoreCase = true) &&
+                        r.message.equals("Processo falhou com erro", ignoreCase = true) &&
+                        errorMatches && httpOk
             }
+
 
             LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
         }
     }
 
 
-
-
-
     /**
      * Campos com retorno de Falhas
      */
     data class StatusResponseFields(
-        val error: String,
-        val currentStep: String,
-        val message: String,
-        val status: String
+        val error: String?,
+        val currentStep: String?,
+        val message: String?,
+        val status: String?,
+        val result: ResultFields?,
+        val httpStatus: Int?
     )
+
+    data class ResultFields(
+        val message: String?,
+        val status: String?,
+        val startDate: String?,
+        val endDate: String?
+    )
+
+
 
 
     /**
@@ -879,13 +962,12 @@ class DownloadUploadS3Test {
         // Remove paths, deixando apenas os nomes
         val s3FilesMap = s3Keys.associateBy { it.substringAfterLast("/") }
 
-        //renomearPrimeiroArquivoTsvGzParaTeste()
+        //renomearPrimeiroArquivoTsvGzParaTeste() // So foi usado para teste
 
         // 2️⃣ Carrega arquivos do /tmp
-        val tmpDir = File("/tmp")
-        assertTrue(tmpDir.exists(), "Diretório /tmp não existe")
+        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
 
-        val tmpFiles = tmpDir.listFiles()
+        val tmpFiles = tmpDirLocal.listFiles()
             ?.filter { it.isFile && it.name.endsWith(".tsv.gz") }
             ?.associateBy { it.name }
             ?: emptyMap()
@@ -932,6 +1014,36 @@ class DownloadUploadS3Test {
         LogCollector.println("⚠️ Total de erros: $erros\n")
         assertTrue(erros == 0, "Foram encontrados $erros arquivos inválidos ou ausentes no S3!")
     }
+    @Test
+    @Tag("smokeTests")
+    fun listarTudoNoBucket() {
+        val bucket = bucketS3 ?: error("AWS_S3_BUCKET_NAME não definida")
+        val s3 = criarClienteS3()
+
+        println("📌 Listando objetos no bucket: $bucket")
+
+        val req = ListObjectsV2Request.builder()
+            .bucket(bucket)
+            .build()
+
+        var resp = s3.listObjectsV2(req)
+
+        if (resp.contents().isEmpty()) {
+            println("⚠ O bucket está vazio ou você não tem permissão de listObjectsV2")
+        } else {
+            resp.contents().forEach {
+                println(" - ${it.key()}")
+            }
+        }
+
+        // também listar prefixes (pastas)
+        if (resp.commonPrefixes().isNotEmpty()) {
+            println("📁 Pastas detectadas:")
+            resp.commonPrefixes().forEach {
+                println(" - ${it.prefix()}")
+            }
+        }
+    }
     fun listarArquivosS3(prefix: String): List<String> {
         val bucket = bucketS3 ?: error("AWS_S3_BUCKET_NAME não definida")
         val prefixReal = detectarPrefixReal(bucket, prefix)
@@ -968,25 +1080,34 @@ class DownloadUploadS3Test {
             prefixDesejado
         }
     }
-    fun criarClienteS3(): S3Client {
+    fun criarClienteS3_2(): S3Client {
         val region = regionS3 ?: "us-east-1"
         return S3Client.builder()
             .region(Region.of(region))
             .credentialsProvider(DefaultCredentialsProvider.create())
             .build()
     }
+    fun criarClienteS3(): S3Client {
+        return S3Client.builder()
+            .region(Region.of(region))
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(key, secret)
+                )
+            )
+            .build()
+    }
     fun renomearPrimeiroArquivoTsvGzParaTeste() {
-        val tmpDir = File("/tmp")
-        assertTrue(tmpDir.exists(), "Diretório /tmp não existe")
+        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
 
-        val arquivos = tmpDir.listFiles()
+        val arquivos = tmpDirLocal.listFiles()
             ?.filter { it.isFile && it.name.endsWith(".tsv.gz") }
             ?: emptyList()
 
         assertTrue(arquivos.isNotEmpty(), "Nenhum arquivo .tsv.gz encontrado no /tmp!")
 
         val original = arquivos.first()
-        val renomeado = File(tmpDir, original.name.replace(".tsv.gz", "_RENAME_TEST.tsv.gz"))
+        val renomeado = File(tmpDirLocal, original.name.replace(".tsv.gz", "_RENAME_TEST.tsv.gz"))
 
         val ok = original.renameTo(renomeado)
         assertTrue(ok, "Falha ao renomear arquivo ${original.name}")

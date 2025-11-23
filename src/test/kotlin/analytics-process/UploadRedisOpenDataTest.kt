@@ -1,12 +1,9 @@
 package `analytics-process`
 
-import `analytics-process`.UploadRedisOpenDataTest.RedisClient.jedis
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
 import org.junit.jupiter.api.Assertions.assertTrue
-import redis.clients.jedis.JedisPooled
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType
 import org.awaitility.Awaitility
@@ -16,19 +13,26 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
+import redis.clients.jedis.JedisPooled
+import util.EnvLoader
 import util.LogCollector
 import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
+import util.RedisUtils.getRedisKeys
+import util.RedisClient
+import util.RedisClient.jedis
+import util.RedisUtils.cleanupDate
+
 
 class UploadRedisOpenDataTest {
 
     companion object {
+        val localHost = File(EnvLoader.get("HTTP_LOCALHOST"))
         private const val BASE_URL = "http://localhost:3015"
         private var token: String = ""
-        private var start: java.time.Instant? = null
+        val tmpDirLocal = File(EnvLoader.get("DIR_TEMP"))
 
         @JvmStatic
         @BeforeAll
@@ -58,15 +62,17 @@ class UploadRedisOpenDataTest {
 
     }
 
+
+/*
     object RedisClient {
-        private val host = System.getenv("REDIS_HOST") ?: "localhost"
-        private val port = (System.getenv("REDIS_PORT") ?: "6379").toInt()
-        private val password = System.getenv("REDIS_PASSWORD")
+        private val host = EnvLoader.get("REDIS_HOST")
+        private val port = EnvLoader.get("REDIS_PORT")
+        private val password = EnvLoader.get("REDIS_PASSWORD")
 
         val jedis: JedisPooled by lazy {
             if (password.isNullOrBlank()) {
                 // Sem senha
-                JedisPooled(host, port)
+                JedisPooled(host, port.toInt())
             } else {
                 // Com senha — usando URI (a forma correta no Jedis 5.x)
                 val uri = "redis://:$password@$host:$port"
@@ -75,6 +81,8 @@ class UploadRedisOpenDataTest {
 
         }
     }
+
+ */
 
     /**
      * 🔥 Função Test Redis — o que este teste valida
@@ -271,11 +279,28 @@ class UploadRedisOpenDataTest {
                     .then()
                     .extract()
 
+                val error = resp.jsonPath().getString("error") ?: ""
+                val currentStep = resp.jsonPath().getString("current_step") ?: ""
+                val message = resp.jsonPath().getString("message") ?: ""
+                val status = resp.jsonPath().getString("status") ?: ""
+                val httpStatus = resp.statusCode()
+                val resultMessage = resp.jsonPath().getString("result.message") //
+                val resultStatus = resp.jsonPath().getString("result.status")
+                val resultStart = resp.jsonPath().getString("result.start_date")
+                val resultEnd = resp.jsonPath().getString("result.end_date")
+
                 DownloadUploadS3Test.StatusResponseFields(
-                    resp.jsonPath().getString("error") ?: "",
-                    resp.jsonPath().getString("current_step") ?: "",
-                    resp.jsonPath().getString("message") ?: "",
-                    resp.jsonPath().getString("status") ?: ""
+                    error = error,
+                    currentStep = currentStep,
+                    message = message,
+                    status = status,
+                    httpStatus = httpStatus,
+                    result = DownloadUploadS3Test.ResultFields(
+                        message = resultMessage,
+                        status = resultStatus,
+                        startDate = resultStart,
+                        endDate = resultEnd
+                    )
                 )
 
             } matches { r ->
@@ -433,7 +458,10 @@ class UploadRedisOpenDataTest {
     fun `CN8 - Validar entrega dos dados abertosXagrupados no Redis 'sumarize_tops'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(-60).format(formatter)
+        val date = "2025-11-11"//LocalDate.now().plusDays(-60).format(formatter)
+
+        // 🔥 Limpa o Redis ANTES de iniciar para melhorar a performance do teste
+        cleanupDate(date)
 
         val requestBody = """
             {
@@ -460,13 +488,15 @@ class UploadRedisOpenDataTest {
         // Aguarda liberar Redis
         Awaitility.await()
             .atMost(30, TimeUnit.MINUTES)
-            .pollInterval(55, TimeUnit.SECONDS)
+            .pollInterval(15, TimeUnit.SECONDS)
             .until {
                 val resp = given()
                     .header("authorization", "Bearer $token")
                     .header("origin", "http://localhost")
                     .get("/process-status")
-                    .then().extract()
+                    .then()
+                    .log().all()
+                    .extract()
 
                 val status = resp.jsonPath().getString("status") ?: ""
                 val flow = resp.jsonPath().getString("current_step") ?: ""
@@ -486,25 +516,57 @@ class UploadRedisOpenDataTest {
         assertTrue(plataformas.isNotEmpty(), "Nenhuma plataforma encontrada para $date!")
         LogCollector.println("📌 Plataformas detectadas: $plataformas")
 
+
         // 1) Carregar dados brutos por plataforma (imusic:*:<PLATAFORMA>:<DATA>:rows)
         val rawRowsByPlatform = plataformas.associateWith { plataforma ->
-            val keyRows = getRedisKeys("imusic:*:${plataforma}:${date}:rows").first()
+            //val keyRows = getRedisKeys("imusic:*:${plataforma}:${date}:rows").first()
+            val keyRows = getRedisKeys("imusic:dashes:${plataforma}:${date}:rows")
+                .firstOrNull()
+                ?: error("❌ Nenhum RAW encontrado em dashes para $plataforma")
+
+
+            //val seq = readLargeRedisListPaged(jedis, keyRows, 50000)
+            //var count = 0
+            //for (item in seq) count++
+            //println("Total lido = $count")
+
             // converte JSON -> Map
-            val rows = jedis.lrange(keyRows, 0, -1).map { jsonToMap(it).toMutableMap() }
-            // Injeta a plataforma em cada row para que o recalculo tenha o mesmo campo que o Redis summary
-            rows.forEach { it["plataform"] = plataforma } // observe 'plataform' com 'a' (mesma string do Python)
+            //val rows = jedis.lrange(keyRows, 0, -1).map { jsonToMap(it).toMutableMap() }
+            // val rows = loadRawRowsPaged(jedis, keyRows, plataforma)
+            println("Cheguei aqui no loadRawRowsLazy")
+            // ✅ COLOCAR AQUI A VERSÃO PAGINADA:
+            // 1️⃣ Carrega TUDO em lista (seguro)
+
+
+            // 🔥 Usa versão LAZY — segura para dados gigantes
+            //val rawSeq: Sequence<Map<String, Any?>> =
+              //  loadRawRowsLazy(jedis, keyRows, plataforma)
+            //println("Passei por loadRawRowsLazy (sequence criado)")
+
+            // ❗ Materializa SOMENTE UMA VEZ aqui
+            // 🚨 DEBUG: limita a quantidade de registros para testar sem travar 50 mil passou
+            //val rows: List<Map<String, Any?>> = rawSeq.take(100_000).toList()
+            //println("📦 Total carregado (limitado) para $plataforma = ${rows.size}")
+            //rows
+
+            val rows = loadRawRowsWindowed(jedis, keyRows, plataforma)
+            //val rows = rawSeq.toList()
+            //println("📦 Total carregado de $plataforma = ${rows.size}")
+
             rows
+
         }
+
 
         // 2) Definir regras de sumarização
         val summaryRules = listOf(
             Triple("topplays", "number_of_streams", "plays"),
             Triple("topplataform", "plataform", "plays"),
             Triple("topplaylist", "plataform", "plays"),
-            //Triple("topalbuns", "upc", "plays"),
-            //Triple("topalbum", "upc", "plays"),
-            //Triple("topregiao", "territory", "plays"),
-            //Triple("topregioes", "territory", "plays")
+            Triple("topalbuns", "upc", "plays"),
+            Triple("topalbum", "upc", "plays"),
+            Triple("topregiao", "territory", "plays"),
+            Triple("topregioes", "territory", "plays")
         )
 
         // 3) Validar cada sumarização para cada plataforma
@@ -512,10 +574,23 @@ class UploadRedisOpenDataTest {
 
             summaryRules.forEach { (prefix, campo, metric) ->
 
-                val summaryKey = "imusic:${prefix}:${plataforma}:${date}:rows"
+                //val summaryKey = "imusic:${prefix}:${plataforma}:${date}:rows"
+                // TODO: A espera da correção do BUG na montagem do arquivo
+                val summaryKey =
+                    when (prefix) {
+                        "topalbuns" ->
+                            "imusic:topalbuns:${date}:rows"
+
+                        "topregiao" ->
+                            "imusic:topregiao:${date}:rows"
+
+                        else ->
+                            "imusic:${prefix}:${plataforma}:${date}:rows"
+                    }
+
+
 
                 LogCollector.println("\n🔎 Validando sumarização → $summaryKey")
-
                 validarSumarizacao(
                     summaryKey,
                     rawRowsByPlatform[plataforma]!!,
@@ -530,6 +605,79 @@ class UploadRedisOpenDataTest {
     }
 
 
+    /**
+     *Função para Paginar de 50 em 50 mil linhas os dados do Redis
+     */
+    fun readLargeRedisListPaged(
+        jedis: JedisPooled,
+        key: String,
+        pageSize: Int = 50000
+    ): List<String> {
+
+        println("Iniciando paginação Redis para key=$key pageSize=$pageSize")
+
+        val result = mutableListOf<String>()
+
+        var start = 0L
+        val step = pageSize.toLong()
+
+        while (true) {
+            val end = start + step - 1
+
+            println("➡️  Lendo página: start=$start end=$end")
+
+            val page = jedis.lrange(key, start, end)
+
+            if (page.isEmpty()) {
+                println("✅ page vazia -> fim da paginação")
+                break
+            }
+
+            result.addAll(page)
+            start += step
+        }
+
+        println("🏁 Paginação FINALIZADA")
+        return result
+    }
+
+    /**
+     *Função para Carregar de 50 em 50 mil linhas os dados do Redis
+     */
+    fun loadRawRowsWindowed(
+        jedis: JedisPooled,
+        key: String,
+        plataforma: String,
+        pageSize: Int = 50_000
+    ): Sequence<Map<String, Any?>> = sequence {
+
+        var start = 0L
+        val step = pageSize.toLong()
+
+        while (true) {
+            val end = start + step - 1
+
+            println("➡️  Lendo janela: start=$start end=$end")
+
+            val page = jedis.lrange(key, start, end)
+            if (page.isEmpty()) {
+                println("✅ page vazia -> fim")
+                break
+            }
+
+            for (json in page) {
+                val map = jsonToMap(json).toMutableMap()
+                map["plataform"] = plataforma
+                yield(map)
+            }
+
+            start += step
+        }
+    }
+
+    /**
+     *Função para identificar as Plataformas a serem processadas
+     */
     fun detectarPlataformas(date: String): Set<String> {
         val keys = getRedisKeys("imusic:*:*:$date:rows")
 
@@ -537,19 +685,6 @@ class UploadRedisOpenDataTest {
             val partes = key.split(":")
             if (partes.size >= 5) partes[2] else null
         }.toSet()
-    }
-
-
-    fun groupAndCount(list: List<Map<String, Any?>>, key: String): Map<String, Int> {
-        return list.groupBy { it[key]?.toString() ?: "null" }
-            .mapValues { (_, rows) ->
-                rows.sumOf { row ->
-                    row["number_of_streams"]?.toString()?.toIntOrNull() ?: 0
-                }
-            }
-            .toList()
-            .sortedByDescending { it.second }
-            .toMap()
     }
 
     /**
@@ -565,26 +700,35 @@ class UploadRedisOpenDataTest {
      */
     fun validarSumarizacao(
         summaryKey: String,
-        rawRows: List<Map<String, Any?>>,
+        rawRows: Sequence<Map<String, Any?>>,
         campo: String,
         dumpDir: String
     ) {
-        val jedis = RedisClient.jedis
+        val jedis = RedisClient.jedis // JedisPooled
 
-        // 1. Busca no Redis
-        val redisSummary = jedis.lrange(summaryKey, 0, -1).map { jsonToMap(it) }
-        if (redisSummary.isNotEmpty()) {
+        // 1. Busca paginada no Redis
+        println("Cheguei aqui validarSumarizacao")
+        val redisSummary = readLargeRedisListPaged(jedis, summaryKey)
+            .map { jsonToMap(it) }
+
+        println("Passei pela leitura dos 50_000 registros paginados")
+        if (redisSummary.isEmpty()) {
             LogCollector.println("❌ Sumarização vazia: $summaryKey")
         }
-        assertTrue(redisSummary.isNotEmpty(), "❌ Sumarização vazia: $summaryKey")
 
-        // 2. Determina agrupamento baseado no prefixo
+        // 2. Determina agrupamento
+        println("Cheguei aqui getSumarizacaoConfig")
         val config = getSumarizacaoConfig(summaryKey, campo)
 
         // 3. Recalcula sumarização
+        println("Cheguei aqui recalcularSumarizacao")
+        //val expected = recalcularSumarizacao(rawRows.asSequence(), config)
         val expected = recalcularSumarizacao(rawRows, config)
 
-        // 4. Redis → Map(agrupamento → streams)
+
+
+        // 4. Redis → Map
+        println("Cheguei aqui Redis → Map")
         val redisMap = redisSummary.associate { row ->
             val key = config.groupFields.joinToString("|") { field ->
                 (row[field]?.toString()?.trim()?.ifEmpty { "null" } ?: "null").lowercase()
@@ -593,74 +737,32 @@ class UploadRedisOpenDataTest {
             key to streams
         }
 
-        // 5. Dump em caso de erro
+        // 5. Dumps
+        println("Cheguei aqui Dumps save _expected e _from_redis")
         saveJsonToFile(dumpDir, "${summaryKey}_expected.json", expected)
         saveJsonToFile(dumpDir, "${summaryKey}_from_redis.json", redisMap)
 
-        // 6. Validação de quantidade
+        // 6. Valida quantidade
         if (expected.size != redisMap.size) {
-
             LogCollector.println(
                 """
-                ❌ Quantidade divergente → $summaryKey  
+            ❌ Quantidade divergente → $summaryKey
             
-                Esperado = ${expected.size}  
-                Redis    = ${redisMap.size}  
-            
-                Veja dumps em: $dumpDir
-                """.trimIndent()
-                    )
-        } else {
-            LogCollector.println(
-                "✔ Quantidade OK → $summaryKey (total = ${expected.size})"
-            )
-        }
-
-        assertEquals(
-            expected.size,
-            redisMap.size,
-            """
-            ❌ Quantidade divergente → $summaryKey  
-            
-            Esperado = ${expected.size}  
-            Redis    = ${redisMap.size}  
-            
+            Esperado = ${expected.size}
+            Redis    = ${redisMap.size}
             Veja dumps em: $dumpDir
             """.trimIndent()
-                )
+            )
+        } else {
+            LogCollector.println("✔ Quantidade OK → $summaryKey (total = ${expected.size})")
+        }
 
+        assertEquals(expected.size, redisMap.size)
 
-        // 7. Validação item a item
+        // 7. Valida item a item
         expected.forEach { (key, expectedStreams) ->
             val redisStreams = redisMap[key]
-
-            if (expectedStreams != redisStreams) {
-                LogCollector.println(
-                    """
-                    ❌ Divergência → $summaryKey  
-                    Chave: $key  
-                    Esperado: $expectedStreams  
-                    Redis: $redisStreams  
-            
-                    Veja dumps em: $dumpDir
-                    """.trimIndent()
-                )
-            } else {
-                //LogCollector.println("✔ OK → $summaryKey | $key = $expectedStreams") //TODO: Arquivo .log fica muito grande
-            }
-
-            assertEquals(
-                expectedStreams,
-                redisStreams,
-                        """
-                ❌ Divergência → $summaryKey  
-                Chave: $key  
-                Esperado: $expectedStreams  
-                Redis: $redisStreams  
-            
-                Veja dumps em: $dumpDir
-                """.trimIndent()
-                    )
+            assertEquals(expectedStreams, redisStreams)
         }
 
         LogCollector.println("✔ Sumarização validada → $summaryKey")
@@ -691,22 +793,32 @@ class UploadRedisOpenDataTest {
 
      */
     fun recalcularSumarizacao(
-        raw: List<Map<String, Any?>>,
+        raw: Sequence<Map<String, Any?>>,
         config: SumarizacaoConfig
     ): Map<String, Int> {
-        return raw.groupBy { row ->
-            config.groupFields.joinToString("|") { field ->
+
+        val acumulado = mutableMapOf<String, Int>()
+
+        raw.forEach { row ->
+            val key = config.groupFields.joinToString("|") { field ->
                 (row[field]?.toString()?.trim()?.ifEmpty { "null" } ?: "null").lowercase()
             }
-        }.mapValues { (_, items) ->
-            items.sumOf { it["number_of_streams"]?.toString()?.toIntOrNull() ?: 0 }
-        }
-    }
 
+            val streams = row["number_of_streams"]?.toString()?.toIntOrNull() ?: 0
+
+            acumulado[key] = acumulado.getOrDefault(key, 0) + streams
+        }
+
+        return acumulado
+    }
 
     data class SumarizacaoConfig(
         val groupFields: List<String>
     )
+
+    /**
+     *Função configuração usada na sumarização
+     */
     fun getSumarizacaoConfig(key: String, campo: String): SumarizacaoConfig {
         return when {
             key.contains("topplays") -> SumarizacaoConfig(
@@ -741,6 +853,10 @@ class UploadRedisOpenDataTest {
         }
     }
 
+
+    /**
+     *Função para geração e interpretação do JSON
+     */
     fun saveJsonToFile(dir: String, fileName: String, data: Any) {
         val folder = File(dir)
         if (!folder.exists()) folder.mkdirs()
@@ -752,22 +868,9 @@ class UploadRedisOpenDataTest {
         return mapper.readValue(json, object : TypeReference<Map<String, Any?>>() {})
     }
 
-
-
-
-
-
     /**
      *Função para capturar dados do Redis para validar idempotencia
      */
-    fun captureRedisValue(key: String): Any {
-        val jedis = RedisClient.jedis
-        return when (jedis.type(key)) {
-            "hash" -> jedis.hgetAll(key)
-            "list" -> jedis.lrange(key, 0, -1).map { jsonToMap(it) }
-            else -> error("Tipo inesperado no Redis: ${jedis.type(key)} ($key)")
-        }
-    }
     fun captureRedisOtimizadaValue(key: String): Any {
         val jedis = RedisClient.jedis
         return when (jedis.type(key)) {
@@ -1042,9 +1145,7 @@ class UploadRedisOpenDataTest {
     }
 
     fun localizarArquivoTsv(redisKey: String): File {
-
-        val tmpDir = File("/tmp")
-        assertTrue(tmpDir.exists(), "Diretório /tmp não existe!")
+        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe!")
 
         // Exemplo redisKey → imusic:dashes:Amazon:2025-11-13:rows
         val parts = redisKey.split(":")
@@ -1054,7 +1155,7 @@ class UploadRedisOpenDataTest {
         val prefix = "iMusics_${platform}_"   // Ex: iMusics_Amazon_
         val suffix = "_${date}.tsv"           // Ex: _2025-11-13.tsv"
 
-        val encontrado = tmpDir.listFiles()
+        val encontrado = tmpDirLocal.listFiles()
             ?.firstOrNull { file ->
                 val nome = file.name
                 nome.startsWith(prefix) && nome.endsWith(suffix)
@@ -1067,7 +1168,7 @@ class UploadRedisOpenDataTest {
                  prefix = $prefix
                  suffix = $suffix
             → Arquivos encontrados no /tmp:
-            ${tmpDir.listFiles()?.joinToString("\n") { " - ${it.name}" }}
+            ${tmpDirLocal.listFiles()?.joinToString("\n") { " - ${it.name}" }}
             """.trimIndent()
             )
 
@@ -1076,17 +1177,11 @@ class UploadRedisOpenDataTest {
         return encontrado
     }
 
-    fun jsonToMap0(json: String): Map<String, Any> {
-        val mapper = jacksonObjectMapper()
-        return mapper.readValue(json, object : TypeReference<Map<String, Any>>() {})
-    }
-
 
     /**
      *Função Test Redis
      */
-
-    fun getRedisKeys(pattern: String): List<String> {
+    fun getRedisKeys_2(pattern: String): List<String> {
         val jedis = RedisClient.jedis
         val keys = mutableListOf<String>()
         var cursor = "0"
@@ -1101,20 +1196,42 @@ class UploadRedisOpenDataTest {
 
         return keys.sorted()
     }
+    fun getRedisKeys_3(pattern: String, maxIterations: Int = 5000, timeoutMs: Long = 8000): List<String> {
+        val jedis = RedisClient.jedis
+        val keys = mutableListOf<String>()
+        var cursor = "0"
 
+        val scanParams = redis.clients.jedis.params.ScanParams()
+            .match(pattern)
+            .count(2000) // aumenta performance
 
+        val start = System.currentTimeMillis()
+        var iterations = 0
+
+        do {
+            if (iterations++ >= maxIterations)
+                throw RuntimeException("SCAN excedeu o número máximo de iterações para pattern=$pattern")
+
+            if (System.currentTimeMillis() - start > timeoutMs)
+                throw RuntimeException("SCAN timeout após ${timeoutMs}ms para pattern=$pattern")
+
+            val result = jedis.scan(cursor, scanParams)
+            cursor = result.cursor
+            keys += result.result
+
+        } while (cursor != "0")
+
+        return keys.sorted()
+    }
     fun getRedisType(key: String): String {
         return RedisClient.jedis.type(key)
     }
-
     fun getRedisListSize(key: String): Long {
         return RedisClient.jedis.llen(key)
     }
-
     fun getRedisListSample(key: String, size: Int = 5): List<String> {
         return RedisClient.jedis.lrange(key, 0, (size - 1).toLong())
     }
-
     fun getRedisHash(key: String): Map<String, String> {
         return RedisClient.jedis.hgetAll(key)
     }

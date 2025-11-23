@@ -60,6 +60,8 @@ dependencies {
     testImplementation("software.amazon.awssdk:s3:2.20.0")
     testImplementation("redis.clients:jedis:5.1.0")
     testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+    testImplementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
 
 }
 
@@ -84,6 +86,20 @@ test {
 
     // 🟩 Para garantir que qualquer arquivo solto caia dentro de /temp
     systemProperty "user.dir", file("temp")
+
+    // ------------------------------
+    // CARREGAR CREDENCIAIS VIA ENV VAR
+    // (sem expor no Git)
+    // ------------------------------
+    ext {
+        AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID") ?: ""
+        AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY") ?: ""
+        AWS_S3_REGION_NAME = System.getenv("AWS_S3_REGION_NAME") ?: ""
+        AWS_S3_BUCKET_NAME = System.getenv("AWS_S3_BUCKET_NAME") ?: ""
+        REDIS_HOST = System.getenv("REDIS_HOST") ?: ""
+        REDIS_PORT = System.getenv("REDIS_PORT") ?: ""
+        REDIS_PASSWORD = System.getenv("REDIS_PASSWORD") ?: ""
+    }
 
 }
 

@@ -199,6 +199,41 @@ make start
 ./gradlew test
 ```
 
+## 4. Como consultar dados direto no redis local
+```bash
+> Meta e o Agrupamento sumarizado
+> Rows são as linhas
+
+-- Install Redis
+sudo apt install redis-tools
+
+-- Logar no Redis Local
+redis-cli
+AUTH impass
+
+-- Ver se existe (1 existe / 0 nao existe)
+EXISTS imusic:topalbuns:Deezer:2025-09-23:rows
+EXISTS imusic:topalbuns:Deezer:2025-09-23:meta
+
+
+-- ver Ver o tipo primeiro
+127.0.0.1:6379> TYPE imusic:dashes:Deezer:2025-09-23:meta
+hash
+
+-- hash
+127.0.0.1:6379> HGETALL imusic:dashes:Deezer:2025-11-17:meta
+
+-- String
+GET imusic:dashes:Deezer:2025-11-17:meta
+
+-- Lista
+LLEN imusic:topplataform:Deezer:2025-09-23:rows
+
+-- Ver primeiros 10 itens
+LRANGE imusic:topplataform:Deezer:2025-09-23:rows 0 10
+
+```
+
 
 
 

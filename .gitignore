@@ -13,6 +13,10 @@ gradlew
 .temp/redis-dump/
 .temp/summary-dump/
 .temp/test-results/
+.env
+*.env
+*.env.local
+
 
 ### STS ###
 .apt_generated
