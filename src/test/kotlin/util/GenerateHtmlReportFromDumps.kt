@@ -3,6 +3,7 @@ package util
 import `analytics-process`.UploadRedisOpenDataTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import util.Data.Companion.DIR_REPORT_DOCS
 import util.Data.Companion.DIR_SUMMARY_DUMP
 import util.Data.Companion.DIR_TEST_RESULT
 import java.io.File
@@ -184,7 +185,6 @@ class GenerateHtmlReportFromDumps() {
           <ul>
             <li>O key é composto pela concatenação dos campos de agrupamento, na ordem: ${groupFields.joinToString(", ")}.</li>
             <li>Se o valor do Redis aparecer como <code>null</code>, significa que a chave esperada não foi encontrada no Redis.</li>
-            <li>Foram exibidas até 5000 divergências no relatório.</li>
           </ul>
 
         </body>
@@ -192,7 +192,7 @@ class GenerateHtmlReportFromDumps() {
     """.trimIndent())
 
        // salvar HTML
-       val outFile = File(dumpDir, "${summaryKey}_report.html")
+       val outFile = File(DIR_REPORT_DOCS, "${summaryKey}_report.html")
        outFile.writeText(html.toString(), Charsets.UTF_8)
 
        LogCollector.println("✅ Relatório HTML salvo em: ${outFile.absolutePath}")

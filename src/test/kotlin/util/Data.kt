@@ -15,7 +15,7 @@ class Data {
         const val DIR_SUMMARY_DUMP = "temp/summary-dump"
         const val DIR_TEST_RESULT = "temp/test-results"
         const val DIR_TEMP="/tmp"
-
+        const val DIR_REPORT_DOCS = "docs"
         const val PATH_PROCESS = "/start-process"
 
         // Campos Redis

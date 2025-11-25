@@ -169,8 +169,9 @@ Este projeto possui um mecanismo automático de geração de relatórios HTML ut
 > A comparação é feita campo a campo, e um relatório visual é gerado para facilitar a análise.
 
 ```bash
-temp/summary-dump/${summaryKey}_report.html
-``
+docs/${summaryKey}_report.html
+```
+
 
 # ⚠️ Exemplo real de divergência detectada
 ```bash
