@@ -192,7 +192,8 @@ class GenerateHtmlReportFromDumps() {
     """.trimIndent())
 
        // salvar HTML
-       val outFile = File(DIR_REPORT_DOCS, "${summaryKey}_report.html")
+       val safeName = summaryKey.replace(":", "_")
+       val outFile = File(DIR_REPORT_DOCS, "${safeName}_report.html")
        outFile.writeText(html.toString(), Charsets.UTF_8)
 
        LogCollector.println("✅ Relatório HTML salvo em: ${outFile.absolutePath}")
