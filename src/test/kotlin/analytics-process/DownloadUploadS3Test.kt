@@ -1,6 +1,5 @@
 package `analytics-process`
 
-import io.github.cdimascio.dotenv.dotenv
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType
@@ -14,13 +13,18 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request
 import util.EnvLoader
+import util.ListsConstants.EXPECTED_PLAYERS
+import util.ListsConstants.PLAYERS_ICON
 import util.LogCollector
+import util.Data.Companion.BASE_URL
+import util.Data.Companion.DIR_TEMP
+import util.Data.Companion.PATH_PROCESS
+import util.givenOauth
 import java.io.File
 import java.time.Duration
 import java.time.LocalDate
@@ -38,7 +42,6 @@ class DownloadUploadS3Test {
      */
 
     companion object {
-        private const val BASE_URL = "http://localhost:3015"
         private var token: String = ""
         private var start: java.time.Instant? = null
 
@@ -47,7 +50,6 @@ class DownloadUploadS3Test {
          */
         private var startDate ="2025-09-28"
         private var endDate ="2025-09-28"
-        val tmpDirLocal = File(EnvLoader.get("DIR_TEMP"))
 
         // Parâmetros dos testes caminho feliz
         val timeoutFull = Duration.ofMinutes(15) // tempo máximo total do teste
@@ -61,58 +63,23 @@ class DownloadUploadS3Test {
         val prefixS3 = EnvLoader.get("AWS_S3_FILE_PREFIX")
 
 
-        val expectedPlayers = listOf(
-            "iMusics_Amazon",
-            "iMusics_Deezer",
-            "iMusics_iTunes",
-            "iMusics_TikTok",
-            "iMusics_Pandora",
-            "iMusics_Spotify",
-            "iMusics_Youtube",
-            "iMusics_SoundCloud"
-        )
-        val playerIcons = mapOf(
-            "iMusics_Amazon" to "🛒",
-            "iMusics_Spotify" to "🎵",
-            "iMusics_Deezer" to "📻",
-            "iMusics_iTunes" to "🍎",
-            "iMusics_TikTok" to "🎬",
-            "iMusics_Pandora" to "📡",
-            "iMusics_Youtube" to "▶️",
-            "iMusics_SoundCloud" to "☁️"
-        )
-
         @JvmStatic
         @BeforeAll
         fun setup() {
-
             RestAssured.baseURI = BASE_URL
-            val loginBody = """
-                {
-                  "grant_type": "client_credentials",
-                  "email": "superadmin@taomusic.com.br",
-                  "senha": "tao001"
-                }
-            """.trimIndent()
-
-            val response = given()
-                .contentType(ContentType.JSON)
-                .header("origin", "http://localhost")
-                .body(loginBody)
-                .post("/auth/login")
-                .then()
-                .statusCode(200)
-                .extract()
-
+            val response = givenOauth()
             token = response.jsonPath().getString("token")
             assertNotNull(token, "Token não deve ser nulo")
         }
+
     }
+
 
 
     @Test
     @Tag("smokeTests") // TPF-70
     fun `CN1 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3`() {
+
         // 🔹 Corpo com período definido
         val requestBody = """
             {
@@ -127,7 +94,7 @@ class DownloadUploadS3Test {
             .header("origin", "http://localhost")
             .header("authorization", "Bearer $token")
             .body(requestBody)
-            .post("/start-process")
+            .post(PATH_PROCESS)
             .then()
             .extract()
         val statusCode = startResponse.statusCode()
@@ -222,7 +189,7 @@ class DownloadUploadS3Test {
             .header("origin", "http://localhost")
             .header("authorization", "Bearer $token")
             .body(requestBody)
-            .post("/start-process")
+            .post(PATH_PROCESS)
             .then()
             .statusCode(HttpStatus.SC_OK)
             .extract()
@@ -321,7 +288,7 @@ class DownloadUploadS3Test {
                 .header("authorization", "Bearer $token")
                 .log().all()
                 .body(requestBody)
-                .post("/start-process")
+                .post(PATH_PROCESS)
                 .then()
                 .log().all()
                 .extract()
@@ -365,7 +332,7 @@ class DownloadUploadS3Test {
             .contentType(ContentType.JSON)
             .header("origin", "http://localhost")
             .header("authorization", "Bearer $token")
-            .post("/start-process")
+            .post(PATH_PROCESS)
             .then()
             .extract()
         val statusCode = startResponse.statusCode()
@@ -493,7 +460,7 @@ class DownloadUploadS3Test {
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
                 .body(requestBody)
-                .post("/start-process")
+                .post(PATH_PROCESS)
                 .then()
                 .log().all()
                 .extract()
@@ -568,7 +535,7 @@ class DownloadUploadS3Test {
     }
 
     @Test
-    @Tag("smokeTests") // TPF-67 TODO: Processo esta retornando 200 nao 400 verificar mensagens de falhas após ajuste
+    @Tag("smokeTests") // TPF-67
     fun `CN6 - Erro no Processamento`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -617,7 +584,7 @@ class DownloadUploadS3Test {
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
                 .body(requestBody)
-                .post("/start-process")
+                .post(PATH_PROCESS)
                 .then()
                 .log().all()
                 .extract()
@@ -719,18 +686,18 @@ class DownloadUploadS3Test {
         timeoutSeconds: Long = 60,
         pollIntervalSeconds: Long = 2
     ) {
-        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
+        assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe")
 
         LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 1: Validando deleção dos arquivos no /tmp...")
         val start = System.currentTimeMillis()
         var arquivosFiltrados: List<String>
 
         while (true) {
-            val arquivos = tmpDirLocal.listFiles()?.map { it.name } ?: emptyList()
+            val arquivos = File(DIR_TEMP).listFiles()?.map { it.name } ?: emptyList()
 
             // Filtra somente arquivos dos players
             arquivosFiltrados = arquivos.filter { nome ->
-                expectedPlayers.any { player ->
+                EXPECTED_PLAYERS.any { player ->
                     nome.contains(player, ignoreCase = true)
                 }
             }
@@ -773,10 +740,10 @@ class DownloadUploadS3Test {
         val inicio = LocalDate.parse(startDate, dateFormatter)
         val fim = LocalDate.parse(endDate, dateFormatter)
 
-        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
+        assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe")
 
         // Filtrar somente arquivos .tsv ou .tsv.gz
-        val arquivos = tmpDirLocal.listFiles()
+        val arquivos = File(DIR_TEMP).listFiles()
             ?.filter { it.name.endsWith(".tsv") || it.name.endsWith(".tsv.gz") }
             ?.map { it.name }
             ?: emptyList()
@@ -817,8 +784,8 @@ class DownloadUploadS3Test {
         agrupadoPorData.forEach { (data, lista) ->
             LogCollector.println("📅 $data")
             lista.forEach { nome ->
-                val player = expectedPlayers.firstOrNull { nome.startsWith(it) }
-                val icon = playerIcons[player] ?: "📁"
+                val player = EXPECTED_PLAYERS.firstOrNull { nome.startsWith(it) }
+                val icon = PLAYERS_ICON[player] ?: "📁"
                 LogCollector.println("   $icon  $nome")
             }
         }
@@ -826,7 +793,7 @@ class DownloadUploadS3Test {
         LogCollector.println("\uD83D\uDCC2 Lista de arquivos não encontrados no /tmp:")
         dias.forEach { dia ->
             val dataStr = dia.format(dateFormatter)
-            expectedPlayers.forEach { player ->
+            EXPECTED_PLAYERS.forEach { player ->
 
                 // agora valida .tsv E .tsv.gz
                 val encontrado = arquivos.any { nome ->
@@ -886,8 +853,8 @@ class DownloadUploadS3Test {
      *Função filtra e lista do arquivos .tsv.gz e .tsv no diretório /tmp
      */
     fun filterFilesGz(): List<String> {
-        if (!tmpDirLocal.exists()) return emptyList()
-        return tmpDirLocal.listFiles()
+        if (!File(DIR_TEMP).exists()) return emptyList()
+        return File(DIR_TEMP).listFiles()
             ?.filter { file ->
                  file.name.endsWith(".tsv.gz")
             }
@@ -896,8 +863,8 @@ class DownloadUploadS3Test {
             ?: emptyList()
     }
     fun filterFilesTsv(): List<String> {
-        if (!tmpDirLocal.exists()) return emptyList()
-        return tmpDirLocal.listFiles()
+        if (!File(DIR_TEMP).exists()) return emptyList()
+        return File(DIR_TEMP).listFiles()
             ?.filter { file ->
                 file.name.endsWith(".tsv")
             }
@@ -914,7 +881,7 @@ class DownloadUploadS3Test {
     fun validarTsvDescompactadosNoTmp(filesGz: List<String>) {
 
         LogCollector.println("🕵️‍♂ PASSO 4: Validando arquivos .tsv.gz e seus .tsv correspondentes...")
-        val allFiles = tmpDirLocal.listFiles()
+        val allFiles = File(DIR_TEMP).listFiles()
             ?.map { it.name }
             ?: emptyList()
 
@@ -965,9 +932,9 @@ class DownloadUploadS3Test {
         //renomearPrimeiroArquivoTsvGzParaTeste() // So foi usado para teste
 
         // 2️⃣ Carrega arquivos do /tmp
-        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
+        assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe")
 
-        val tmpFiles = tmpDirLocal.listFiles()
+        val tmpFiles = File(DIR_TEMP).listFiles()
             ?.filter { it.isFile && it.name.endsWith(".tsv.gz") }
             ?.associateBy { it.name }
             ?: emptyMap()
@@ -1080,13 +1047,6 @@ class DownloadUploadS3Test {
             prefixDesejado
         }
     }
-    fun criarClienteS3_2(): S3Client {
-        val region = regionS3 ?: "us-east-1"
-        return S3Client.builder()
-            .region(Region.of(region))
-            .credentialsProvider(DefaultCredentialsProvider.create())
-            .build()
-    }
     fun criarClienteS3(): S3Client {
         return S3Client.builder()
             .region(Region.of(region))
@@ -1098,16 +1058,16 @@ class DownloadUploadS3Test {
             .build()
     }
     fun renomearPrimeiroArquivoTsvGzParaTeste() {
-        assertTrue(tmpDirLocal.exists(), "Diretório /tmp não existe")
+        assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe")
 
-        val arquivos = tmpDirLocal.listFiles()
+        val arquivos = File(DIR_TEMP).listFiles()
             ?.filter { it.isFile && it.name.endsWith(".tsv.gz") }
             ?: emptyList()
 
         assertTrue(arquivos.isNotEmpty(), "Nenhum arquivo .tsv.gz encontrado no /tmp!")
 
         val original = arquivos.first()
-        val renomeado = File(tmpDirLocal, original.name.replace(".tsv.gz", "_RENAME_TEST.tsv.gz"))
+        val renomeado = File(File(DIR_TEMP), original.name.replace(".tsv.gz", "_RENAME_TEST.tsv.gz"))
 
         val ok = original.renameTo(renomeado)
         assertTrue(ok, "Falha ao renomear arquivo ${original.name}")

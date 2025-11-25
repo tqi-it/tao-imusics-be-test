@@ -160,6 +160,18 @@ Transforma em:
 
 ---
 
+###  ✓ 4. 📊 Relatório HTML de Validação das Sumarizações:
+Este projeto possui um mecanismo automático de geração de relatórios HTML utilizados para validar a consistência entre:
+> os dados esperados calculados localmente (*_expected.json)
+
+> os dados sumarizados pela pipeline gravados no Redis (*_from_redis.json)
+
+> A comparação é feita campo a campo, e um relatório visual é gerado para facilitar a análise.
+
+```bash
+temp/summary-dump/${summaryKey}_report.html
+``
+
 # ⚠️ Exemplo real de divergência detectada
 ```bash
 ❌ Divergência → imusic:topregioes:Amazon:2025-09-30:rows

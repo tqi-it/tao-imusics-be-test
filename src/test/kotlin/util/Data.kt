@@ -1,4 +1,4 @@
-package util.configs
+package util
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,40 +11,24 @@ class Data {
         const val APPLICATION = "application"
         const val DATA = "data"
 
-        /**
-         * URLs Services
-         */
-        val URL_: String = getProperties(APPLICATION, "url.responsys")
+        const val BASE_URL = "http://localhost:3015"
+        const val DIR_SUMMARY_DUMP = "temp/summary-dump"
+        const val DIR_TEST_RESULT = "temp/test-results"
+        const val DIR_TEMP="/tmp"
 
-        // DADOS
-        val USER_PASS: String = getProperties(DATA, "user.pass")
+        const val PATH_PROCESS = "/start-process"
 
+        // Campos Redis
+        const val ASSERT_ID = "asset_id"
+        const val PLATAFORM = "plataform"
+        const val UCP = "upc"
+        const val STATUS = "status"
+        const val TERRITORY = "territory"
+        const val NUMBER_OF_STREAMS = "number_of_streams"
+        const val DATE = "date"
+        const val STREAM_SOURCE = "stream_source"
+        const val STREAM_SOURCE_URI = "stream_source_uri"
 
-        val TIME_SLEEP: Long = getProperties(APPLICATION, "time.sleep").toLong()
-
-        /**
-         * Utilizado para obter parametros de acordo com cada ambiente
-         */
-        fun getProperties(parameterType: String, parameterName: String): String {
-            val profile: String = Env.get() ?: throw Exception("Faltou passar o profile (-Dprofile=ambiente)")
-            val propertyInputStream = this::class.java.classLoader.getResourceAsStream("$parameterType-$profile.properties")
-            val property = Properties()
-            property.load(propertyInputStream)
-            println(parameterName)
-            return property.getProperty(parameterName)
-        }
-
-        /**
-         * Realizar replace em variáveis
-         */
-        fun replaceValue(parametroReplace: String, valueReplace: String? = " "):String{
-            return parametroReplace.replace("$valueReplace","")
-                .replace("{","")
-                .replace("}","")
-                .replace("[","")
-                .replace("]","")
-                .replace(" ","")
-        }
 
     }
 }
