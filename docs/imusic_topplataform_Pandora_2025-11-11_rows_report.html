@@ -1,0 +1,1057 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Relatório Sumarização — imusic:topplataform:Pandora:2025-11-11:rows</title>
+
+  <style>
+    /* ----------- DARK THEME ----------- */
+    body {
+      margin: 20px;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+    }
+
+    h1, h2 {
+      color: #58a6ff;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .small { color:#8b949e; font-size:13px; }
+
+    /* ----------- METRICS CARDS ----------- */
+    .metrics {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .card {
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      width: 245px;
+    }
+
+    .card strong {
+      color: #58a6ff;
+      font-size: 14px;
+    }
+
+    /* ----------- TABLES ----------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background: #161b22;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background: #21262d;
+      padding: 10px;
+      border-bottom: 1px solid #30363d;
+      text-align: left;
+      color: #58a6ff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #21262d;
+      font-size: 13px;
+      color: #c9d1d9;
+    }
+
+    tr.diff {
+      background: rgba(248, 81, 73, 0.15);
+    }
+
+    .bad { color:#ff7b72; font-weight:600; }
+    .ok { color:#3fb950; font-weight:600; }
+
+    .mono {
+      font-family: "JetBrains Mono", "Courier New", monospace;
+      font-size: 12px;
+      color:#9da7b3;
+    }
+
+    .summary-table td { width: 200px; }
+
+    a.link {
+      color:#79c0ff;
+      text-decoration:none;
+    }
+    a.link:hover {
+      text-decoration: underline;
+    }
+
+    /* scroll horizontal para tabelas */
+    .scroll {
+      overflow-x: auto;
+    }
+    
+    .bad {
+      color: #ff7b72;     /* vermelho GitHub */
+      font-weight: 600;
+    }
+
+    .ok {
+      color: #3fb950;     /* verde GitHub */
+      font-weight: 600;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<h1>Relatório de Sumarização — imusic:topplataform:Pandora:2025-11-11:rows</h1>
+<p class="small">Gerado em: 2025-11-26 16:34:48</p>
+
+<div class="metrics">
+  <div class="card"><strong>Expected keys</strong><br/>144</div>
+  <div class="card"><strong>Redis keys</strong><br/>144</div>
+  <div class="card"><strong>Chaves divergentes</strong><br/>0</div>
+  <div class="card"><strong>Extras no Redis</strong><br/>0</div>
+  <div class="card"><strong>Arquivo expected</strong><br/><a class="link" href="imusic:topplataform:Pandora:2025-11-11:rows_expected.json">imusic:topplataform:Pandora:2025-11-11:rows_expected.json</a></div>
+  <div class="card"><strong>Arquivo from_redis</strong><br/><a class="link" href="imusic:topplataform:Pandora:2025-11-11:rows_from_redis.json">imusic:topplataform:Pandora:2025-11-11:rows_from_redis.json</a></div>
+</div>
+
+<h2>Resumo por campo</h2>
+
+<div class="scroll">
+<table class="summary-table">
+  <thead>
+    <tr><th>Campo</th><th>Chaves com divergência</th><th>Soma absoluta das diferenças</th></tr>
+  </thead>
+  <tbody><tr><td>asset_id</td><td>0</td><td>0</td></tr><tr><td>plataform</td><td>0</td><td>0</td></tr><tr><td>date</td><td>0</td><td>0</td></tr>  </tbody>
+</table>
+
+<h2>Top divergências (ordenado por |expected - redis| descendente)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>key</th>
+      <th class="mono">expected</th>
+      <th class="mono">redis</th>
+      <th class="mono">abs(diff)</th>
+    </tr>
+  </thead>
+  <tbody><tr >
+  <td>1</td>
+  <td class="mono">1002875051506|Pandora|2025-11-11</td>
+  <td class="mono">4</td>
+  <td class="mono">4</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>2</td>
+  <td class="mono">1004792812319|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>3</td>
+  <td class="mono">1002723070735|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>4</td>
+  <td class="mono">1002874903774|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>5</td>
+  <td class="mono">1005976363294|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>6</td>
+  <td class="mono">5600634449|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>7</td>
+  <td class="mono">8867879858|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>8</td>
+  <td class="mono">1001239791380|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>9</td>
+  <td class="mono">1003670224736|Pandora|2025-11-11</td>
+  <td class="mono">4</td>
+  <td class="mono">4</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>10</td>
+  <td class="mono">1004071286457|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>11</td>
+  <td class="mono">1005955922715|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>12</td>
+  <td class="mono">1003340600839|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>13</td>
+  <td class="mono">1005308558067|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>14</td>
+  <td class="mono">1005772581569|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>15</td>
+  <td class="mono">1005908418327|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>16</td>
+  <td class="mono">1002955252911|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>17</td>
+  <td class="mono">1004151894043|Pandora|2025-11-11</td>
+  <td class="mono">4</td>
+  <td class="mono">4</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>18</td>
+  <td class="mono">1002956109817|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>19</td>
+  <td class="mono">1002956250362|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>20</td>
+  <td class="mono">1003445314547|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>21</td>
+  <td class="mono">1005005087124|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>22</td>
+  <td class="mono">6549015498|Pandora|2025-11-11</td>
+  <td class="mono">4</td>
+  <td class="mono">4</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>23</td>
+  <td class="mono">5588251351|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>24</td>
+  <td class="mono">5588251389|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>25</td>
+  <td class="mono">5588251424|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>26</td>
+  <td class="mono">5588251571|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>27</td>
+  <td class="mono">5588251660|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>28</td>
+  <td class="mono">5586956067|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>29</td>
+  <td class="mono">1005987239282|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>30</td>
+  <td class="mono">1005021704594|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>31</td>
+  <td class="mono">7311759838|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>32</td>
+  <td class="mono">7329923953|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>33</td>
+  <td class="mono">7386654738|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>34</td>
+  <td class="mono">8110666578|Pandora|2025-11-11</td>
+  <td class="mono">5</td>
+  <td class="mono">5</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>35</td>
+  <td class="mono">8383902945|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>36</td>
+  <td class="mono">8710153555|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>37</td>
+  <td class="mono">8954548189|Pandora|2025-11-11</td>
+  <td class="mono">162</td>
+  <td class="mono">162</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>38</td>
+  <td class="mono">8991460237|Pandora|2025-11-11</td>
+  <td class="mono">33</td>
+  <td class="mono">33</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>39</td>
+  <td class="mono">9021199203|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>40</td>
+  <td class="mono">9021199221|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>41</td>
+  <td class="mono">1001491879296|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>42</td>
+  <td class="mono">1001803515169|Pandora|2025-11-11</td>
+  <td class="mono">5</td>
+  <td class="mono">5</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>43</td>
+  <td class="mono">1001803515930|Pandora|2025-11-11</td>
+  <td class="mono">7</td>
+  <td class="mono">7</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>44</td>
+  <td class="mono">1001803516248|Pandora|2025-11-11</td>
+  <td class="mono">7</td>
+  <td class="mono">7</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>45</td>
+  <td class="mono">1001883756165|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>46</td>
+  <td class="mono">1003182652135|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>47</td>
+  <td class="mono">1003200692275|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>48</td>
+  <td class="mono">1003651550586|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>49</td>
+  <td class="mono">1004095973510|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>50</td>
+  <td class="mono">1004408874337|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>51</td>
+  <td class="mono">1004419900748|Pandora|2025-11-11</td>
+  <td class="mono">69</td>
+  <td class="mono">69</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>52</td>
+  <td class="mono">1004434914239|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>53</td>
+  <td class="mono">1004545814550|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>54</td>
+  <td class="mono">1004595099873|Pandora|2025-11-11</td>
+  <td class="mono">6</td>
+  <td class="mono">6</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>55</td>
+  <td class="mono">1004654840178|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>56</td>
+  <td class="mono">1005019806721|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>57</td>
+  <td class="mono">1005297212954|Pandora|2025-11-11</td>
+  <td class="mono">5</td>
+  <td class="mono">5</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>58</td>
+  <td class="mono">1005675827836|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>59</td>
+  <td class="mono">1005785154711|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>60</td>
+  <td class="mono">1005917036319|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>61</td>
+  <td class="mono">1005966178706|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>62</td>
+  <td class="mono">1006002776892|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>63</td>
+  <td class="mono">1006005567743|Pandora|2025-11-11</td>
+  <td class="mono">5</td>
+  <td class="mono">5</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>64</td>
+  <td class="mono">1006032855015|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>65</td>
+  <td class="mono">1006139137658|Pandora|2025-11-11</td>
+  <td class="mono">14</td>
+  <td class="mono">14</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>66</td>
+  <td class="mono">1004039194948|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>67</td>
+  <td class="mono">5576750087|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>68</td>
+  <td class="mono">5576750247|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>69</td>
+  <td class="mono">1005191635697|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>70</td>
+  <td class="mono">1005449674193|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>71</td>
+  <td class="mono">1000275861922|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>72</td>
+  <td class="mono">1000307404068|Pandora|2025-11-11</td>
+  <td class="mono">45</td>
+  <td class="mono">45</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>73</td>
+  <td class="mono">1000569202314|Pandora|2025-11-11</td>
+  <td class="mono">7</td>
+  <td class="mono">7</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>74</td>
+  <td class="mono">1005191946041|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>75</td>
+  <td class="mono">1005499751637|Pandora|2025-11-11</td>
+  <td class="mono">36</td>
+  <td class="mono">36</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>76</td>
+  <td class="mono">1005499751722|Pandora|2025-11-11</td>
+  <td class="mono">20</td>
+  <td class="mono">20</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>77</td>
+  <td class="mono">1005499751830|Pandora|2025-11-11</td>
+  <td class="mono">8</td>
+  <td class="mono">8</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>78</td>
+  <td class="mono">1005499751874|Pandora|2025-11-11</td>
+  <td class="mono">56</td>
+  <td class="mono">56</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>79</td>
+  <td class="mono">1005507767013|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>80</td>
+  <td class="mono">1005507767962|Pandora|2025-11-11</td>
+  <td class="mono">4</td>
+  <td class="mono">4</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>81</td>
+  <td class="mono">1005509228472|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>82</td>
+  <td class="mono">1005499764067|Pandora|2025-11-11</td>
+  <td class="mono">31</td>
+  <td class="mono">31</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>83</td>
+  <td class="mono">1005499764097|Pandora|2025-11-11</td>
+  <td class="mono">7</td>
+  <td class="mono">7</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>84</td>
+  <td class="mono">1005499764171|Pandora|2025-11-11</td>
+  <td class="mono">6</td>
+  <td class="mono">6</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>85</td>
+  <td class="mono">1005499764237|Pandora|2025-11-11</td>
+  <td class="mono">7</td>
+  <td class="mono">7</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>86</td>
+  <td class="mono">7446881582|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>87</td>
+  <td class="mono">1002784250767|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>88</td>
+  <td class="mono">5611164651|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>89</td>
+  <td class="mono">5588251505|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>90</td>
+  <td class="mono">5588251722|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>91</td>
+  <td class="mono">1005266609390|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>92</td>
+  <td class="mono">1001801298267|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>93</td>
+  <td class="mono">1002736504714|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>94</td>
+  <td class="mono">1005425682559|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>95</td>
+  <td class="mono">1005740256150|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>96</td>
+  <td class="mono">1004658974400|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>97</td>
+  <td class="mono">1005927720191|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>98</td>
+  <td class="mono">1002784749832|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>99</td>
+  <td class="mono">1004430875149|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>100</td>
+  <td class="mono">1005947774823|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>101</td>
+  <td class="mono">1005541440159|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>102</td>
+  <td class="mono">1005693616167|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>103</td>
+  <td class="mono">1005796079665|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>104</td>
+  <td class="mono">1005741132437|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>105</td>
+  <td class="mono">1001159336549|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>106</td>
+  <td class="mono">1002956233168|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>107</td>
+  <td class="mono">1005090432553|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>108</td>
+  <td class="mono">1005828505056|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>109</td>
+  <td class="mono">1005919448694|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>110</td>
+  <td class="mono">6823560545|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>111</td>
+  <td class="mono">6934166094|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>112</td>
+  <td class="mono">7770880724|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>113</td>
+  <td class="mono">8365109788|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>114</td>
+  <td class="mono">8369423335|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>115</td>
+  <td class="mono">8991212199|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>116</td>
+  <td class="mono">1001802111379|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>117</td>
+  <td class="mono">1001802111746|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>118</td>
+  <td class="mono">1001802112163|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>119</td>
+  <td class="mono">1001802112343|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>120</td>
+  <td class="mono">1001802112610|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>121</td>
+  <td class="mono">1001802112952|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>122</td>
+  <td class="mono">1001802113228|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>123</td>
+  <td class="mono">1001802201852|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>124</td>
+  <td class="mono">1001802202958|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>125</td>
+  <td class="mono">1001802203229|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>126</td>
+  <td class="mono">1001802203536|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>127</td>
+  <td class="mono">1001802204345|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>128</td>
+  <td class="mono">1001803403226|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>129</td>
+  <td class="mono">1001803403421|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>130</td>
+  <td class="mono">1001803403595|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>131</td>
+  <td class="mono">1001803403761|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>132</td>
+  <td class="mono">1001803516410|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>133</td>
+  <td class="mono">1003182571927|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>134</td>
+  <td class="mono">1003322403399|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>135</td>
+  <td class="mono">1004787464817|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>136</td>
+  <td class="mono">1006188424082|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>137</td>
+  <td class="mono">1003192827225|Pandora|2025-11-11</td>
+  <td class="mono">3</td>
+  <td class="mono">3</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>138</td>
+  <td class="mono">1004658974154|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>139</td>
+  <td class="mono">1004658976164|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>140</td>
+  <td class="mono">1005123481305|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>141</td>
+  <td class="mono">8720982831|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>142</td>
+  <td class="mono">6484321723|Pandora|2025-11-11</td>
+  <td class="mono">5</td>
+  <td class="mono">5</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>143</td>
+  <td class="mono">1005507683728|Pandora|2025-11-11</td>
+  <td class="mono">1</td>
+  <td class="mono">1</td>
+  <td class="mono ok">0</td>
+</tr><tr >
+  <td>144</td>
+  <td class="mono">5591213600|Pandora|2025-11-11</td>
+  <td class="mono">2</td>
+  <td class="mono">2</td>
+  <td class="mono ok">0</td>
+</tr>    </tbody>
+  </table>
+
+        <h2>Observações</h2>
+        <ul>
+          <li>
+            <strong>Chave de agrupamento:</strong> cada registro é identificado pela concatenação 
+            dos campos configurados para este tipo de sumarização, na ordem: 
+            <code>asset_id, plataform, date</code>.
+          </li>
+        
+          <li>
+            <strong>Valores <code>null</code> no Redis:</strong> quando o Redis retorna 
+            <code>null</code> significa que a chave esperada não foi encontrada no resultado 
+            da sumarização armazenada.
+          </li>
+        
+          <li>
+            <strong>Divergências exibidas:</strong> o relatório mostra até 
+            <strong>5.000 maiores diferenças</strong>, ordenadas por 
+            <code>|expected - redis|</code> de forma decrescente.
+          </li>
+        
+          <li>
+            <strong>Cor das diferenças:</strong> valores iguais aparecem em 
+            <span style="color:#3fb950;font-weight:600">verde</span>, 
+            enquanto divergências são destacadas em 
+            <span style="color:#ff7b72;font-weight:600">vermelho</span>.
+          </li>
+        
+          <li>
+            <strong>Linhas destacadas:</strong> registros com diferença (diff ≠ 0) 
+            são marcados com fundo vermelho suave para facilitar a visualização.
+          </li>
+        
+          <li>
+            <strong>Tabelas com rolagem horizontal:</strong> caso existam chaves muito longas,
+            utilize a rolagem horizontal para visualizar todo o conteúdo sem quebra.
+          </li>
+        </ul>
+
+
+</body>
+</html>

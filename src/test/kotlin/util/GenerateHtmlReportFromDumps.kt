@@ -97,46 +97,144 @@ class GenerateHtmlReportFromDumps() {
 
        val html = StringBuilder()
        html.append("""
-        <!doctype html>
-        <html>
-        <head>
-          <meta charset="utf-8"/>
-          <title>Relatório Sumarização — ${summaryKey}</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 20px; color:#222; }
-            h1,h2 { color: #003366; }
-            .metrics { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
-            .card { padding:12px 16px; border-radius:8px; background:#f7f9fb; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-            table { width:100%; border-collapse:collapse; margin-top:12px; }
-            th, td { padding:8px 10px; border-bottom:1px solid #e7eef6; text-align:left; font-size:13px; }
-            th { background:#f0f6fb; color:#004a7f; }
-            tr.diff { background:#fff7f6; }
-            .bad { color:#c00; font-weight:600; }
-            .ok { color:#0a8a0a; font-weight:600; }
-            .mono { font-family: "Courier New", monospace; font-size:12px; color:#333; }
-            .small { font-size:12px; color:#666; }
-            .summary-table td { width: 200px; }
-            a.link { color:#0b66a3; text-decoration:none; }
-          </style>
-        </head>
-        <body>
-          <h1>Relatório de Sumarização — ${summaryKey}</h1>
-          <p class="small">Gerado em: $now</p>
+            <!doctype html>
+            <html>
+            <head>
+              <meta charset="utf-8"/>
+              <title>Relatório Sumarização — ${summaryKey}</title>
+            
+              <style>
+                /* ----------- DARK THEME ----------- */
+                body {
+                  margin: 20px;
+                  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                  background: #0d1117;
+                  color: #e6edf3;
+                }
+            
+                h1, h2 {
+                  color: #58a6ff;
+                  margin-bottom: 10px;
+                  font-weight: 600;
+                }
+            
+                .small { color:#8b949e; font-size:13px; }
+            
+                /* ----------- METRICS CARDS ----------- */
+                .metrics {
+                  display: flex;
+                  gap: 20px;
+                  flex-wrap: wrap;
+                  margin: 20px 0;
+                }
+            
+                .card {
+                  padding: 16px 20px;
+                  border-radius: 10px;
+                  background: #161b22;
+                  border: 1px solid #30363d;
+                  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+                  width: 245px;
+                }
+            
+                .card strong {
+                  color: #58a6ff;
+                  font-size: 14px;
+                }
+            
+                /* ----------- TABLES ----------- */
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-top: 16px;
+                  background: #161b22;
+                  border-radius: 8px;
+                  overflow: hidden;
+                }
+            
+                th {
+                  background: #21262d;
+                  padding: 10px;
+                  border-bottom: 1px solid #30363d;
+                  text-align: left;
+                  color: #58a6ff;
+                  font-size: 13px;
+                  font-weight: 600;
+                }
+            
+                td {
+                  padding: 8px 10px;
+                  border-bottom: 1px solid #21262d;
+                  font-size: 13px;
+                  color: #c9d1d9;
+                }
+            
+                tr.diff {
+                  background: rgba(248, 81, 73, 0.15);
+                }
+            
+                .bad { color:#ff7b72; font-weight:600; }
+                .ok { color:#3fb950; font-weight:600; }
+            
+                .mono {
+                  font-family: "JetBrains Mono", "Courier New", monospace;
+                  font-size: 12px;
+                  color:#9da7b3;
+                }
+            
+                .summary-table td { width: 200px; }
+            
+                a.link {
+                  color:#79c0ff;
+                  text-decoration:none;
+                }
+                a.link:hover {
+                  text-decoration: underline;
+                }
+            
+                /* scroll horizontal para tabelas */
+                .scroll {
+                  overflow-x: auto;
+                }
+                
+                .bad {
+                  color: #ff7b72;     /* vermelho GitHub */
+                  font-weight: 600;
+                }
 
-          <div class="metrics">
-            <div class="card"><strong>Expected keys</strong><br/>${prettyNumber(expected.size)}</div>
-            <div class="card"><strong>Redis keys</strong><br/>${prettyNumber(redisMap.size)}</div>
-            <div class="card"><strong>Chaves divergentes</strong><br/>${prettyNumber(diffsOrdered.count { (_, p) -> p.first != (p.second ?: 0) })}</div>
-            <div class="card"><strong>Chaves extras no Redis</strong><br/>${prettyNumber(extraRedisKeys.size)}</div>
-            <div class="card"><strong>Arquivo expected</strong><br/><a class="link" href="${expectedFile.name}">${expectedFile.name}</a></div>
-            <div class="card"><strong>Arquivo from_redis</strong><br/><a class="link" href="${redisFile.name}">${redisFile.name}</a></div>
-          </div>
+                .ok {
+                  color: #3fb950;     /* verde GitHub */
+                  font-weight: 600;
+                }
 
-          <h2>Resumo por campo (somatório absoluto das diferenças)</h2>
-          <table class="summary-table">
-            <thead><tr><th>Campo</th><th>Qtde de chaves com divergência</th><th>Soma absoluta das diferenças</th></tr></thead>
-            <tbody>
-    """.trimIndent())
+              </style>
+            
+            </head>
+            
+            <body>
+            
+            <h1>Relatório de Sumarização — ${summaryKey}</h1>
+            <p class="small">Gerado em: $now</p>
+            
+            <div class="metrics">
+              <div class="card"><strong>Expected keys</strong><br/>${prettyNumber(expected.size)}</div>
+              <div class="card"><strong>Redis keys</strong><br/>${prettyNumber(redisMap.size)}</div>
+              <div class="card"><strong>Chaves divergentes</strong><br/>${prettyNumber(diffsOrdered.count { (_, p) -> p.first != (p.second ?: 0) })}</div>
+              <div class="card"><strong>Extras no Redis</strong><br/>${prettyNumber(extraRedisKeys.size)}</div>
+              <div class="card"><strong>Arquivo expected</strong><br/><a class="link" href="${expectedFile.name}">${expectedFile.name}</a></div>
+              <div class="card"><strong>Arquivo from_redis</strong><br/><a class="link" href="${redisFile.name}">${redisFile.name}</a></div>
+            </div>
+            
+            <h2>Resumo por campo</h2>
+            
+            <div class="scroll">
+            <table class="summary-table">
+              <thead>
+                <tr><th>Campo</th><th>Chaves com divergência</th><th>Soma absoluta das diferenças</th></tr>
+              </thead>
+              <tbody>
+            """.trimIndent())
+
 
        fieldSummary.forEach { (field, stats) ->
            html.append("<tr><td>${field}</td><td>${prettyNumber(stats.count)}</td><td>${prettyNumber(stats.totalAbsDiff)}</td></tr>")
@@ -181,11 +279,44 @@ class GenerateHtmlReportFromDumps() {
             </tbody>
           </table>
 
-          <h2>Observações</h2>
-          <ul>
-            <li>O key é composto pela concatenação dos campos de agrupamento, na ordem: ${groupFields.joinToString(", ")}.</li>
-            <li>Se o valor do Redis aparecer como <code>null</code>, significa que a chave esperada não foi encontrada no Redis.</li>
-          </ul>
+                <h2>Observações</h2>
+                <ul>
+                  <li>
+                    <strong>Chave de agrupamento:</strong> cada registro é identificado pela concatenação 
+                    dos campos configurados para este tipo de sumarização, na ordem: 
+                    <code>${groupFields.joinToString(", ")}</code>.
+                  </li>
+                
+                  <li>
+                    <strong>Valores <code>null</code> no Redis:</strong> quando o Redis retorna 
+                    <code>null</code> significa que a chave esperada não foi encontrada no resultado 
+                    da sumarização armazenada.
+                  </li>
+                
+                  <li>
+                    <strong>Divergências exibidas:</strong> o relatório mostra até 
+                    <strong>5.000 maiores diferenças</strong>, ordenadas por 
+                    <code>|expected - redis|</code> de forma decrescente.
+                  </li>
+                
+                  <li>
+                    <strong>Cor das diferenças:</strong> valores iguais aparecem em 
+                    <span style="color:#3fb950;font-weight:600">verde</span>, 
+                    enquanto divergências são destacadas em 
+                    <span style="color:#ff7b72;font-weight:600">vermelho</span>.
+                  </li>
+                
+                  <li>
+                    <strong>Linhas destacadas:</strong> registros com diferença (diff ≠ 0) 
+                    são marcados com fundo vermelho suave para facilitar a visualização.
+                  </li>
+                
+                  <li>
+                    <strong>Tabelas com rolagem horizontal:</strong> caso existam chaves muito longas,
+                    utilize a rolagem horizontal para visualizar todo o conteúdo sem quebra.
+                  </li>
+                </ul>
+
 
         </body>
         </html>

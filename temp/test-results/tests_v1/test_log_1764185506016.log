@@ -1,0 +1,98 @@
+
+────────────────────────────────────────────
+🚀 PASSO 1: Processo iniciado...
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → completed
+🔄 Step atual → Finalizado
+
+────────────────────────────────────────────
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 2: Validando sumarizações TOP no Redis...
+📌 Plataformas detectadas: [Pandora]
+
+🔎 Validando sumarização → imusic:topplays:Pandora:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplays:Pandora:2025-11-11:rows
+➡ expected: 144, redis: 144
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplays_Pandora_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topplataform:Pandora:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplataform:Pandora:2025-11-11:rows
+➡ expected: 144, redis: 144
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplataform_Pandora_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topplaylist:Pandora:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplaylist:Pandora:2025-11-11:rows
+➡ expected: 539, redis: 539
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplaylist_Pandora_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topalbuns:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topalbuns:2025-11-11:rows
+➡ expected: 111, redis: 111
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbuns_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topalbum:Pandora:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topalbum:Pandora:2025-11-11:rows
+➡ expected: 111, redis: 111
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbum_Pandora_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topregiao:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topregiao:2025-11-11:rows
+➡ expected: 144, redis: 144
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topregiao_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topregioes:Pandora:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topregioes:Pandora:2025-11-11:rows
+➡ expected: 144, redis: 144
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topregioes_Pandora_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🎉 Todas as sumarizações validadas com sucesso!
+✔ Execução finalizada com sucesso garantindo ate a etapa 'sumarize_tops'.
+

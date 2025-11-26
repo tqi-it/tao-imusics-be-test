@@ -1,0 +1,113 @@
+
+────────────────────────────────────────────
+🚀 PASSO 1: Processo iniciado...
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → download_fuga_trends
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → pipeline
+
+📌 Status atual → running
+🔄 Step atual → process_file_to_redis
+
+📌 Status atual → running
+🔄 Step atual → sumarize_top_plays
+
+📌 Status atual → running
+🔄 Step atual → sumarize_top_albuns
+
+📌 Status atual → running
+🔄 Step atual → sumarize_top_regioes
+
+📌 Status atual → completed
+🔄 Step atual → Finalizado
+
+────────────────────────────────────────────
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 2: Validando sumarizações TOP no Redis...
+📌 Plataformas detectadas: [Youtube]
+
+🔎 Validando sumarização → imusic:topplays:Youtube:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplays:Youtube:2025-11-11:rows
+➡ expected: 13849, redis: 13849
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplays_Youtube_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topplataform:Youtube:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplataform:Youtube:2025-11-11:rows
+➡ expected: 13849, redis: 13849
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplataform_Youtube_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topplaylist:Youtube:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topplaylist:Youtube:2025-11-11:rows
+➡ expected: 41274, redis: 41274
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplaylist_Youtube_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topalbuns:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topalbuns:2025-11-11:rows
+➡ expected: 8578, redis: 8578
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbuns_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topalbum:Youtube:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topalbum:Youtube:2025-11-11:rows
+➡ expected: 8578, redis: 8578
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbum_Youtube_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topregiao:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topregiao:2025-11-11:rows
+➡ expected: 40114, redis: 40114
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topregiao_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🔎 Validando sumarização → imusic:topregioes:Youtube:2025-11-11:rows
+📌 Iniciando validação detalhada → imusic:topregioes:Youtube:2025-11-11:rows
+➡ expected: 40114, redis: 40114
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topregioes_Youtube_2025-11-11_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🎉 Todas as sumarizações validadas com sucesso!
+✔ Execução finalizada com sucesso garantindo ate a etapa 'sumarize_tops'.
+
