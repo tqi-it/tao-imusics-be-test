@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "mensagem",
+    "codigo",
+    "dados",
+    "qde_registros",
+    "pagina",
+    "qde_por_pagina"
+  ],
+  "properties": {
+    "mensagem": { "type": "string" },
+    "codigo": { "type": "integer" },
+
+    "dados": {
+      "type": "object",
+      "required": [
+        "id",
+        "qdePlaysAtual",
+        "titulo",
+        "artistas",
+        "dataLancamento",
+        "capa",
+        "qdePlaysAnterior",
+        "plataforma"
+      ],
+      "properties": {
+        "id": { "type": ["integer", "null"] },
+        "qdePlaysAtual": { "type": "integer" },
+        "titulo": { "type": "string" },
+        "artistas": { "type": "string" },
+        "dataLancamento": { "type": ["string", "null"] },
+        "capa": { "type": "string" },
+        "qdePlaysAnterior": { "type": "integer" },
+        "plataforma": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "qde_registros": { "type": "integer" },
+    "pagina": { "type": "integer" },
+    "qde_por_pagina": { "type": "integer" }
+  },
+  "additionalProperties": false
+}

@@ -74,6 +74,7 @@ compileKotlin {
 test {
     useJUnitPlatform {
         includeTags 'smokeTests'
+        includeTags 'contractTests'
     }
     systemProperties System.properties
     timeout = Duration.ofMinutes(10)

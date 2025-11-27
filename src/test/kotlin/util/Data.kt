@@ -1,17 +1,13 @@
 package util
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
-
 class Data {
     companion object {
 
         const val APPLICATION = "application"
         const val DATA = "data"
 
-        const val BASE_URL = "http://localhost:3015"
+        const val BASE_URL_ANALYTICS = "http://localhost:3015"
+        const val BASE_URL_BACKEND = "http://localhost:8080"
         const val DIR_SUMMARY_DUMP = "temp/summary-dump"
         const val DIR_TEST_RESULT = "temp/test-results"
         const val DIR_TEMP="/tmp"

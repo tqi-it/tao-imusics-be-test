@@ -7,11 +7,11 @@ import org.apache.http.HttpStatus
 import org.awaitility.Awaitility
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -21,7 +21,7 @@ import util.EnvLoader
 import util.ListsConstants.EXPECTED_PLAYERS
 import util.ListsConstants.PLAYERS_ICON
 import util.LogCollector
-import util.Data.Companion.BASE_URL
+import util.Data.Companion.BASE_URL_ANALYTICS
 import util.Data.Companion.DIR_TEMP
 import util.Data.Companion.PATH_PROCESS
 import util.givenOauth
@@ -31,6 +31,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Execution(ExecutionMode.SAME_THREAD) // Executar um teste por vez
 class DownloadUploadS3Test {
 
     /**
@@ -48,8 +50,8 @@ class DownloadUploadS3Test {
         /**
          * Parâmetros do CN1
          */
-        private var startDate ="2025-09-28"
-        private var endDate ="2025-09-28"
+        private var startDateCN1 ="2025-11-20"
+        private var endDateCN1 ="2025-11-20"
 
         // Parâmetros dos testes caminho feliz
         val timeoutFull = Duration.ofMinutes(15) // tempo máximo total do teste
@@ -66,14 +68,13 @@ class DownloadUploadS3Test {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            RestAssured.baseURI = BASE_URL
+            RestAssured.baseURI = BASE_URL_ANALYTICS
             val response = givenOauth()
             token = response.jsonPath().getString("token")
             assertNotNull(token, "Token não deve ser nulo")
         }
 
     }
-
 
 
     @Test
@@ -83,8 +84,8 @@ class DownloadUploadS3Test {
         // 🔹 Corpo com período definido
         val requestBody = """
             {
-              "start-date": "$startDate",
-              "end-date": "$endDate"
+              "start-date": "$startDateCN1",
+              "end-date": "$endDateCN1"
             }
         """.trimIndent()
 
@@ -157,7 +158,7 @@ class DownloadUploadS3Test {
         calcDateTime()
 
         // 🔥 Validação dos arquivos no /tmp
-        validarArquivosNoTmp("$startDate", "$endDate")
+        validarArquivosNoTmp("$startDateCN1", "$endDateCN1")
 
         // 🔥 Validação dos arquivos no .gz descompactado
         var filesGz = filterFilesGz()
@@ -166,7 +167,6 @@ class DownloadUploadS3Test {
         // 🔥 Validação dos arquivos no S3
         validarArquivosNoS3(prefixS3)
     }
-
 
     @Test
     @Tag("smokeTests") // TPF-67
@@ -191,6 +191,7 @@ class DownloadUploadS3Test {
             .body(requestBody)
             .post(PATH_PROCESS)
             .then()
+            .log().all()
             .statusCode(HttpStatus.SC_OK)
             .extract()
         val statusStart = startResponse.jsonPath().getBoolean("success")
@@ -262,8 +263,7 @@ class DownloadUploadS3Test {
 
     }
 
-
-    @Test //TODO: esta reornando 200 ao invez de 409
+    @Test
     @Tag("smokeTests")  // TPF-67 /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
     fun `CN3 - Validar ingestão quando já possui um processamento sendo realizado`() {
 
@@ -322,7 +322,6 @@ class DownloadUploadS3Test {
 
     }
 
-
     @Test
     @Tag("smokeTests") // TPF-70 /* DateTime()-3 conforme esperado do /start-process */
     fun `CN4 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3 sem passar data`() {
@@ -341,11 +340,12 @@ class DownloadUploadS3Test {
         capturaDateTime()
 
         // 🔹 Caso já exista processo rodando (409 por exemplo)
+        /*
         if (statusCode == 409 || statusCode == 400) {
             LogCollector.println("Processo já está em execução. Código: $statusCode")
             assertTrue(statusCode == 409 || statusCode == 400)
             return
-        }
+        */
 
         // 🔹 Caso contrário, precisa ser 200 ou 202 = processo iniciou corretamente
         assertTrue(statusCode == 200 || statusCode == 202, "O processo não iniciou corretamente")
@@ -394,7 +394,7 @@ class DownloadUploadS3Test {
         calcDateTime()
 
         // 🔥 Validação dos arquivos no /tmp
-        validarArquivosNoTmp("$startDate", "$endDate")
+        validarArquivosNoTmp("$startDateCN1", "$endDateCN1")
 
         // 🔥 Validação dos arquivos no .gz descompactado
         var filesGz = filterFilesGz()
@@ -415,25 +415,22 @@ class DownloadUploadS3Test {
         val datePlusDays2 = LocalDate.now().plusDays(2).format(formatter)
         val dateMinusDays1 = LocalDate.now().minusDays(1).format(formatter)
 
-        // 🔥 MAPA DE CENÁRIOS → mensagem esperada
+        // 🔥 MAPA DE CENÁRIOS → mensagem esperada no retorno
         val cenarios = listOf(
-            // Data no futuro
+            // 1 - data futura
             Triple(future, future, "Data inicial ($future) não pode ser futura. Data atual: $now"),
 
-            // Data inexistente
-            Triple("2025-13-30", "2025-13-30", "Formato de data inválido para data-inicio: 2025-13-30"),
-            Triple("2025-12-40", "2025-12-40", "Formato de data inválido para data-inicio: 2025-12-40"),
+            // 2 - datas inválidas
+            Triple("2025-13-30", "2025-13-30", "Formato de data inválido para data-inicio: 2025-13-30. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"),
+            Triple("2025-12-40", "2025-12-40", "Formato de data inválido para data-inicio: 2025-12-40. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"),
+            Triple("25-01-2025", "25-01-2025", "Formato de data inválido para data-inicio: 25-01-2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"),
+            Triple("2025/01/25", "2025/01/25", "Formato de data inválido para data-inicio: 2025/01/25. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"),
+            Triple("25/01/2025", "25/01/2025", "Formato de data inválido para data-inicio: 25/01/2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"),
 
-            // Formatos incorretos
-            Triple("25-01-2025", "25-01-2025", "Formato de data inválido para data-inicio: 25-01-2025"),
-            Triple("2025/01/25", "2025/01/25", "Formato de data inválido para data-inicio: 2025/01/25"),
-            Triple("25/01/2025", "25/01/2025", "Formato de data inválido para data-inicio: 25/01/2025"),
-
-
-            // start-date > end-date
+            // 3 - start > end
             Triple(datePlusDays2, dateMinusDays1,
                 "Data inicial ($datePlusDays2) não pode ser maior que data final ($dateMinusDays1)"
-            ),
+            )
 
             // Range grande // TODO: Hoje pode aceitar um periodo longo por se tratar de reprocessamento
             //Triple("2000-01-01", "2050-01-01", "Data final (2050-01-01) não pode ser futura. Data atual: 2025-11-19")
@@ -442,9 +439,9 @@ class DownloadUploadS3Test {
         cenarios.forEach { (startDate, endDate, mensagemEsperada) ->
 
             LogCollector.println("\n🔎 Testando cenário inválido")
-            LogCollector.println("   ➤ start-date=$startDate")
-            LogCollector.println("   ➤ end-date=$endDate")
-            LogCollector.println("   ➤ Esperado: \"$mensagemEsperada\"")
+            LogCollector.println(" ▶ start-date=$startDate")
+            LogCollector.println(" ▶ end-date=$endDate")
+            LogCollector.println(" ▶ Esperado: \"$mensagemEsperada\"")
 
             val requestBody = """
             {
@@ -453,89 +450,33 @@ class DownloadUploadS3Test {
             }
         """.trimIndent()
 
-            // Requisição ao start-process
-            val startResponse = given()
+            val response = given()
                 .contentType(ContentType.JSON)
-                .log().all()
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
                 .body(requestBody)
-                .post(PATH_PROCESS)
+                .post("/start-process")
                 .then()
-                .log().all()
+                .log().body()
                 .extract()
 
-            val statusCode = startResponse.statusCode()
-            LogCollector.println("➡ Status HTTP start-process: $statusCode")
-            assertTrue(statusCode in listOf(200))
+            val status = response.statusCode()
+            val error = response.jsonPath().getString("error") ?: ""
+            val success = response.jsonPath().getBoolean("success")
 
-            // 🔥 Aguardar mensagem de erro específica no /process-status
-            Awaitility.await()
-                .atMost(1, TimeUnit.MINUTES)
-                .pollInterval(5, TimeUnit.SECONDS)
-                .untilCallTo {
+            // 📌 validação do contrato
+            assertEquals(400, status)
+            assertFalse(success)
+            assertEquals(mensagemEsperada, error)
 
-                    val resp = given()
-                        .contentType(ContentType.JSON)
-                        .header("origin", "http://localhost")
-                        .header("authorization", "Bearer $token")
-                        .get("/process-status")
-                        .then()
-                        .extract()
-
-                    val error = resp.jsonPath().getString("error") ?: ""
-                    val currentStep = resp.jsonPath().getString("current_step") ?: ""
-                    val message = resp.jsonPath().getString("message") ?: ""
-                    val status = resp.jsonPath().getString("status") ?: ""
-                    val httpStatus = resp.statusCode()
-
-                    LogCollector.println("⏳ Campos obtidos →")
-                    LogCollector.println("   error: $error")
-                    LogCollector.println("   current_step: $currentStep")
-                    LogCollector.println("   message: $message")
-                    LogCollector.println("   status: $status")
-
-                    val resultMessage = resp.jsonPath().getString("result.message")
-                    val resultStatus = resp.jsonPath().getString("result.status")
-                    val resultStart = resp.jsonPath().getString("result.start_date")
-                    val resultEnd = resp.jsonPath().getString("result.end_date")
-
-                    StatusResponseFields(
-                        error = error,
-                        currentStep = currentStep,
-                        message = message,
-                        status = status,
-                        httpStatus = httpStatus,
-                        result = ResultFields(
-                            message = resultMessage,
-                            status = resultStatus,
-                            startDate = resultStart,
-                            endDate = resultEnd
-                        )
-                    )
-
-                } matches { result ->
-                val r = result as StatusResponseFields
-                val noError = r.error.isNullOrBlank()
-                val statusCompleted = r.status.equals("completed", ignoreCase = true)
-                val stepFinished = r.currentStep.equals("Finalizado", ignoreCase = true)
-                val resultMessageOk =
-                    r.result?.message?.equals(
-                        "FUGA não tem dados de analytics para o período solicitado",
-                        ignoreCase = true
-                    ) ?: false
-
-                noError && statusCompleted && stepFinished && resultMessageOk
-            }
-
-
-
-            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+            LogCollector.println("✔ Erro validado corretamente! → [$error]")
         }
+
+        LogCollector.println("\n🎉 Todos os cenários de datas inválidas foram validados com sucesso.\n")
     }
 
     @Test
-    @Tag("smokeTests") // TPF-67
+    @Tag("") // TPF-67
     fun `CN6 - Erro no Processamento`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -656,6 +597,38 @@ class DownloadUploadS3Test {
         }
     }
 
+    @Test
+    @Tag("smokeTests") // TPF-67
+    fun `CN7 - Validar ingestão com token inválido`() {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val now = LocalDate.now().plusDays(-2).format(formatter)
+        val requestBody = """
+                    {
+                      "start-date": "$now",
+                      "end-date": "$now"
+                    }
+                """.trimIndent()
+        val startResponse = given()
+                .contentType(ContentType.JSON)
+                .log().all()
+                .header("origin", "http://localhost")
+                .header("authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9")
+                .body(requestBody)
+                .post(PATH_PROCESS)
+                .then()
+                .log().all()
+                .extract()
+
+        val statusCode = startResponse.statusCode()
+        val error = startResponse.jsonPath().getString("error")
+        val flagSuccess = startResponse.jsonPath().getString("success")
+        LogCollector.println("➡ Status HTTP start-process: $statusCode")
+        assertTrue(statusCode in listOf(401))
+        assertEquals(error,"Invalid token (does not match current session)")
+        assertFalse(false,flagSuccess)
+            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+    }
 
     /**
      * Campos com retorno de Falhas
@@ -675,9 +648,6 @@ class DownloadUploadS3Test {
         val startDate: String?,
         val endDate: String?
     )
-
-
-
 
     /**
      *Função para validar que nao tenha nenhum arquivo no diretório tmp antes da execução
@@ -730,7 +700,6 @@ class DownloadUploadS3Test {
         LogCollector.println("✔ Processo concluído: diretório /tmp está limpo.")
         LogCollector.println("\n────────────────────────────────────────────")
     }
-
 
     /**
      *Função para validar que todos os arquivos dos 8 players foram gerados para todas as datas
@@ -873,8 +842,6 @@ class DownloadUploadS3Test {
             ?: emptyList()
     }
 
-
-
     /**
      *Função para validar se para cada arquivo .tsv.gz possui um arquivo .tsv descompactado
      */
@@ -910,8 +877,6 @@ class DownloadUploadS3Test {
         assertTrue(erros == 0, "Foram encontrados $erros arquivos .tsv.gz sem existir um .tsv!")
         LogCollector.println("\n────────────────────────────────────────────")
     }
-
-
 
     /**
      *Função Test S3

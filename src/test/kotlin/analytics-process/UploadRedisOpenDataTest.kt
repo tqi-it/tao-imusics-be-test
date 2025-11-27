@@ -27,7 +27,7 @@ import util.RedisUtils.getRedisKeys
 import util.RedisClient
 import util.RedisClient.jedis
 import util.RedisUtils.cleanupDate
-import util.Data.Companion.BASE_URL
+import util.Data.Companion.BASE_URL_ANALYTICS
 import util.Data.Companion.DATE
 import util.Data.Companion.DIR_SUMMARY_DUMP
 import util.Data.Companion.DIR_TEMP
@@ -51,7 +51,7 @@ class UploadRedisOpenDataTest {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            RestAssured.baseURI = BASE_URL
+            RestAssured.baseURI = BASE_URL_ANALYTICS
             val response = givenOauth()
             token = response.jsonPath().getString("token")
             assertNotNull(token, "Token não deve ser nulo")
