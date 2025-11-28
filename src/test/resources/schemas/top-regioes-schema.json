@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "mensagem",
+    "codigo",
+    "dados",
+    "qde_registros",
+    "pagina",
+    "qde_por_pagina"
+  ],
+  "properties": {
+    "mensagem": {
+      "type": "string"
+    },
+
+    "codigo": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "dados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "codigoPais",
+          "nomePais",
+          "imagemPais",
+          "valor"
+        ],
+        "properties": {
+
+          "codigoPais": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 3,
+            "pattern": "^[A-Z]{2,3}$"
+          },
+
+          "nomePais": {
+            "type": ["string", "null"]
+          },
+
+          "imagemPais": {
+            "type": ["string", "null"]
+          },
+
+          "valor": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false
+}

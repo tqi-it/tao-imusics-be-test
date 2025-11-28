@@ -2,7 +2,8 @@ package util
 
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType
-
+import util.Data.Companion.PASS_LOGIN
+import util.Data.Companion.USER_LOGIN
 
 
 /**
@@ -24,8 +25,8 @@ val requestBodyStartProcess = """
 val loginBody = """
                 {
                   "grant_type": "client_credentials",
-                  "email": "superadmin@taomusic.com.br",
-                  "senha": "tao001"
+                  "email": "$USER_LOGIN",
+                  "senha": "$PASS_LOGIN"
                 }
             """.trimIndent()
 fun givenOauth() =
@@ -38,3 +39,4 @@ fun givenOauth() =
         .log().all()
         .statusCode(200)
         .extract()
+

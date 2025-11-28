@@ -1,4 +1,8 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Distribuicao Top Plataformas",
+  "description": "Schema compatível com o contrato de distribuição por plataformas",
+
   "type": "object",
   "required": [
     "mensagem",
@@ -9,34 +13,62 @@
     "qde_por_pagina",
     "somaTotalRegistros"
   ],
+
   "properties": {
-    "mensagem": { "type": "string" },
+
+    "mensagem": {
+      "type": "string",
+      "minLength": 0,
+      "description": "Mensagem retornada pela API"
+    },
 
     "codigo": {
       "type": "integer",
-      "const": 0
+      "minimum": 0,
+      "description": "Código do retorno"
     },
 
-    "dados": { "type": "array" },
+    "dados": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["plataforma", "porcentagem", "qdePlays", "logoLoja"],
 
-    "qde_registros": {
-      "type": "integer",
-      "minimum": 0
+        "properties": {
+          "plataforma": {
+            "type": "string",
+            "minLength": 1
+          },
+
+          "porcentagem": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentual total da plataforma"
+          },
+
+          "qdePlays": {
+            "type": "integer",
+            "minimum": 0
+          },
+
+          "logoLoja": {
+            "type": "string",
+            "minLength": 5,
+            "pattern": "^lojas\\/.+\\.(png|jpg|jpeg)$"
+          }
+        },
+
+        "additionalProperties": false
+      }
     },
 
-    "pagina": {
-      "type": "integer",
-      "minimum": 0
-    },
+    "qde_registros": { "type": "integer", "minimum": 0 },
+    "pagina": { "type": "integer", "minimum": 0 },
+    "qde_por_pagina": { "type": "integer", "minimum": 1 },
+    "somaTotalRegistros": { "type": "integer", "minimum": 0 }
+  },
 
-    "qde_por_pagina": {
-      "type": "integer",
-      "const": 20
-    },
-
-    "somaTotalRegistros": {
-      "type": "integer",
-      "minimum": 0
-    }
-  }
+  "additionalProperties": false
 }

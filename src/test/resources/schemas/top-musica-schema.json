@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Top Plays - Retorno com apenas um registro",
+  "type": "object",
+
+  "required": ["mensagem", "codigo", "dados", "qde_registros", "pagina", "qde_por_pagina"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "mensagem": {
+      "type": "string",
+      "minLength": 0,
+      "description": "Mensagem da API — aceita vazia"
+    },
+
+    "codigo": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Código da API: 0 = sucesso"
+    },
+
+    "dados": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "description": "Array que deve conter apenas um registro obrigatório",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "qdePlaysAtual",
+          "titulo",
+          "artistas",
+          "dataLancamento",
+          "capa",
+          "qdePlaysAnterior",
+          "plataforma"
+        ],
+        "additionalProperties": false,
+
+        "properties": {
+
+          "id": {
+            "type": "integer",
+            "description": "Identificador único"
+          },
+
+          "qdePlaysAtual": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Quantidade atual de plays"
+          },
+
+          "titulo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "Título da música"
+          },
+
+          "artistas": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Artistas da faixa em string única"
+          },
+
+          "dataLancamento": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$",
+            "description": "Formato esperado: YYYY-MM-DD HH:MM:SS"
+          },
+
+          "capa": {
+            "type": "string",
+            "minLength": 10,
+            "pattern": "^distributions\\/[A-Za-z0-9\\-\\/\\._]+\\.(png|jpe?g|JPG|JPEG|PNG)$",
+            "description": "URL da capa gerada na plataforma"
+          },
+
+          "qdePlaysAnterior": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Plays antes desta medição"
+          },
+
+          "plataforma": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "Origem do play — ex.: TikTok, Youtube, Spotify",
+            "examples": ["Tiktok", "You Tube", "Spotify", "Deezer", "Amazon"]
+          }
+        }
+      }
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total de registros disponíveis"
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Número da página atual"
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200,
+      "description": "Quantidade de itens por página"
+    }
+  }
+}

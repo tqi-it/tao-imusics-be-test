@@ -11,14 +11,14 @@
   ],
   "properties": {
     "mensagem": { "type": "string" },
-    "codigo": { "type": "integer" },
+    "codigo": { "type": "number" },
 
     "dados": {
       "type": "object",
       "required": [
         "id",
         "qdePlaysAtual",
-        "titulo",
+        " titulo",
         "artistas",
         "dataLancamento",
         "capa",
@@ -27,20 +27,20 @@
       ],
       "properties": {
         "id": { "type": ["integer", "null"] },
-        "qdePlaysAtual": { "type": "integer" },
+        "qdePlaysAtual": { "type": "number" },
         "titulo": { "type": "string" },
         "artistas": { "type": "string" },
-        "dataLancamento": { "type": ["string", "null"] },
+        "dataLancamento": { "type": ["string", "null"], "format": "date-time" },
         "capa": { "type": "string" },
-        "qdePlaysAnterior": { "type": "integer" },
+        "qdePlaysAnterior": { "type": "number" },
         "plataforma": { "type": "string" }
       },
       "additionalProperties": false
     },
 
-    "qde_registros": { "type": "integer" },
-    "pagina": { "type": "integer" },
-    "qde_por_pagina": { "type": "integer" }
+    "qde_registros": { "type": "number" },
+    "pagina": { "type": "number" },
+    "qde_por_pagina": { "type": "number" }
   },
   "additionalProperties": false
 }

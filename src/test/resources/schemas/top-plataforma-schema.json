@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Top Plataforma Individual",
+  "type": "object",
+
+  "required": ["mensagem", "codigo", "dados", "qde_registros", "pagina", "qde_por_pagina"],
+
+  "properties": {
+
+    "mensagem": {
+      "type": "string",
+      "minLength": 0,
+      "description": "Mensagem informativa — pode ser vazia."
+    },
+
+    "codigo": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Código de retorno do serviço (0 = OK)"
+    },
+
+    "dados": {
+      "type": "object",
+      "description": "Informações individuais da plataforma",
+      "required": ["plataforma", "porcentagem", "qdePlays", "logoLoja"],
+      "additionalProperties": false,
+
+      "properties": {
+        "plataforma": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "Nome da plataforma",
+          "examples": ["Tiktok", "Spotify", "YouTube"]
+        },
+
+        "porcentagem": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentual de plays atribuídos à plataforma (0 a 100)"
+        },
+
+        "qdePlays": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total de plays registrados"
+        },
+
+        "logoLoja": {
+          "type": "string",
+          "pattern": "^lojas\\/[A-Za-z0-9\\-\\/\\._]+\\.(png|jpg|jpeg|JPG|JPEG|PNG)$",
+          "minLength": 10,
+          "description": "Caminho da imagem da plataforma"
+        }
+      }
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+
+  "additionalProperties": false
+}

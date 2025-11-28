@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "required": [
+    "mensagem",
+    "codigo",
+    "dados",
+    "qde_registros",
+    "pagina",
+    "qde_por_pagina",
+    "somaTotalRegistros"
+  ],
+  "properties": {
+
+    "mensagem": {
+      "type": "string"
+
+    },
+
+    "codigo": {
+      "type": "integer",
+      "const": 0
+    },
+
+    "dados": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["plataforma", "tituloMusica", "capaAlbum", "qdePlays", "percentual"],
+        "properties": {
+          "plataforma": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tituloMusica": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capaAlbum": {
+            "type": "string",
+            "minLength": 1
+          },
+          "qdePlays": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "percentual": {
+            "type": "number",
+            "minimum": 0.0
+          }
+        }
+      }
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 1
+    },
+
+    "somaTotalRegistros": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
