@@ -3,7 +3,7 @@
   "title": "Top Plays por Faixas",
   "type": "object",
 
-  "required": ["mensagem", "codigo", "dados", "qde_registros", "pagina", "qde_por_pagina"],
+  "required": ["mensagem", "codigo", "dados","total", "qde_registros", "pagina", "qde_por_pagina"],
   "additionalProperties": false,
 
   "properties": {
@@ -94,6 +94,12 @@
           }
         }
       }
+    },
+
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total"
     },
 
     "qde_registros": {

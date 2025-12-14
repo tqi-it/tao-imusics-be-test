@@ -5,6 +5,7 @@ import io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.*
 import util.Data
+import util.Data.Companion.ORIGIN
 import util.givenOauth
 
 
@@ -22,6 +23,16 @@ import util.givenOauth
  *
  * Resultado esperado:
  *   Response deve estar 100% aderente ao schema do contrato.
+ *
+ * Endpoint
+    * top-plays-wl OK
+    * top-plataforma,top-plataformas OK
+    * top-playlist,top-playlists OK
+    * top-albuns,top-album,top-album-musica,top-album-plataformas OK
+    * top-plays-semana,total-plays-periodo OK
+    * top-musicas,top-musica OK
+    * top-regioes OK
+ *
  */
 class TopContractAnalyticsGeralTest {
 
@@ -41,7 +52,7 @@ class TopContractAnalyticsGeralTest {
         fun givenTop()=
             RestAssured.given()
                 .header("Authorization", "Bearer $token")
-                .header("origin","http://localhost:4302")
+                .header("origin",ORIGIN)
 
     }
 
@@ -64,19 +75,21 @@ class TopContractAnalyticsGeralTest {
 
     }
     @Test
-    @Tag("")
+    @Tag("contractTests")
     @DisplayName("Contrato - GET /analytics/top-playlist deve retornar 200 e JSON válido")
     fun topPlaylist() {
         givenTop()
             .`when`()
             .get("/analytics/top-playlist?dataInicial=2025-01-01&dataFinal=2025-11-30&faixaMusicalId=")
             .then()
+            .log().all()
             .statusCode(200)
             .body(matchesJsonSchemaInClasspath("schemas/top-playlist-schema.json"))
 
     }
     @Test
-    @Tag("")
+    @Tag("contractTests")
+    @Disabled("Sem Dados no Ambiente")
     @DisplayName("Contrato - GET /analytics/top-plays-semana deve retornar 200 e JSON válido")
     fun topPlaysSemana() {
         RestAssured.given()
@@ -84,8 +97,9 @@ class TopContractAnalyticsGeralTest {
             .`when`()
             .get("/analytics/top-plays-semana")
             .then()
+            .log().all()
             .statusCode(200)
-            .body(matchesJsonSchemaInClasspath("schemas/top-plataformas-schema.json"))
+            .body(matchesJsonSchemaInClasspath("schemas/top-plays-semana-schema.json"))
 
     }
 
@@ -94,7 +108,7 @@ class TopContractAnalyticsGeralTest {
      * → Tests de Contract: TopRegiões
      */
     @Test
-    @Tag("contractTests")  // TODO: OK so não esta validando obrigatoriedade (mensagem, nomePais e imagemPais)
+    @Tag("contractTests")
     @DisplayName("Contrato - GET /analytics/top-regioes deve retornar 200 e JSON válido")
     fun topRegioes() {
         givenTop()
@@ -113,7 +127,7 @@ class TopContractAnalyticsGeralTest {
      * → Tests de Contract: TopPlataformas
      */
     @Test
-    @Tag("contractTests") // TODO: OK
+    @Tag("contractTests")
     @DisplayName("Contrato - GET /analytics/top-plataformas deve retornar 200 e JSON válido")
     fun topPlataformas() {
         givenTop()
@@ -127,7 +141,7 @@ class TopContractAnalyticsGeralTest {
 
     }
     @Test
-    @Tag("contractTests") // TODO: OK so não esta validando obrigatoriedade (mensagem )
+    @Tag("contractTests")
     @DisplayName("Contrato - GET /analytics/top-plataforma deve retornar 200 e JSON válido")
     fun topPlataforma() {
         givenTop()
@@ -160,7 +174,7 @@ class TopContractAnalyticsGeralTest {
 
     }
     @Test
-    @Tag("contractTests") // TODO: OK so não esta validando obrigatoriedade (mensagem e plataforma)
+    @Tag("contractTests")
     @DisplayName("Contrato - GET /analytics/top-musica deve retornar 200 e JSON válido")
     fun topMusica() {
         givenTop()
@@ -179,55 +193,100 @@ class TopContractAnalyticsGeralTest {
      * → Tests de Contract: TopAlbuns
      */
     @Test
-    @Tag("")
+    @Tag("contractTests")
+    @Disabled("Sem Dados no Ambiente")
     @DisplayName("Contrato - GET /analytics/top-albuns deve retornar 200 e JSON válido")
     fun topAlbuns() {
         RestAssured.given()
             .header("Authorization", "Bearer $token")
             .`when`()
-            .get("/analytics/top-albuns")
+            .get("/analytics/top-albuns?dataInicial=2024-01-01&dataFinal=2025-11-30&pagina=0&qde_por_pagina=5")
             .then()
+            .log().all()
             .statusCode(200)
             .body(matchesJsonSchemaInClasspath("schemas/top-albuns-schema.json"))
 
     }
     @Test
-    @Tag("")
+    @Tag("contractTests")
+    @Disabled("Sem Dados no Ambiente")
     @DisplayName("Contrato - GET /analytics/top-album deve retornar 200 e JSON válido")
     fun topAlbum() {
         RestAssured.given()
             .header("Authorization", "Bearer $token")
             .`when`()
-            .get("/analytics/top-album")
+            .get("/analytics/top-album?dataInicial=2024-01-01&dataFinal=2025-11-30&pagina=0&qde_por_pagina=5")
             .then()
+            .log().all()
             .statusCode(200)
             .body(matchesJsonSchemaInClasspath("schemas/top-album-schema.json"))
 
     }
     @Test
-    @Tag("")
+    @Tag("contractTests")
+    @Disabled("Sem Dados no Ambiente")
     @DisplayName("Contrato - GET /analytics/top-album-musica deve retornar 200 e JSON válido")
     fun topAlbumMusica() {
         RestAssured.given()
             .header("Authorization", "Bearer $token")
             .`when`()
-            .get("/analytics/top-album-musica")
+            .get("/analytics/top-album-musica?dataInicial=2024-01-01&dataFinal=2025-11-30&pagina=0&qde_por_pagina=5")
             .then()
+            .log().all()
             .statusCode(200)
             .body(matchesJsonSchemaInClasspath("schemas/top-album-schema.json"))
 
     }
     @Test
-    @Tag("")
+    @Tag("contractTests")
+    @Disabled("Sem Dados no Ambiente")
     @DisplayName("Contrato - GET /analytics/top-album-plataformas deve retornar 200 e JSON válido")
     fun topAlbumPLataformas() {
         RestAssured.given()
             .header("Authorization", "Bearer $token")
             .`when`()
-            .get("/analytics/top-album-plataformas")
+            .get("/analytics/top-album-plataformas?dataInicial=2024-01-01&dataFinal=2025-11-30&pagina=0&qde_por_pagina=5")
             .then()
+            .log().all()
             .statusCode(200)
             .body(matchesJsonSchemaInClasspath("schemas/top-plataformas-schema.json"))
+
+    }
+
+
+    /**
+     * → Tests de Contract: Whitelist
+     */
+    @Test
+    @Tag("contractTests")
+    @Disabled("Sem dados no Ambiente")
+    @DisplayName("Contrato - GET /analytics/top-plays-wl deve retornar 200 e JSON com dados")
+    fun topPlaysWhitelabel() {
+        givenTop()
+            .`when`()
+            .log().all()
+            .get("/analytics/top-plays-wl?mesInicial=11&anoInicial=2025&mesFinal=11&anoFinal=2025&page=1&perpage=10")
+            .then()
+            .log().all()
+            .statusCode(200)
+            .body(matchesJsonSchemaInClasspath("schemas/top-playlistsWL-schema.json"))
+
+    }
+
+    /**
+     * → Tests de Contract: Total Players por Período
+     */
+    @Test
+    @Tag("contractTests")
+    @DisplayName("Contrato - GET /analytics/total-plays-periodo deve retornar 200 e JSON válido")
+    fun totalPlaysPeriodo() {
+        givenTop()
+            .`when`()
+            .get("/analytics/total-plays-periodo?dataInicial=2025-01-01&dataFinal=2025-11-30")
+            .then()
+            .log().all()
+            .statusCode(200)
+            .body(matchesJsonSchemaInClasspath("schemas/total-plays-periodo-shema.json"))
 
     }
 

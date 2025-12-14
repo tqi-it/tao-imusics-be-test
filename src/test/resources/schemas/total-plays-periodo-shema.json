@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+
+  "required": ["mensagem", "codigo", "dados","total", "qde_registros", "pagina", "qde_por_pagina"],
+
+  "properties": {
+    "mensagem": {
+      "type": "string",
+      "minLength": 0,
+      "description": "Mensagem de retorno da requisição. Pode vir vazia."
+    },
+
+    "codigo": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Código numérico do retorno da API."
+    },
+
+    "dados": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Quantidade de players."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+
+  "additionalProperties": false
+}

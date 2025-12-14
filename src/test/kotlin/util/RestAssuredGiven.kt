@@ -34,6 +34,7 @@ fun givenOauth() =
         .contentType(ContentType.JSON)
         .header("origin", "http://localhost")
         .body(loginBody)
+        .log().all()
         .post("/auth/login")
         .then()
         .log().all()

@@ -35,21 +35,42 @@ object ListsConstants {
         Triple("topplaylist",   "plataform",         "plays"),
         Triple("topalbuns",     "upc",               "plays"),
         Triple("topalbum",      "upc",               "plays"),
-        Triple("topregiao",     "territory",         "plays"),
+        Triple("topplaysremunerado",     "territory",         "plays"),
         Triple("topregioes",    "territory",         "plays")
     )
 
     // 🟢 Etapas que liberam redis para continuação
-    val FLOWS_REDIS = setOf(
+    val FLOWS_STATUS = setOf(
         "process_all_files_complete",
         "sumarize_top_plays",
         "sumarize_top_plataform",
         "sumarize_top_playlist",
         "sumarize_top_albuns",
-        "sumarize_top_regiao",
+        "sumarize_top_plays_remunerado",
         "sumarize_top_regioes",
         "Finalizado",
         "completed"
+    )
+
+    val FLOWS_MESSAGE = setOf(
+        "Validando configuração FUGA e S3",
+        "Removendo arquivos antigos",
+        "Limpando dados do Redis para o intervalo ...",
+        "Buscando dados de analytics em FUGA Trends",
+        "Executando a esteira de processamento dos arquivos (descompressao, upload para S3)",
+        "Executando o envio dos dados para o REDIS",
+        "Processamento concluído: X arquivos",
+        "Sumarizando top plays",
+        "Sumarizando top plataform",
+        "Sumarizando top playlist",
+        "Sumarizando top albuns",
+        "Sumarizando top album",
+        "Sumarizando top plays remunerado",
+        "Sumarizando top regioes",
+        "Iniciando processamento no backend externo",
+        "Backend externo: ...",
+        "Processamento externo concluído com sucesso",
+        "Processamento completo (incluindo backend externo)"
     )
 
     // 📄 Colunas do TSV
@@ -67,6 +88,60 @@ object ListsConstants {
         "first_trial_membership","first_paid_membership_week","first_paid_membership",
         "total_user_streams","youtube_uploader_type","audio_format","dsp_data"
     )
+
+    val SCHEMA_SUMARIZADO = mapOf(
+        "topplaysremunerado" to listOf(
+            "asset_id",
+            "territory",
+            "status",
+            "number_of_streams",
+            "date"
+        ),
+        "topplays" to listOf(
+            "asset_id",
+            "number_of_streams",
+            "date",
+            "status"
+        ),
+        "topalbum" to listOf(
+            "upc",
+            "plataform",
+            "status",
+            "number_of_streams",
+            "date"
+        ),
+        "topalbuns" to listOf(
+            "upc",
+            "status",
+            "number_of_streams",
+            "date"
+        ),
+        "topplataform" to listOf(
+            "asset_id",
+            "plataform",
+            "status",
+            "number_of_streams",
+            "date"
+        ),
+        "topplaylist" to listOf(
+            "asset_id",
+            "plataform",
+            "stream_source",
+            "stream_source_uri",
+            "status",
+            "number_of_streams",
+            "date"
+        ),
+        "topregioes" to listOf(
+            "asset_id",
+            "territory",
+            "plataform",
+            "status",
+            "number_of_streams",
+            "date"
+        )
+    )
+
 
     val EXPECTED_PLAYERS = listOf(
         "iMusics_Amazon",
@@ -90,12 +165,30 @@ object ListsConstants {
     )
 
     // Campos esperados na CHAVE META
-    val HASH_FIELDS = listOf(
+    val HASH_FIELDS_BY_ALL = listOf(
         "date",
         "file_name",
         "platform",
         "status",
         "timestamp",
+        "total_items"
+    )
+
+    val HASH_FIELDS_BY_DASHES = listOf(
+        "date",
+        "file_name",
+        "platform",
+        "status",
+        "timestamp",
+        "reprocess",
         "row_count"
+    )
+
+    val HASH_FIELDS_BY_ALBUM_BY_PLAYREMUNERADO = listOf(
+        "date",
+        "file_name",
+        "status",
+        "timestamp",
+        "total_items"
     )
 }

@@ -7,12 +7,16 @@ class Data {
         const val DATA = "data"
 
         const val BASE_URL_ANALYTICS = "http://localhost:3015"
-        const val BASE_URL_BACKEND = "https://backend.dev.sintonize.me" //http://localhost:8080
+        const val BASE_URL_BACKEND = "http://localhost:8080" // http://localhost:8080 | https://backend.dev.sintonize.me
+        const val ORIGIN = "http://localhost" // http://localhost" | http://localhost:4302
         const val DIR_SUMMARY_DUMP = "temp/summary-dump"
         const val DIR_TEST_RESULT = "temp/test-results"
         const val DIR_TEMP="/tmp"
         const val DIR_REPORT_DOCS = "docs"
         const val PATH_PROCESS = "/start-process"
+
+        // Endpoints
+        const val PATH_ANALYTICS_TOP_PLAYS_WL = "/analytics/top-plays-wl"
 
         // Campos Redis
         const val ASSERT_ID = "asset_id"
@@ -26,8 +30,8 @@ class Data {
         const val STREAM_SOURCE_URI = "stream_source_uri"
 
         // Users
-        const val USER_LOGIN = "equipetropado7music2023@gmail.com" //superadmin@taomusic.com.br
-        const val PASS_LOGIN = "uJb7RgenrKrtuocqL2dqXoHTR24hGfaizzzTjHVvK5" //tao001
+        const val USER_LOGIN = "superadmin@taomusic.com.br" // superadmin@taomusic.com.br | equipetropado7music2023@gmail.com
+        const val PASS_LOGIN = "tao001" // tao001 | uJb7RgenrKrtuocqL2dqXoHTR24hGfaizzzTjHVvK5
 
 
     }

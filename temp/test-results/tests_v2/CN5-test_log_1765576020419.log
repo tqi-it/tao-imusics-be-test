@@ -1,0 +1,45 @@
+
+🔎 Testando cenário inválido
+ ▶ start-date=2025-12-17
+ ▶ end-date=2025-12-17
+ ▶ Esperado: "Data inicial (2025-12-17) não pode ser futura. Data atual: 2025-12-12"
+✔ Erro validado corretamente! → [Data inicial (2025-12-17) não pode ser futura. Data atual: 2025-12-12]
+
+🔎 Testando cenário inválido
+ ▶ start-date=2025-13-30
+ ▶ end-date=2025-13-30
+ ▶ Esperado: "Formato de data inválido para data-inicio: 2025-13-30. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"
+✔ Erro validado corretamente! → [Formato de data inválido para data-inicio: 2025-13-30. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)]
+
+🔎 Testando cenário inválido
+ ▶ start-date=2025-12-40
+ ▶ end-date=2025-12-40
+ ▶ Esperado: "Formato de data inválido para data-inicio: 2025-12-40. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"
+✔ Erro validado corretamente! → [Formato de data inválido para data-inicio: 2025-12-40. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)]
+
+🔎 Testando cenário inválido
+ ▶ start-date=25-01-2025
+ ▶ end-date=25-01-2025
+ ▶ Esperado: "Formato de data inválido para data-inicio: 25-01-2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"
+✔ Erro validado corretamente! → [Formato de data inválido para data-inicio: 25-01-2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)]
+
+🔎 Testando cenário inválido
+ ▶ start-date=2025/01/25
+ ▶ end-date=2025/01/25
+ ▶ Esperado: "Formato de data inválido para data-inicio: 2025/01/25. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"
+✔ Erro validado corretamente! → [Formato de data inválido para data-inicio: 2025/01/25. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)]
+
+🔎 Testando cenário inválido
+ ▶ start-date=25/01/2025
+ ▶ end-date=25/01/2025
+ ▶ Esperado: "Formato de data inválido para data-inicio: 25/01/2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)"
+✔ Erro validado corretamente! → [Formato de data inválido para data-inicio: 25/01/2025. Use formato ISO 8601 (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS)]
+
+🔎 Testando cenário inválido
+ ▶ start-date=2025-12-14
+ ▶ end-date=2025-12-11
+ ▶ Esperado: "Data inicial (2025-12-14) não pode ser maior que data final (2025-12-11)"
+✔ Erro validado corretamente! → [Data inicial (2025-12-14) não pode ser maior que data final (2025-12-11)]
+
+🎉 Todos os cenários de datas inválidas foram validados com sucesso.
+

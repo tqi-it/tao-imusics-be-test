@@ -1,0 +1,112 @@
+
+────────────────────────────────────────────
+🚀 PASSO 1: Processo iniciado...
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Processando arquivo 8/8: iMusics_Deezer_1006318593479_2025-11-12.tsv | ⏳ Progresso → 25% 
+⏳ Status atual → completed | ⏳ Mensagem → Processo completado com sucesso | ⏳ Progresso → 100% 
+
+────────────────────────────────────────────
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 2: Validando sumarizações TOP no Redis...
+📌 Plataformas detectadas: [Deezer]
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topplays:Deezer:2025-11-12:rows
+🔍 Esperado: [asset_id, number_of_streams, date, status]
+🔍 Redis:    [status, asset_id, number_of_streams, date]
+✔ SCHEMA OK para imusic:topplays:Deezer:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topplays:Deezer:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topplays:Deezer:2025-11-12:rows
+➡ expected: 4881, redis: 4881
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplays_Deezer_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topplataform:Deezer:2025-11-12:rows
+🔍 Esperado: [asset_id, plataform, status, number_of_streams, date]
+🔍 Redis:    [asset_id, plataform, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topplataform:Deezer:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topplataform:Deezer:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topplataform:Deezer:2025-11-12:rows
+➡ expected: 4881, redis: 4881
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplataform_Deezer_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topplaylist:Deezer:2025-11-12:rows
+🔍 Esperado: [asset_id, plataform, stream_source, stream_source_uri, status, number_of_streams, date]
+🔍 Redis:    [asset_id, plataform, stream_source, stream_source_uri, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topplaylist:Deezer:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topplaylist:Deezer:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topplaylist:Deezer:2025-11-12:rows
+➡ expected: 25272, redis: 25272
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplaylist_Deezer_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topalbuns:2025-11-12:rows
+🔍 Esperado: [upc, status, number_of_streams, date]
+🔍 Redis:    [upc, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topalbuns:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topalbuns:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topalbuns:2025-11-12:rows
+➡ expected: 3319, redis: 3319
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbuns_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topalbum:Deezer:2025-11-12:rows
+🔍 Esperado: [upc, plataform, status, number_of_streams, date]
+🔍 Redis:    [upc, plataform, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topalbum:Deezer:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topalbum:Deezer:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topalbum:Deezer:2025-11-12:rows
+➡ expected: 3319, redis: 3319
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topalbum_Deezer_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topplaysremunerado:2025-11-12:rows
+🔍 Esperado: [asset_id, territory, status, number_of_streams, date]
+🔍 Redis:    [asset_id, territory, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topplaysremunerado:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topplaysremunerado:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topplaysremunerado:2025-11-12:rows
+➡ expected: 5774, redis: 5774
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topplaysremunerado_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA do Redis → imusic:topregioes:Deezer:2025-11-12:rows
+🔍 Esperado: [asset_id, territory, plataform, status, number_of_streams, date]
+🔍 Redis:    [asset_id, plataform, territory, status, number_of_streams, date]
+✔ SCHEMA OK para imusic:topregioes:Deezer:2025-11-12:rows
+
+🔎 Validando sumarização → imusic:topregioes:Deezer:2025-11-12:rows
+📌 Iniciando validação detalhada → imusic:topregioes:Deezer:2025-11-12:rows
+➡ expected: 5774, redis: 5774
+✅ Relatório HTML salvo em: /home/diegomachado/workspace/tao-imusics-be-test/temp/docs/imusic_topregioes_Deezer_2025-11-12_rows_report.html
+📌 Diferenças detectadas (se houver):
+✔ Nenhuma divergência encontrada
+
+🎉 Todas as sumarizações validadas com sucesso!
+✔ Execução finalizada com sucesso garantindo ate a etapa 'sumarize_tops'.
+

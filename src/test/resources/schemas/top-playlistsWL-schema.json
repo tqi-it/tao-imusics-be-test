@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TopPlaysWLResponse",
+  "type": "object",
+  "required": [
+    "mensagem",
+    "codigo",
+    "dados",
+    "qde_registros",
+    "pagina",
+    "qde_por_pagina",
+    "somaTotalRegistros"
+  ],
+  "properties": {
+    "mensagem": {
+      "type": "string"
+    },
+    "codigo": {
+      "type": "integer"
+    },
+    "dados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "capa",
+          "usuario",
+          "plays",
+          "artistas",
+          "referencia"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "capa": {
+            "type": "string",
+            "format": "uri"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "plays": {
+            "type": "integer"
+          },
+          "artistas": {
+            "type": "string"
+          },
+          "referencia": {
+            "type": "string",
+            "pattern": "^[0-9]{1,2}/[0-9]{4}$"
+          }
+        }
+      }
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pagina": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "qde_por_pagina": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "somaTotalRegistros": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

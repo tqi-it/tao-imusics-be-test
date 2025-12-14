@@ -10,9 +10,9 @@ gradlew.bat
 gradlew
 .gradle
 .temp/
-.temp/redis-dump/
-.temp/summary-dump/
-.temp/test-results/
+temp/redis-dump/
+temp/summary-dump/
+docs/
 .env
 *.env
 *.env.local

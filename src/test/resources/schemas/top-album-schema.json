@@ -5,6 +5,7 @@
     "mensagem",
     "codigo",
     "dados",
+    "total",
     "qde_registros",
     "pagina",
     "qde_por_pagina"
@@ -18,7 +19,7 @@
       "required": [
         "id",
         "qdePlaysAtual",
-        " titulo",
+        "titulo",
         "artistas",
         "dataLancamento",
         "capa",
@@ -38,9 +39,26 @@
       "additionalProperties": false
     },
 
-    "qde_registros": { "type": "number" },
-    "pagina": { "type": "number" },
-    "qde_por_pagina": { "type": "number" }
+
+    "total": {
+      "type": "integer",
+      "minimum": 1
+    },
+
+    "qde_registros": {
+      "type": "integer",
+      "minimum": 1
+    },
+
+    "pagina": {
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "qde_por_pagina": {
+      "type": "integer",
+      "const": 20
+    }
   },
   "additionalProperties": false
 }

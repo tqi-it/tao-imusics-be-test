@@ -4,6 +4,7 @@
     "mensagem",
     "codigo",
     "dados",
+    "total",
     "qde_registros",
     "pagina",
     "qde_por_pagina"
@@ -24,6 +25,11 @@
     "dados": {
       "type": "array",
       "minItems": 1
+    },
+
+    "total": {
+      "type": "integer",
+      "minimum": 1
     },
 
     "qde_registros": {

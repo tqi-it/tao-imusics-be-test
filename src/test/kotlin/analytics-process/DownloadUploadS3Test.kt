@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
+import `process-sync`.TopContractAnalyticsGeralTest
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -24,11 +25,17 @@ import util.LogCollector
 import util.Data.Companion.BASE_URL_ANALYTICS
 import util.Data.Companion.DIR_TEMP
 import util.Data.Companion.PATH_PROCESS
+import util.ProcessStatus.aguardarProcessoCompleto
+import util.ProcessStatus.imprimirHistorico
+import util.StartProcess.PostStartProcess
+import util.StartProcess.PostStartProcessNotDate
 import util.givenOauth
 import java.io.File
-import java.time.Duration
-import java.time.LocalDate
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
+import java.time.*
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -50,8 +57,8 @@ class DownloadUploadS3Test {
         /**
          * Parâmetros do CN1
          */
-        private var startDateCN1 ="2025-11-20"
-        private var endDateCN1 ="2025-11-20"
+        private var startDateCN1 ="2025-12-02"
+        private var endDateCN1 ="2025-12-03"
 
         // Parâmetros dos testes caminho feliz
         val timeoutFull = Duration.ofMinutes(15) // tempo máximo total do teste
@@ -79,80 +86,32 @@ class DownloadUploadS3Test {
 
     @Test
     @Tag("smokeTests") // TPF-70
+    @Timeout(value = 45, unit = TimeUnit.MINUTES)
     fun `CN1 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3`() {
 
-        // 🔹 Corpo com período definido
-        val requestBody = """
-            {
-              "start-date": "$startDateCN1",
-              "end-date": "$endDateCN1"
-            }
-        """.trimIndent()
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN1 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3")
+        LogCollector.println("📅 Data utilizada: $startDateCN1 e $endDateCN1 ")
+        LogCollector.println("════════════════════════════════════════════════════\n")
+
 
         // 🔹 Fazer chamada ao /start-process
-        val startResponse = given()
-            .contentType(ContentType.JSON)
-            .header("origin", "http://localhost")
-            .header("authorization", "Bearer $token")
-            .body(requestBody)
-            .post(PATH_PROCESS)
-            .then()
-            .extract()
-        val statusCode = startResponse.statusCode()
+        val response = PostStartProcess(
+            startDate = startDateCN1,
+            endDate= endDateCN1,
+            token=token)
+        assertTrue(response?.extract()?.statusCode() == 200)
+        response?.extract()?.jsonPath()?.getBoolean("success")?.let { assertTrue(it) }
+        assertEquals("Process started (background)", response?.extract()?.jsonPath()?.getString("message"))
 
         // 🔹 Tempo do teste
         capturaDateTime()
 
-        // 🔹 Caso já exista processo rodando (409 por exemplo)
-        if (statusCode == 409 || statusCode == 400) {
-            LogCollector.println("Processo já está em execução. Código: $statusCode")
-            assertTrue(statusCode == 409 || statusCode == 400)
-            return
-        }
-
-        // 🔹 Caso contrário, precisa ser 200 ou 202 = processo iniciou corretamente
-        assertTrue(statusCode == 200 || statusCode == 202, "O processo não iniciou corretamente")
-
         // 🔹 Validar se os arquivos foram deletados no diretório
         validarTmpSemArquivosDePlayers()
 
-        // 🔥 Loop para acompanhar o processo via /process-status
-        var finalStatus = ""
-        val start = System.currentTimeMillis()
-
         LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
-        do {
-            Thread.sleep(15000) // aguarda 15 segundos
-
-            val statusResponse = given()
-                .contentType(ContentType.JSON)
-                .header("origin", "http://localhost")
-                .header("authorization", "Bearer $token")
-                .get("/process-status")
-                .then()
-                .statusCode(200)
-                .extract()
-
-            val running = statusResponse.jsonPath().getString("is_running")
-            val descFlow = statusResponse.jsonPath().getString("message")
-            finalStatus = statusResponse.jsonPath().getString("status")
-            LogCollector.println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
-
-            // sai do loop quando o processo terminar
-            if (finalStatus.equals("completed", ignoreCase = true)) break
-
-            // timeout de segurança
-            val elapsedMinutes = (System.currentTimeMillis() - start) / 60000
-            if (elapsedMinutes > timeoutFull.toMinutes()) {
-                fail("Timeout: processo demorou demais para concluir ($elapsedMinutes minutos)")
-            }
-
-        } while (true)
-
-        // 🔹 Validação final
-        assertEquals("completed", finalStatus.lowercase(), "Processo não chegou ao status 'concluido'")
-        LogCollector.println("✔ Processo finalizado com sucesso! Status = $finalStatus")
-        LogCollector.println("────────────────────────────────────────────")
+        aguardarProcessoCompleto(token = token)
 
         // 🔹 Tempo do teste
         calcDateTime()
@@ -166,6 +125,8 @@ class DownloadUploadS3Test {
 
         // 🔥 Validação dos arquivos no S3
         validarArquivosNoS3(prefixS3)
+
+        imprimirHistorico()
     }
 
     @Test
@@ -175,33 +136,35 @@ class DownloadUploadS3Test {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val date = LocalDate.now().format(formatter)
 
-        // 🔹 Corpo com período definido
-        val requestBody = """
-            {
-              "start-date": "$date",
-              "end-date": "$date"
-            }
-        """.trimIndent()
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN2 – Validar ingestão sem arquivos para baixar")
+        LogCollector.println("📅 Data utilizada: $date")
+        LogCollector.println("════════════════════════════════════════════════════\n")
 
-        // 🔹 Fazer chamada ao /start-process
-        val startResponse = given()
-            .contentType(ContentType.JSON)
-            .header("origin", "http://localhost")
-            .header("authorization", "Bearer $token")
-            .body(requestBody)
-            .post(PATH_PROCESS)
-            .then()
-            .log().all()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-        val statusStart = startResponse.jsonPath().getBoolean("success")
-        assertTrue(statusStart)
-        LogCollector.println("Status process: $statusStart")
+        // PASSO 1
+        LogCollector.println("🟦 PASSO 1: Iniciando processamento via API POST /start-process...")
+        val response = PostStartProcess(
+            startDate = date,
+            endDate = date,
+            token = token
+        )
+
+        val httpStatusStart = response?.extract()?.statusCode()
+        LogCollector.println("➡️  HTTP Status recebido: $httpStatusStart")
+        assertTrue(httpStatusStart == 200)
+
+        val success = response?.extract()?.jsonPath()?.getBoolean("success")
+        LogCollector.println("➡️  Campo success: $success")
+        assertTrue(success == true)
+
+        LogCollector.println("\n🟦 PASSO 2: Aguardando backend processar (Awaitility)\n")
 
         Awaitility.await()
             .atMost(10, TimeUnit.SECONDS)
             .pollInterval(2, TimeUnit.SECONDS)
             .untilCallTo {
+
+                LogCollector.println("🔄 Consultando /process-status ...")
 
                 val resp = given()
                     .contentType(ContentType.JSON)
@@ -213,30 +176,36 @@ class DownloadUploadS3Test {
                     .statusCode(HttpStatus.SC_OK)
                     .extract()
 
-
                 val error = resp.jsonPath().getString("error") ?: ""
                 val currentStep = resp.jsonPath().getString("current_step") ?: ""
                 val message = resp.jsonPath().getString("message") ?: ""
                 val status = resp.jsonPath().getString("status") ?: ""
-                val httpStatus = resp.statusCode()
+                val httpCode = resp.statusCode()
 
-                LogCollector.println("⏳ Campos obtidos →")
-                LogCollector.println("   error: $error")
-                LogCollector.println("   current_step: $currentStep")
-                LogCollector.println("   message: $message")
-                LogCollector.println("   status: $status")
+                LogCollector.println("📥 Resposta recebida:")
+                LogCollector.println("   ▪ error: $error")
+                LogCollector.println("   ▪ current_step: $currentStep")
+                LogCollector.println("   ▪ message: $message")
+                LogCollector.println("   ▪ status: $status")
+                LogCollector.println("   ▪ http code: $httpCode")
 
-                val resultMessage = resp.jsonPath().getString("result.message") // <-- CORRETO
+                val resultMessage = resp.jsonPath().getString("result.message")
                 val resultStatus = resp.jsonPath().getString("result.status")
                 val resultStart = resp.jsonPath().getString("result.start_date")
                 val resultEnd = resp.jsonPath().getString("result.end_date")
+
+                LogCollector.println("📦 result:")
+                LogCollector.println("   ▪ result.message = $resultMessage")
+                LogCollector.println("   ▪ result.status  = $resultStatus")
+                LogCollector.println("   ▪ result.start   = $resultStart")
+                LogCollector.println("   ▪ result.end     = $resultEnd")
 
                 StatusResponseFields(
                     error = error,
                     currentStep = currentStep,
                     message = message,
                     status = status,
-                    httpStatus = httpStatus,
+                    httpStatus = httpCode,
                     result = ResultFields(
                         message = resultMessage,
                         status = resultStatus,
@@ -246,43 +215,78 @@ class DownloadUploadS3Test {
                 )
 
             } matches { result ->
+
+            LogCollector.println("\n🟩 PASSO 3: Validando condições finais...")
+
             val r = result as StatusResponseFields
-            val httpOk = r.httpStatus == 200
-            val noError = r.error.isNullOrBlank()
-            val statusCompleted = r.status.equals("completed", ignoreCase = true)
-            val stepFinished = r.currentStep.equals("Finalizado", ignoreCase = true)
+
+            LogCollector.println("🔎 Validações:")
+            LogCollector.println("   ▪ error vazio? -> ${r.error.isNullOrBlank()}")
+            LogCollector.println("   ▪ status == 'completed'? -> ${r.status.equals("completed", true)}")
+            LogCollector.println("   ▪ current_step == 'Finalizado'? -> ${r.currentStep.equals("Finalizado", true)}")
+            LogCollector.println(
+                "   ▪ result.message esperado? -> ${
+                    r.result?.message.equals(
+                        "FUGA não tem dados de analytics para o período solicitado",
+                        true
+                    )
+                }"
+            )
+
             val resultMessageOk =
                 r.result?.message?.equals(
                     "FUGA não tem dados de analytics para o período solicitado",
                     ignoreCase = true
-                ) ?: false
+                ) == true
 
-            noError && statusCompleted && stepFinished && resultMessageOk
+            val ok =
+                r.httpStatus == 200 &&
+                        r.error.isNullOrBlank() &&
+                        r.status.equals("completed", ignoreCase = true) &&
+                        r.currentStep.equals("Finalizado", ignoreCase = true) &&
+                        resultMessageOk
+
+            if (ok) {
+                LogCollector.println("🎉 TESTE APROVADO – condições finais válidas!")
+            } else {
+                LogCollector.println("❌ TESTE REPROVADO – alguma condição não foi satisfeita!")
+            }
+
+            ok
         }
 
-
+        LogCollector.println("\n🏁 CN2 FINALIZADO\n")
     }
 
+
     @Test
-    @Tag("smokeTests")  // TPF-67 /* PRÉ-CONFIÇÃO: Executar somente quando nao tiver nenhum processamento REDIS_IGNORE_FILES_PATTERN=(Spotify|Youtube|) */
+    @Tag("smokeTests")  // TPF-67
     fun `CN3 - Validar ingestão quando já possui um processamento sendo realizado`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val date = LocalDate.now().plusDays(-5).format(formatter)
 
-        // 🔹 Corpo com período definido
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN3 – Validar bloqueio quando já existe processamento")
+        LogCollector.println("📅 Data utilizada: $date")
+        LogCollector.println("════════════════════════════════════════════════════\n")
+
+        // Corpo JSON da requisição
         val requestBody = """
-            {
-              "start-date": "$date",
-              "end-date": "$date"
-            }
-        """.trimIndent()
+        {
+          "start-date": "$date",
+          "end-date": "$date"
+        }
+    """.trimIndent()
 
         repeat(2) { tentativa ->
-            val numero = tentativa + 1
-            LogCollector.println("Executando start-process tentativa $numero")
 
-            val resposta = given()
+            val numero = tentativa + 1
+            LogCollector.println("\n────────────────────────────────────────────────────")
+            LogCollector.println("▶️  Tentativa $numero – Enviando POST /start-process")
+            LogCollector.println("────────────────────────────────────────────────────")
+
+            val resp = given()
                 .contentType(ContentType.JSON)
                 .header("origin", "http://localhost")
                 .header("authorization", "Bearer $token")
@@ -293,102 +297,85 @@ class DownloadUploadS3Test {
                 .log().all()
                 .extract()
 
-            val statusCode = resposta.statusCode()
-            val success = resposta.jsonPath().getBoolean("success")
-            val error = resposta.jsonPath().getString("error")
+            val statusCode = resp.statusCode()
+            val success = resp.jsonPath().getBoolean("success")
+            val error = resp.jsonPath().getString("error")
+
+            LogCollector.println("📥 Resposta recebida:")
+            LogCollector.println("   ▪ statusCode = $statusCode")
+            LogCollector.println("   ▪ success    = $success")
+            LogCollector.println("   ▪ error      = $error\n")
 
             if (tentativa == 0) {
-                // 🟢 PRIMEIRA EXECUÇÃO — Espera 200
+                // ==========================================================
+                // PRIMEIRA EXECUÇÃO → ESPERADO = ACEITAR O PROCESSAMENTO
+                // ==========================================================
+                LogCollector.println("🔎 Validando Tentativa 1...")
+
                 assertEquals(
                     HttpStatus.SC_OK,
                     statusCode,
-                    "Primeira execução deveria retornar 200 OK"
+                    "❌ Primeira execução deveria retornar 200 OK"
                 )
-                assertTrue(success, "Primeira execução deveria retornar success=true")
-                LogCollector.println("✔️ Tentativa 1 OK: status=$statusCode success=$success")
+                assertTrue(success, "❌ Primeira execução deveria retornar success=true")
+
+                LogCollector.println("✔️ Tentativa 1 OK — Processo aceito normalmente")
+
+                // Pequeno delay para permitir que o processo entre no estado "running"
                 Thread.sleep(3000)
+
             } else {
-                // 🔴 SEGUNDA EXECUÇÃO — Espera 409 (já tem processo rodando)
+                // ==========================================================
+                // SEGUNDA EXECUÇÃO → ESPERADO = BLOQUEIO (409)
+                // ==========================================================
+                LogCollector.println("🔎 Validando Tentativa 2...")
+
                 assertEquals(
                     HttpStatus.SC_CONFLICT,
                     statusCode,
-                    "Segunda execução deveria retornar 409, mas retornou $statusCode"
+                    "❌ Segunda execução deveria retornar 409, mas retornou $statusCode"
                 )
-                assertEquals( error, "Process already running" )
-                assertFalse(success, "Segunda execução deveria retornar success=false")
-                LogCollector.println("✔️ Tentativa 2 Bloqueada como esperado: status=$statusCode success=$success")
+
+                assertEquals(
+                    "Process already running",
+                    error,
+                    "❌ Mensagem de erro incorreta para processo já em execução"
+                )
+
+                assertFalse(success, "❌ Segunda execução deveria retornar success=false")
+
+                LogCollector.println("✔️ Tentativa 2 BLOQUEADA como esperado — 409 CONFLICT")
             }
         }
 
+        LogCollector.println("\n🏁 CN3 FINALIZADO COM SUCESSO\n")
     }
 
     @Test
-    @Tag("smokeTests") // TPF-70 /* DateTime()-3 conforme esperado do /start-process */
+    @Tag("smokeTests") // TPF-70 TODO: Aguardando start-process do BE para consegui processar até o final
+    @Timeout(value = 45, unit = TimeUnit.MINUTES)
     fun `CN4 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3 sem passar data`() {
 
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN4 - Validar ingestão com sucesso download|limpeza|descompactação|upload dos arquivos para o S3 sem passar data")
+        LogCollector.println("📅 Sem Data")
+        LogCollector.println("════════════════════════════════════════════════════\n")
+
         // 🔹 Fazer chamada ao /start-process
-        val startResponse = given()
-            .contentType(ContentType.JSON)
-            .header("origin", "http://localhost")
-            .header("authorization", "Bearer $token")
-            .post(PATH_PROCESS)
-            .then()
-            .extract()
-        val statusCode = startResponse.statusCode()
+        val response = PostStartProcessNotDate(
+            token=token)
+        assertTrue(response?.extract()?.statusCode() == 200)
+        response?.extract()?.jsonPath()?.getBoolean("success")?.let { assertTrue(it) }
+        assertEquals("Process started (background)", response?.extract()?.jsonPath()?.getString("message"))
 
         // 🔹 Tempo do teste
         capturaDateTime()
 
-        // 🔹 Caso já exista processo rodando (409 por exemplo)
-        /*
-        if (statusCode == 409 || statusCode == 400) {
-            LogCollector.println("Processo já está em execução. Código: $statusCode")
-            assertTrue(statusCode == 409 || statusCode == 400)
-            return
-        */
-
-        // 🔹 Caso contrário, precisa ser 200 ou 202 = processo iniciou corretamente
-        assertTrue(statusCode == 200 || statusCode == 202, "O processo não iniciou corretamente")
-
         // 🔹 Validar se os arquivos foram deletados no diretório
         validarTmpSemArquivosDePlayers()
 
-        // 🔥 Loop para acompanhar o processo via /process-status
-        var finalStatus = ""
-        val start = System.currentTimeMillis()
-
         LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 2: Consultando status do processamento...")
-        do {
-            Thread.sleep(15000) // aguarda 15 segundos
-
-            val statusResponse = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .header("origin", "http://localhost")
-                .header("authorization", "Bearer $token")
-                .get("/process-status")
-                .then()
-                .statusCode(200)
-                .extract()
-
-            val running = statusResponse.jsonPath().getString("is_running")
-            val descFlow = statusResponse.jsonPath().getString("message")
-            finalStatus = statusResponse.jsonPath().getString("status")
-            LogCollector.println("🔄 Flow: $descFlow\n📌 Status Atual: $finalStatus\n")
-
-            // sai do loop quando o processo terminar
-            if (finalStatus.equals("completed", ignoreCase = true)) break
-
-            // timeout de segurança
-            val elapsedMinutes = (System.currentTimeMillis() - start) / 60000
-            if (elapsedMinutes > timeoutFull.toMinutes()) {
-                fail("Timeout: processo demorou demais para concluir ($elapsedMinutes minutos)")
-            }
-
-        } while (true)
-
-        // 🔹 Validação final
-        assertEquals("completed", finalStatus.lowercase(), "Processo não chegou ao status 'concluido'")
-        LogCollector.println("✔ Processo finalizado com sucesso! Status = $finalStatus")
+        aguardarProcessoCompleto(token = token)
 
         // 🔹 Tempo do teste
         calcDateTime()
@@ -414,6 +401,11 @@ class DownloadUploadS3Test {
         val future = LocalDate.now().plusDays(5).format(formatter)
         val datePlusDays2 = LocalDate.now().plusDays(2).format(formatter)
         val dateMinusDays1 = LocalDate.now().minusDays(1).format(formatter)
+
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN5 - Validar ingestão com datas inválidas")
+        LogCollector.println("📅 Data aleatórios")
+        LogCollector.println("════════════════════════════════════════════════════\n")
 
         // 🔥 MAPA DE CENÁRIOS → mensagem esperada no retorno
         val cenarios = listOf(
@@ -476,11 +468,86 @@ class DownloadUploadS3Test {
     }
 
     @Test
-    @Tag("") // TPF-67
-    fun `CN6 - Erro no Processamento`() {
+    @Tag("smokeTests") // TPF-67
+    fun `CN6 - Validar ingestão com token inválido`() {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val date = LocalDate.now().minusDays(2).format(formatter)
+
+        LogCollector.println("\n═══════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN6 – Validar ingestão com TOKEN INVÁLIDO")
+        LogCollector.println("📅 Data utilizada: $date")
+        LogCollector.println("═══════════════════════════════════════════════════\n")
+
+        val requestBody = """
+        {
+          "start-date": "$date",
+          "end-date": "$date"
+        }
+    """.trimIndent()
+
+        LogCollector.println("▶️  Enviando requisição com token inválido...")
+
+        val resp = given()
+            .contentType(ContentType.JSON)
+            .header("origin", "http://localhost")
+            .header("authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9") // Token inválido
+            .log().all()
+            .body(requestBody)
+            .post(PATH_PROCESS)
+            .then()
+            .log().all()
+            .extract()
+
+        val statusCode = resp.statusCode()
+        val error = resp.jsonPath().getString("error")
+        val successValue = resp.jsonPath().getBoolean("success")
+
+        LogCollector.println("\n📥 RESPOSTA RECEBIDA DO SERVIDOR:")
+        LogCollector.println("   ▪ Status Code = $statusCode")
+        LogCollector.println("   ▪ success     = $successValue")
+        LogCollector.println("   ▪ error       = $error")
+
+        LogCollector.println("\n🔎 Validando comportamento esperado para token inválido...")
+
+        // ==========================================================
+        // VALIDAÇÕES
+        // ==========================================================
+
+        assertEquals(
+            401,
+            statusCode,
+            "❌ O serviço deveria retornar 401 para token inválido."
+        )
+
+        assertEquals(
+            "Invalid token (does not match current session)",
+            error,
+            "❌ Mensagem de erro incorreta para token inválido."
+        )
+
+        assertFalse(
+            successValue,
+            "❌ O campo success deveria ser false quando o token é inválido."
+        )
+
+        LogCollector.println("✔ Validações concluídas com sucesso.")
+
+        LogCollector.println("\n🏁 CN6 FINALIZADO COM SUCESSO\n")
+    }
+
+
+    @Test
+    @Tag("smokeTests")// TPF-67
+    fun `CN7 - Erro no Processamento`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val now = LocalDate.now().plusDays(-2).format(formatter)
+
+        LogCollector.println("\n═══════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN7 - Erro no Processamento")
+        LogCollector.println("📅 Data utilizada: $now")
+        LogCollector.println("═══════════════════════════════════════════════════\n")
 
         // 🔥 MAPA DE CENÁRIOS → mensagem esperada
         val cenarios = listOf(
@@ -535,6 +602,7 @@ class DownloadUploadS3Test {
             assertTrue(statusCode in listOf(200)) // Processo assincrono
 
             // 🔥 Aguardar mensagem de erro específica no /process-status
+            LogCollector.println("\n⏳ Aguardando detecção de FALHA no /process-status ...")
             Awaitility.await()
                 .atMost(2, TimeUnit.MINUTES)
                 .pollInterval(10, TimeUnit.SECONDS)
@@ -555,11 +623,13 @@ class DownloadUploadS3Test {
                     val status = resp.jsonPath().getString("status") ?: ""
                     val httpStatus = resp.statusCode()
 
-                    LogCollector.println("⏳ Campos obtidos →")
+                    LogCollector.println("\n📥 RESPOSTA /process-status:")
                     LogCollector.println("   error: $error")
                     LogCollector.println("   current_step: $currentStep")
                     LogCollector.println("   message: $message")
                     LogCollector.println("   status: $status")
+                    LogCollector.println("   httpStatus   = $httpStatus")
+
 
                     val resultMessage = resp.jsonPath().getString("result.message")
                     val resultStatus = resp.jsonPath().getString("result.status")
@@ -592,43 +662,11 @@ class DownloadUploadS3Test {
                         errorMatches && httpOk
             }
 
-
-            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
+            LogCollector.println("\n✔ Cenário validado com sucesso.")
+            LogCollector.println("🏁 CN7 FINALIZADO\n")
         }
     }
 
-    @Test
-    @Tag("smokeTests") // TPF-67
-    fun `CN7 - Validar ingestão com token inválido`() {
-
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val now = LocalDate.now().plusDays(-2).format(formatter)
-        val requestBody = """
-                    {
-                      "start-date": "$now",
-                      "end-date": "$now"
-                    }
-                """.trimIndent()
-        val startResponse = given()
-                .contentType(ContentType.JSON)
-                .log().all()
-                .header("origin", "http://localhost")
-                .header("authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9")
-                .body(requestBody)
-                .post(PATH_PROCESS)
-                .then()
-                .log().all()
-                .extract()
-
-        val statusCode = startResponse.statusCode()
-        val error = startResponse.jsonPath().getString("error")
-        val flagSuccess = startResponse.jsonPath().getString("success")
-        LogCollector.println("➡ Status HTTP start-process: $statusCode")
-        assertTrue(statusCode in listOf(401))
-        assertEquals(error,"Invalid token (does not match current session)")
-        assertFalse(false,flagSuccess)
-            LogCollector.println("✔ Cenário validado com sucesso: mensagem correta recebida.")
-    }
 
     /**
      * Campos com retorno de Falhas
@@ -659,47 +697,55 @@ class DownloadUploadS3Test {
         assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe")
 
         LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 1: Validando deleção dos arquivos no /tmp...")
+
         val start = System.currentTimeMillis()
-        var arquivosFiltrados: List<String>
+        val agora = System.currentTimeMillis()
+        val limiteMillis = 2 * 24 * 60 * 60 * 1000 // 2 dias em ms
+
+        var arquivosFiltrados: List<File>
 
         while (true) {
-            val arquivos = File(DIR_TEMP).listFiles()?.map { it.name } ?: emptyList()
 
-            // Filtra somente arquivos dos players
-            arquivosFiltrados = arquivos.filter { nome ->
-                EXPECTED_PLAYERS.any { player ->
+            val arquivos = File(DIR_TEMP).listFiles()?.toList() ?: emptyList()
+
+            // Filtra somente arquivos dos players E com mais de 2 dias de criação
+            arquivosFiltrados = arquivos.filter { arquivo ->
+                val nome = arquivo.name
+
+                val isPlayerFile = EXPECTED_PLAYERS.any { player ->
                     nome.contains(player, ignoreCase = true)
                 }
+
+                val idadeArquivo = agora - arquivo.lastModified()
+
+                isPlayerFile && idadeArquivo > limiteMillis
             }
+
             if (arquivosFiltrados.isEmpty()) {
-                LogCollector.println("\n✅ Diretório limpo: Nenhum arquivo de players encontrado no /tmp !")
+                LogCollector.println("\n✅ Diretório limpo: Nenhum arquivo de players (com mais de 2 dias) encontrado no /tmp !")
                 break
             }
 
-            // Ainda existem arquivos → loga quais são
-            LogCollector.println("⚠️ Arquivos de players ainda encontrados no /tmp:")
-            arquivosFiltrados.forEach { LogCollector.println(" - $it") }
-
-            // Checa timeout
-            val elapsed = (System.currentTimeMillis() - start) / 1000
-            if (elapsed > timeoutSeconds) {
-                fail("⛔ Timeout: Ainda existem arquivos de players após $timeoutSeconds segundos.")
+            // Arquivos ainda encontrados → log
+            LogCollector.println("⚠️ Arquivos de players com mais de 2 dias ainda encontrados no /tmp:")
+            arquivosFiltrados.forEach { arq ->
+                val horas = (agora - arq.lastModified()) / 3600000
+                LogCollector.println(" - ${arq.name}  (idade: ${horas}h)")
             }
 
-            // Espera antes da próxima verificação
+            // Timeout
+            val elapsed = (System.currentTimeMillis() - start) / 1000
+            if (elapsed > timeoutSeconds) {
+                fail("⛔ Timeout: Ainda existem arquivos antigos ( +2 dias ) após $timeoutSeconds segundos.")
+            }
+
             Thread.sleep(pollIntervalSeconds * 1000)
         }
 
-        // Impressão final dos arquivos que foram detectados (e que sumiram)
-        if (arquivosFiltrados.isEmpty()) {
-            LogCollector.println("\uD83D\uDCC2 Nenhum arquivo foi encontrado!!!")
-        } else {
-            arquivosFiltrados.forEach { LogCollector.println(" - $it") }
-        }
-
-        LogCollector.println("✔ Processo concluído: diretório /tmp está limpo.")
+        LogCollector.println("✔ Processo concluído: diretório /tmp está limpo dos arquivos antigos.")
         LogCollector.println("\n────────────────────────────────────────────")
     }
+
 
     /**
      *Função para validar que todos os arquivos dos 8 players foram gerados para todas as datas

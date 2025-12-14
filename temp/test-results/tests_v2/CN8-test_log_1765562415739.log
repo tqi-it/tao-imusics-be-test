@@ -1,0 +1,97 @@
+🚀 PASSO 1: Startando processamento dos períodos: 2025-11-03 | 2025-11-04 ...
+
+────────────────────────────────────────────
+🚀 PASSO 2: Aguardando conclusão do processamento...
+🔄 Status → running | msg: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+🔄 Status → running | msg: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+🔄 Status → running | msg: Executando a esteira de processamento dos arquivos (descompressao, upload para S3)
+🔄 Status → completed | msg: Processo completado com sucesso
+
+────────────────────────────────────────────
+🚀 PASSO 3: Validando Redis
+
+📌 Chaves encontradas:
+ → imusic:dashes:Deezer:2025-11-03:meta
+ → imusic:dashes:Deezer:2025-11-03:rows
+ → imusic:topalbum:Deezer:2025-11-03:meta
+ → imusic:topalbum:Deezer:2025-11-03:rows
+ → imusic:topalbuns:2025-11-03:meta
+ → imusic:topalbuns:2025-11-03:rows
+ → imusic:topplataform:Deezer:2025-11-03:meta
+ → imusic:topplataform:Deezer:2025-11-03:rows
+ → imusic:topplaylist:Deezer:2025-11-03:meta
+ → imusic:topplaylist:Deezer:2025-11-03:rows
+ → imusic:topplays:Deezer:2025-11-03:meta
+ → imusic:topplays:Deezer:2025-11-03:rows
+ → imusic:topplaysremunerado:2025-11-03:meta
+ → imusic:topplaysremunerado:2025-11-03:rows
+ → imusic:topregioes:Deezer:2025-11-03:meta
+ → imusic:topregioes:Deezer:2025-11-03:rows
+
+============================================================
+🎧 VALIDANDO PLAYER: Deezer
+============================================================
+META → imusic:dashes:Deezer:2025-11-03:meta
+ROWS → imusic:dashes:Deezer:2025-11-03:rows
+
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA HASH → imusic:dashes:Deezer:2025-11-03:meta
+🔍 Esperado: [date, file_name, platform, status, timestamp, reprocess, row_count]
+🔍 Redis:    [date, reprocess, file_name, platform, status, timestamp, row_count]
+✔ SCHEMA HASH OK para imusic:dashes:Deezer:2025-11-03:meta
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA LIST → imusic:dashes:Deezer:2025-11-03:rows
+🔍 Esperado: [label_id, product_id, asset_id, date, territory, number_of_downloads, number_of_streams, number_of_listeners, number_of_saves, reporting_organization_id, asset_duration, stream_device_type, stream_device_os, stream_length, stream_source, stream_source_uri, user_id, user_region, user_region_detail, user_gender, user_birth_year, user_age_group, user_country, user_access_type, user_account_type, track_id, primary_artist_ids, isrc, upc, shuffle, repeat, cached, completion, apple_container_type, apple_container_sub_type, apple_source_of_stream, youtube_channel_id, video_id, youtube_claimed_status, subscribed_status, asset_type, discovery_flag, current_membership_week, first_trial_membership_week, first_trial_membership, first_paid_membership_week, first_paid_membership, total_user_streams, youtube_uploader_type, audio_format, dsp_data]
+🔍 Redis:    [label_id, product_id, asset_id, date, territory, number_of_downloads, number_of_streams, number_of_listeners, number_of_saves, reporting_organization_id, asset_duration, stream_device_type, stream_device_os, stream_length, stream_source, stream_source_uri, user_id, user_region, user_region_detail, user_gender, user_birth_year, user_age_group, user_country, user_access_type, user_account_type, track_id, primary_artist_ids, isrc, upc, shuffle, repeat, cached, completion, apple_container_type, apple_container_sub_type, apple_source_of_stream, youtube_channel_id, video_id, youtube_claimed_status, subscribed_status, asset_type, discovery_flag, current_membership_week, first_trial_membership_week, first_trial_membership, first_paid_membership_week, first_paid_membership, total_user_streams, youtube_uploader_type, audio_format, dsp_data]
+✔ SCHEMA LIST OK para imusic:dashes:Deezer:2025-11-03:rows
+📄 Arquivo TSV localizado → iMusics_Deezer_1006181630623_2025-11-03.tsv
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 5: Iniciando validação entre Redis X Arquivo...
+
+🔍 Comparando Redis x TSV para: imusic:dashes:Deezer:2025-11-03:rows
+✔ Quantidade OK → 50 registros
+✔ Conteúdo válido → TSV x Redis (imusic:dashes:Deezer:2025-11-03:rows)
+
+📄 Key salva em: /home/diegomachado/workspace/tao-imusics-be-test/temp/temp/redis-dump/imusic_dashes_Deezer_2025-11-03_meta.txt
+📄 Key salva em: /home/diegomachado/workspace/tao-imusics-be-test/temp/temp/redis-dump/imusic_dashes_Deezer_2025-11-03_rows.txt
+
+============================================================
+🎧 VALIDANDO PLAYER: 2025-11-03
+============================================================
+META → imusic:dashes:Deezer:2025-11-03:meta
+ROWS → imusic:dashes:Deezer:2025-11-03:rows
+
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA HASH → imusic:dashes:Deezer:2025-11-03:meta
+🔍 Esperado: [date, file_name, platform, status, timestamp, reprocess, row_count]
+🔍 Redis:    [date, reprocess, file_name, platform, status, timestamp, row_count]
+✔ SCHEMA HASH OK para imusic:dashes:Deezer:2025-11-03:meta
+
+────────────────────────────────────────────
+🧩 Validando SCHEMA LIST → imusic:dashes:Deezer:2025-11-03:rows
+🔍 Esperado: [label_id, product_id, asset_id, date, territory, number_of_downloads, number_of_streams, number_of_listeners, number_of_saves, reporting_organization_id, asset_duration, stream_device_type, stream_device_os, stream_length, stream_source, stream_source_uri, user_id, user_region, user_region_detail, user_gender, user_birth_year, user_age_group, user_country, user_access_type, user_account_type, track_id, primary_artist_ids, isrc, upc, shuffle, repeat, cached, completion, apple_container_type, apple_container_sub_type, apple_source_of_stream, youtube_channel_id, video_id, youtube_claimed_status, subscribed_status, asset_type, discovery_flag, current_membership_week, first_trial_membership_week, first_trial_membership, first_paid_membership_week, first_paid_membership, total_user_streams, youtube_uploader_type, audio_format, dsp_data]
+🔍 Redis:    [label_id, product_id, asset_id, date, territory, number_of_downloads, number_of_streams, number_of_listeners, number_of_saves, reporting_organization_id, asset_duration, stream_device_type, stream_device_os, stream_length, stream_source, stream_source_uri, user_id, user_region, user_region_detail, user_gender, user_birth_year, user_age_group, user_country, user_access_type, user_account_type, track_id, primary_artist_ids, isrc, upc, shuffle, repeat, cached, completion, apple_container_type, apple_container_sub_type, apple_source_of_stream, youtube_channel_id, video_id, youtube_claimed_status, subscribed_status, asset_type, discovery_flag, current_membership_week, first_trial_membership_week, first_trial_membership, first_paid_membership_week, first_paid_membership, total_user_streams, youtube_uploader_type, audio_format, dsp_data]
+✔ SCHEMA LIST OK para imusic:dashes:Deezer:2025-11-03:rows
+📄 Arquivo TSV localizado → iMusics_Deezer_1006181630623_2025-11-03.tsv
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 5: Iniciando validação entre Redis X Arquivo...
+
+🔍 Comparando Redis x TSV para: imusic:dashes:Deezer:2025-11-03:rows
+✔ Quantidade OK → 50 registros
+✔ Conteúdo válido → TSV x Redis (imusic:dashes:Deezer:2025-11-03:rows)
+
+📄 Key salva em: /home/diegomachado/workspace/tao-imusics-be-test/temp/temp/redis-dump/imusic_dashes_Deezer_2025-11-03_meta.txt
+📄 Key salva em: /home/diegomachado/workspace/tao-imusics-be-test/temp/temp/redis-dump/imusic_dashes_Deezer_2025-11-03_rows.txt
+
+────────────────────────────────────────────
+🚀 PASSO 6: Validando status final do processamento
+
+⏳ Status atual → completed | ⏳ Mensagem → Processo completado com sucesso | ⏳ Progresso → 100% 
+
+✔ Execução finalizada com sucesso garantindo ate a etapa 'Finalizado'.
+

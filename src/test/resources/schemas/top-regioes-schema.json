@@ -5,6 +5,7 @@
     "mensagem",
     "codigo",
     "dados",
+    "total",
     "qde_registros",
     "pagina",
     "qde_por_pagina"
@@ -54,6 +55,12 @@
         "additionalProperties": false
       }
     },
+
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+
 
     "qde_registros": {
       "type": "integer",

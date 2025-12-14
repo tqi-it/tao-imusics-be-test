@@ -1,0 +1,17 @@
+
+════════════════════════════════════════════════════
+🧪 CN12 - Reprocessamento acima de 365 dias (REJEITADO)
+📅 Data inicial : 2024-12-11
+📅 Data final   : 2024-12-11
+📏 Intervalo    : 366 dias
+════════════════════════════════════════════════════
+
+🚀 PASSO 1: Enviando requisição start-process
+🔎 PASSO 2: Validando regras de negócio
+📥 Resposta recebida:
+   ➤ HTTP Status : 400
+   ➤ success     : false
+   ➤ error       : Período solicitado (366 dias) excede o máximo permitido de 365 dias
+✅ Validação concluída com sucesso
+🏁 CN12 FINALIZADO COM SUCESSO
+

@@ -8,6 +8,7 @@
     "mensagem",
     "codigo",
     "dados",
+    "total",
     "qde_registros",
     "pagina",
     "qde_por_pagina",
@@ -64,6 +65,7 @@
       }
     },
 
+    "total": { "type": "integer", "minimum": 0 },
     "qde_registros": { "type": "integer", "minimum": 0 },
     "pagina": { "type": "integer", "minimum": 0 },
     "qde_por_pagina": { "type": "integer", "minimum": 1 },

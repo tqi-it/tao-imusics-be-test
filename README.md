@@ -102,7 +102,7 @@ O foco deste projeto é garantir a integridade dos dados desde sua origem (arqui
 
 ### 1. Gravação dos dados brutos (raw)
 - Tipo da chave: `hash` / `list`
-- `row_count`
+- `total_items`
 - Conteúdo das linhas
 - Status (`pending`, `processed`)
 
@@ -217,12 +217,27 @@ make start
 > Meta e o Agrupamento sumarizado
 > Rows são as linhas
 
--- Install Redis
+-- Instal redisinsight
+sudo snap install redisinsight
+CONFIG: redis://localhost:6379/0 (user:default pass:impass)
+
+-- Install Redis tterminal
 sudo apt install redis-tools
 
 -- Logar no Redis Local
 redis-cli
 AUTH impass
+
+-- Listar todas chaves
+KEYS *
+
+-- Filtrar usando contem
+KEYS *playlist*
+KEYS *Deezer*
+KEYS *2025-11*
+KEYS top:albuns*
+KEYS *:sumarizado
+
 
 -- Ver se existe (1 existe / 0 nao existe)
 EXISTS imusic:topalbuns:Deezer:2025-09-23:rows
@@ -230,11 +245,11 @@ EXISTS imusic:topalbuns:Deezer:2025-09-23:meta
 
 
 -- ver Ver o tipo primeiro
-127.0.0.1:6379> TYPE imusic:dashes:Deezer:2025-09-23:meta
+TYPE imusic:dashes:Deezer:2025-09-23:meta
 hash
 
 -- hash
-127.0.0.1:6379> HGETALL imusic:dashes:Deezer:2025-11-17:meta
+HGETALL imusic:dashes:Deezer:2025-11-17:meta
 
 -- String
 GET imusic:dashes:Deezer:2025-11-17:meta

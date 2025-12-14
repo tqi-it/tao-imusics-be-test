@@ -1,0 +1,25 @@
+
+═══════════════════════════════════════════════════
+🧪 CN7 - Erro no Processamento
+📅 Data utilizada: 2025-12-10
+═══════════════════════════════════════════════════
+
+
+🔎 Testando cenário inválido
+   ➤ start-date=2025-12-10
+   ➤ end-date=2025-12-10
+   ➤ Esperado: "The directory /tmp_TEST/ was not found."
+➡ Status HTTP start-process: 200
+
+⏳ Aguardando detecção de FALHA no /process-status ...
+
+📥 RESPOSTA /process-status:
+   error: The directory /tmp_TEST/ was not found.
+   current_step: clean_old_files
+   message: Processo falhou com erro
+   status: failed
+   httpStatus   = 500
+
+✔ Cenário validado com sucesso.
+🏁 CN7 FINALIZADO
+

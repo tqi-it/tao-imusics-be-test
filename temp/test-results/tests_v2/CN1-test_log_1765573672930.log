@@ -1,0 +1,502 @@
+⏱ Timer iniciado...
+🕵️‍♂ PASSO 1: Validando deleção dos arquivos no /tmp...
+⚠️ Arquivos de players com mais de 2 dias ainda encontrados no /tmp:
+ - iMusics_TikTok_1006157769751_2025-11-01.tsv.gz  (idade: 490437h)
+ - iMusics_Spotify_1006160421788_2025-11-01.tsv.gz  (idade: 490437h)
+ - iMusics_Deezer_1006158301406_2025-11-01.tsv.gz  (idade: 490437h)
+ - iMusics_Deezer_1006162307812_2025-11-02.tsv  (idade: 490437h)
+ - iMusics_Spotify_1006160421788_2025-11-01.tsv  (idade: 490437h)
+ - iMusics_TikTok_1006157769751_2025-11-01.tsv  (idade: 49h)
+ - iMusics_Spotify_1006171351346_2025-11-02.tsv  (idade: 49h)
+ - iMusics_SoundCloud_1006162308495_2025-11-01.tsv  (idade: 49h)
+ - iMusics_iTunes_1006170368578_2025-11-02.tsv  (idade: 49h)
+ - iMusics_Amazon_1006162788094_2025-11-02.tsv  (idade: 49h)
+ - iMusics_Deezer_1006158301406_2025-11-01.tsv  (idade: 49h)
+ - iMusics_Pandora_1006160817198_2025-11-01.tsv.gz  (idade: 49h)
+ - iMusics_iTunes_1006160225503_2025-11-01.tsv.gz  (idade: 49h)
+ - iMusics_Spotify_1006171351346_2025-11-02.tsv.gz  (idade: 49h)
+ - iMusics_Youtube_1006161727940_2025-11-01.tsv  (idade: 49h)
+ - iMusics_Youtube_1006178985334_2025-11-02.tsv.gz  (idade: 49h)
+
+✅ Diretório limpo: Nenhum arquivo de players (com mais de 2 dias) encontrado no /tmp !
+✔ Processo concluído: diretório /tmp está limpo dos arquivos antigos.
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 2: Consultando status do processamento...
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Processando arquivo 16/16: iMusics_Deezer_1006552639334_2025-12-02.tsv | ⏳ Progresso → 25% 
+⏳ Status atual → completed | ⏳ Mensagem → Processo completado com sucesso | ⏳ Progresso → 100% 
+⏱ Tempo total do teste: 1203504 ms (1203 segundos) — 20:03 (MM:SS)
+
+────────────────────────────────────────────
+🕵️‍♂PASSO 3: Validação de arquivos gerados...
+📂 Lista de arquivos encontrados no /tmp:
+📅 2025-11-03
+   🛒  iMusics_Amazon_1006183294323_2025-11-03.tsv.gz
+   🛒  iMusics_Amazon_1006183294323_2025-11-03.tsv
+   📻  iMusics_Deezer_1006181630623_2025-11-03.tsv.gz
+   📻  iMusics_Deezer_1006181630623_2025-11-03.tsv
+   📡  iMusics_Pandora_1006191619861_2025-11-03.tsv.gz
+   📡  iMusics_Pandora_1006191619861_2025-11-03.tsv
+   ☁️  iMusics_SoundCloud_1006203071007_2025-11-03.tsv.gz
+   ☁️  iMusics_SoundCloud_1006203071007_2025-11-03.tsv
+   🎵  iMusics_Spotify_1006189466908_2025-11-03.tsv.gz
+   🎵  iMusics_Spotify_1006189466908_2025-11-03.tsv
+   🎬  iMusics_TikTok_1006178151460_2025-11-03.tsv.gz
+   🎬  iMusics_TikTok_1006178151460_2025-11-03.tsv
+   ▶️  iMusics_Youtube_1006198302986_2025-11-03.tsv.gz
+   ▶️  iMusics_Youtube_1006198302986_2025-11-03.tsv
+   🍎  iMusics_iTunes_1006188813004_2025-11-03.tsv.gz
+   🍎  iMusics_iTunes_1006188813004_2025-11-03.tsv
+📅 2025-11-04
+   🛒  iMusics_Amazon_1006205600509_2025-11-04.tsv.gz
+   🛒  iMusics_Amazon_1006205600509_2025-11-04.tsv
+   📻  iMusics_Deezer_1006203068675_2025-11-04.tsv.gz
+   📻  iMusics_Deezer_1006203068675_2025-11-04.tsv
+   📡  iMusics_Pandora_1006216713902_2025-11-04.tsv.gz
+   📡  iMusics_Pandora_1006216713902_2025-11-04.tsv
+   ☁️  iMusics_SoundCloud_1006220650487_2025-11-04.tsv.gz
+   ☁️  iMusics_SoundCloud_1006220650487_2025-11-04.tsv
+   🎵  iMusics_Spotify_1006215174108_2025-11-04.tsv.gz
+   🎵  iMusics_Spotify_1006215174108_2025-11-04.tsv
+   🎬  iMusics_TikTok_1006197249160_2025-11-04.tsv.gz
+   🎬  iMusics_TikTok_1006197249160_2025-11-04.tsv
+   ▶️  iMusics_Youtube_1006219370994_2025-11-04.tsv.gz
+   ▶️  iMusics_Youtube_1006219370994_2025-11-04.tsv
+   🍎  iMusics_iTunes_1006214310039_2025-11-04.tsv.gz
+   🍎  iMusics_iTunes_1006214310039_2025-11-04.tsv
+📅 2025-11-10
+   🛒  iMusics_Amazon_1006286651710_2025-11-10.tsv.gz
+   🛒  iMusics_Amazon_1006286651710_2025-11-10.tsv
+   📻  iMusics_Deezer_1006285570781_2025-11-10.tsv.gz
+   📻  iMusics_Deezer_1006285570781_2025-11-10.tsv
+   📡  iMusics_Pandora_1006298290931_2025-11-10.tsv.gz
+   📡  iMusics_Pandora_1006298290931_2025-11-10.tsv
+   ☁️  iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz
+   ☁️  iMusics_SoundCloud_1006304643949_2025-11-10.tsv
+   🎵  iMusics_Spotify_1006296016047_2025-11-10.tsv.gz
+   🎵  iMusics_Spotify_1006296016047_2025-11-10.tsv
+   🎬  iMusics_TikTok_1006283308038_2025-11-10.tsv.gz
+   🎬  iMusics_TikTok_1006283308038_2025-11-10.tsv
+   ▶️  iMusics_Youtube_1006303214081_2025-11-10.tsv.gz
+   ▶️  iMusics_Youtube_1006303214081_2025-11-10.tsv
+   🍎  iMusics_iTunes_1006294715957_2025-11-10.tsv.gz
+   🍎  iMusics_iTunes_1006294715957_2025-11-10.tsv
+📅 2025-11-11
+   🛒  iMusics_Amazon_1006305376757_2025-11-11.tsv.gz
+   🛒  iMusics_Amazon_1006305376757_2025-11-11.tsv
+   📻  iMusics_Deezer_1006304642941_2025-11-11.tsv.gz
+   📻  iMusics_Deezer_1006304642941_2025-11-11.tsv
+   📡  iMusics_Pandora_1006313413139_2025-11-11.tsv.gz
+   📡  iMusics_Pandora_1006313413139_2025-11-11.tsv
+   ☁️  iMusics_SoundCloud_1006318594446_2025-11-11.tsv.gz
+   ☁️  iMusics_SoundCloud_1006318594446_2025-11-11.tsv
+   🎵  iMusics_Spotify_1006311713048_2025-11-11.tsv.gz
+   🎵  iMusics_Spotify_1006311713048_2025-11-11.tsv
+   🎬  iMusics_TikTok_1006302731107_2025-11-11.tsv.gz
+   🎬  iMusics_TikTok_1006302731107_2025-11-11.tsv
+   ▶️  iMusics_Youtube_1006317027365_2025-11-11.tsv.gz
+   ▶️  iMusics_Youtube_1006317027365_2025-11-11.tsv
+   🍎  iMusics_iTunes_1006310898844_2025-11-11.tsv.gz
+   🍎  iMusics_iTunes_1006310898844_2025-11-11.tsv
+📅 2025-11-12
+   🛒  iMusics_Amazon_1006319032262_2025-11-12.tsv.gz
+   🛒  iMusics_Amazon_1006319032262_2025-11-12.tsv
+   📻  iMusics_Deezer_1006318593479_2025-11-12.tsv.gz
+   📻  iMusics_Deezer_1006318593479_2025-11-12.tsv
+   📡  iMusics_Pandora_1006328807614_2025-11-12.tsv.gz
+   📡  iMusics_Pandora_1006328807614_2025-11-12.tsv
+   ☁️  iMusics_SoundCloud_1006338739477_2025-11-12.tsv.gz
+   ☁️  iMusics_SoundCloud_1006338739477_2025-11-12.tsv
+   🎵  iMusics_Spotify_1006325568658_2025-11-12.tsv.gz
+   🎵  iMusics_Spotify_1006325568658_2025-11-12.tsv
+   🎬  iMusics_TikTok_1006316441755_2025-11-12.tsv.gz
+   🎬  iMusics_TikTok_1006316441755_2025-11-12.tsv
+   ▶️  iMusics_Youtube_1006337033824_2025-11-12.tsv.gz
+   ▶️  iMusics_Youtube_1006337033824_2025-11-12.tsv
+   🍎  iMusics_iTunes_1006324392533_2025-11-12.tsv.gz
+   🍎  iMusics_iTunes_1006324392533_2025-11-12.tsv
+📅 2025-12-02
+   🛒  iMusics_Amazon_1006553426669_2025-12-02.tsv.gz
+   🛒  iMusics_Amazon_1006553426669_2025-12-02.tsv
+   📻  iMusics_Deezer_1006552639334_2025-12-02.tsv.gz
+   📻  iMusics_Deezer_1006552639334_2025-12-02.tsv
+   📡  iMusics_Pandora_1006561279541_2025-12-02.tsv.gz
+   📡  iMusics_Pandora_1006561279541_2025-12-02.tsv
+   ☁️  iMusics_SoundCloud_1006568130956_2025-12-02.tsv.gz
+   ☁️  iMusics_SoundCloud_1006568130956_2025-12-02.tsv
+   🎵  iMusics_Spotify_1006559875591_2025-12-02.tsv.gz
+   🎵  iMusics_Spotify_1006559875591_2025-12-02.tsv
+   🎬  iMusics_TikTok_1006551114255_2025-12-02.tsv.gz
+   🎬  iMusics_TikTok_1006551114255_2025-12-02.tsv
+   ▶️  iMusics_Youtube_1006565117545_2025-12-02.tsv.gz
+   ▶️  iMusics_Youtube_1006565117545_2025-12-02.tsv
+   🍎  iMusics_iTunes_1006559012296_2025-12-02.tsv.gz
+   🍎  iMusics_iTunes_1006559012296_2025-12-02.tsv
+📅 2025-12-03
+   🛒  iMusics_Amazon_1006568990989_2025-12-03.tsv.gz
+   🛒  iMusics_Amazon_1006568990989_2025-12-03.tsv
+   📻  iMusics_Deezer_1006568129497_2025-12-03.tsv.gz
+   📻  iMusics_Deezer_1006568129497_2025-12-03.tsv
+   📡  iMusics_Pandora_1006576380543_2025-12-03.tsv.gz
+   📡  iMusics_Pandora_1006576380543_2025-12-03.tsv
+   ☁️  iMusics_SoundCloud_1006581094935_2025-12-03.tsv.gz
+   ☁️  iMusics_SoundCloud_1006581094935_2025-12-03.tsv
+   🎵  iMusics_Spotify_1006574839913_2025-12-03.tsv.gz
+   🎵  iMusics_Spotify_1006574839913_2025-12-03.tsv
+   🎬  iMusics_TikTok_1006564448775_2025-12-03.tsv.gz
+   🎬  iMusics_TikTok_1006564448775_2025-12-03.tsv
+   ▶️  iMusics_Youtube_1006580149321_2025-12-03.tsv.gz
+   ▶️  iMusics_Youtube_1006580149321_2025-12-03.tsv
+   🍎  iMusics_iTunes_1006574043721_2025-12-03.tsv.gz
+   🍎  iMusics_iTunes_1006574043721_2025-12-03.tsv
+📅 2025-12-09
+   🛒  iMusics_Amazon_1006627525908_2025-12-09.tsv.gz
+   🛒  iMusics_Amazon_1006627525908_2025-12-09.tsv
+   📻  iMusics_Deezer_1006626586568_2025-12-09.tsv.gz
+   📻  iMusics_Deezer_1006626586568_2025-12-09.tsv
+   📡  iMusics_Pandora_1006634594476_2025-12-09.tsv.gz
+   📡  iMusics_Pandora_1006634594476_2025-12-09.tsv
+   ☁️  iMusics_SoundCloud_1006637701457_2025-12-09.tsv.gz
+   ☁️  iMusics_SoundCloud_1006637701457_2025-12-09.tsv
+   🎵  iMusics_Spotify_1006633445419_2025-12-09.tsv.gz
+   🎵  iMusics_Spotify_1006633445419_2025-12-09.tsv
+   🎬  iMusics_TikTok_1006624982085_2025-12-09.tsv.gz
+   🎬  iMusics_TikTok_1006624982085_2025-12-09.tsv
+   🍎  iMusics_iTunes_1006632723597_2025-12-09.tsv.gz
+   🍎  iMusics_iTunes_1006632723597_2025-12-09.tsv
+📅 2025-12-10
+   🛒  iMusics_Amazon_1006638507524_2025-12-10.tsv.gz
+   🛒  iMusics_Amazon_1006638507524_2025-12-10.tsv
+   📻  iMusics_Deezer_1006637699775_2025-12-10.tsv.gz
+   📻  iMusics_Deezer_1006637699775_2025-12-10.tsv
+   📡  iMusics_Pandora_1006645137087_2025-12-10.tsv.gz
+   📡  iMusics_Pandora_1006645137087_2025-12-10.tsv
+   ☁️  iMusics_SoundCloud_1006648333913_2025-12-10.tsv.gz
+   ☁️  iMusics_SoundCloud_1006648333913_2025-12-10.tsv
+   🎵  iMusics_Spotify_1006644112002_2025-12-10.tsv.gz
+   🎵  iMusics_Spotify_1006644112002_2025-12-10.tsv
+   🎬  iMusics_TikTok_1006636501758_2025-12-10.tsv.gz
+   🎬  iMusics_TikTok_1006636501758_2025-12-10.tsv
+   🍎  iMusics_iTunes_1006643501700_2025-12-10.tsv.gz
+   🍎  iMusics_iTunes_1006643501700_2025-12-10.tsv
+📂 Lista de arquivos não encontrados no /tmp:
+✔ Arquivos validados com sucesso: todos os players e datas encontrados no /tmp
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 4: Validando arquivos .tsv.gz e seus .tsv correspondentes...
+✔️  OK → iMusics_Amazon_1006183294323_2025-11-03.tsv.gz possui o correspondente iMusics_Amazon_1006183294323_2025-11-03.tsv
+✔️  OK → iMusics_Amazon_1006205600509_2025-11-04.tsv.gz possui o correspondente iMusics_Amazon_1006205600509_2025-11-04.tsv
+✔️  OK → iMusics_Amazon_1006286651710_2025-11-10.tsv.gz possui o correspondente iMusics_Amazon_1006286651710_2025-11-10.tsv
+✔️  OK → iMusics_Amazon_1006305376757_2025-11-11.tsv.gz possui o correspondente iMusics_Amazon_1006305376757_2025-11-11.tsv
+✔️  OK → iMusics_Amazon_1006319032262_2025-11-12.tsv.gz possui o correspondente iMusics_Amazon_1006319032262_2025-11-12.tsv
+✔️  OK → iMusics_Amazon_1006553426669_2025-12-02.tsv.gz possui o correspondente iMusics_Amazon_1006553426669_2025-12-02.tsv
+✔️  OK → iMusics_Amazon_1006568990989_2025-12-03.tsv.gz possui o correspondente iMusics_Amazon_1006568990989_2025-12-03.tsv
+✔️  OK → iMusics_Amazon_1006627525908_2025-12-09.tsv.gz possui o correspondente iMusics_Amazon_1006627525908_2025-12-09.tsv
+✔️  OK → iMusics_Amazon_1006638507524_2025-12-10.tsv.gz possui o correspondente iMusics_Amazon_1006638507524_2025-12-10.tsv
+✔️  OK → iMusics_Deezer_1006181630623_2025-11-03.tsv.gz possui o correspondente iMusics_Deezer_1006181630623_2025-11-03.tsv
+✔️  OK → iMusics_Deezer_1006203068675_2025-11-04.tsv.gz possui o correspondente iMusics_Deezer_1006203068675_2025-11-04.tsv
+✔️  OK → iMusics_Deezer_1006285570781_2025-11-10.tsv.gz possui o correspondente iMusics_Deezer_1006285570781_2025-11-10.tsv
+✔️  OK → iMusics_Deezer_1006304642941_2025-11-11.tsv.gz possui o correspondente iMusics_Deezer_1006304642941_2025-11-11.tsv
+✔️  OK → iMusics_Deezer_1006318593479_2025-11-12.tsv.gz possui o correspondente iMusics_Deezer_1006318593479_2025-11-12.tsv
+✔️  OK → iMusics_Deezer_1006552639334_2025-12-02.tsv.gz possui o correspondente iMusics_Deezer_1006552639334_2025-12-02.tsv
+✔️  OK → iMusics_Deezer_1006568129497_2025-12-03.tsv.gz possui o correspondente iMusics_Deezer_1006568129497_2025-12-03.tsv
+✔️  OK → iMusics_Deezer_1006626586568_2025-12-09.tsv.gz possui o correspondente iMusics_Deezer_1006626586568_2025-12-09.tsv
+✔️  OK → iMusics_Deezer_1006637699775_2025-12-10.tsv.gz possui o correspondente iMusics_Deezer_1006637699775_2025-12-10.tsv
+✔️  OK → iMusics_Pandora_1006191619861_2025-11-03.tsv.gz possui o correspondente iMusics_Pandora_1006191619861_2025-11-03.tsv
+✔️  OK → iMusics_Pandora_1006216713902_2025-11-04.tsv.gz possui o correspondente iMusics_Pandora_1006216713902_2025-11-04.tsv
+✔️  OK → iMusics_Pandora_1006298290931_2025-11-10.tsv.gz possui o correspondente iMusics_Pandora_1006298290931_2025-11-10.tsv
+✔️  OK → iMusics_Pandora_1006313413139_2025-11-11.tsv.gz possui o correspondente iMusics_Pandora_1006313413139_2025-11-11.tsv
+✔️  OK → iMusics_Pandora_1006328807614_2025-11-12.tsv.gz possui o correspondente iMusics_Pandora_1006328807614_2025-11-12.tsv
+✔️  OK → iMusics_Pandora_1006561279541_2025-12-02.tsv.gz possui o correspondente iMusics_Pandora_1006561279541_2025-12-02.tsv
+✔️  OK → iMusics_Pandora_1006576380543_2025-12-03.tsv.gz possui o correspondente iMusics_Pandora_1006576380543_2025-12-03.tsv
+✔️  OK → iMusics_Pandora_1006634594476_2025-12-09.tsv.gz possui o correspondente iMusics_Pandora_1006634594476_2025-12-09.tsv
+✔️  OK → iMusics_Pandora_1006645137087_2025-12-10.tsv.gz possui o correspondente iMusics_Pandora_1006645137087_2025-12-10.tsv
+✔️  OK → iMusics_SoundCloud_1006203071007_2025-11-03.tsv.gz possui o correspondente iMusics_SoundCloud_1006203071007_2025-11-03.tsv
+✔️  OK → iMusics_SoundCloud_1006220650487_2025-11-04.tsv.gz possui o correspondente iMusics_SoundCloud_1006220650487_2025-11-04.tsv
+✔️  OK → iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz possui o correspondente iMusics_SoundCloud_1006304643949_2025-11-10.tsv
+✔️  OK → iMusics_SoundCloud_1006318594446_2025-11-11.tsv.gz possui o correspondente iMusics_SoundCloud_1006318594446_2025-11-11.tsv
+✔️  OK → iMusics_SoundCloud_1006338739477_2025-11-12.tsv.gz possui o correspondente iMusics_SoundCloud_1006338739477_2025-11-12.tsv
+✔️  OK → iMusics_SoundCloud_1006568130956_2025-12-02.tsv.gz possui o correspondente iMusics_SoundCloud_1006568130956_2025-12-02.tsv
+✔️  OK → iMusics_SoundCloud_1006581094935_2025-12-03.tsv.gz possui o correspondente iMusics_SoundCloud_1006581094935_2025-12-03.tsv
+✔️  OK → iMusics_SoundCloud_1006637701457_2025-12-09.tsv.gz possui o correspondente iMusics_SoundCloud_1006637701457_2025-12-09.tsv
+✔️  OK → iMusics_SoundCloud_1006648333913_2025-12-10.tsv.gz possui o correspondente iMusics_SoundCloud_1006648333913_2025-12-10.tsv
+✔️  OK → iMusics_Spotify_1006189466908_2025-11-03.tsv.gz possui o correspondente iMusics_Spotify_1006189466908_2025-11-03.tsv
+✔️  OK → iMusics_Spotify_1006215174108_2025-11-04.tsv.gz possui o correspondente iMusics_Spotify_1006215174108_2025-11-04.tsv
+✔️  OK → iMusics_Spotify_1006296016047_2025-11-10.tsv.gz possui o correspondente iMusics_Spotify_1006296016047_2025-11-10.tsv
+✔️  OK → iMusics_Spotify_1006311713048_2025-11-11.tsv.gz possui o correspondente iMusics_Spotify_1006311713048_2025-11-11.tsv
+✔️  OK → iMusics_Spotify_1006325568658_2025-11-12.tsv.gz possui o correspondente iMusics_Spotify_1006325568658_2025-11-12.tsv
+✔️  OK → iMusics_Spotify_1006559875591_2025-12-02.tsv.gz possui o correspondente iMusics_Spotify_1006559875591_2025-12-02.tsv
+✔️  OK → iMusics_Spotify_1006574839913_2025-12-03.tsv.gz possui o correspondente iMusics_Spotify_1006574839913_2025-12-03.tsv
+✔️  OK → iMusics_Spotify_1006633445419_2025-12-09.tsv.gz possui o correspondente iMusics_Spotify_1006633445419_2025-12-09.tsv
+✔️  OK → iMusics_Spotify_1006644112002_2025-12-10.tsv.gz possui o correspondente iMusics_Spotify_1006644112002_2025-12-10.tsv
+✔️  OK → iMusics_TikTok_1006178151460_2025-11-03.tsv.gz possui o correspondente iMusics_TikTok_1006178151460_2025-11-03.tsv
+✔️  OK → iMusics_TikTok_1006197249160_2025-11-04.tsv.gz possui o correspondente iMusics_TikTok_1006197249160_2025-11-04.tsv
+✔️  OK → iMusics_TikTok_1006283308038_2025-11-10.tsv.gz possui o correspondente iMusics_TikTok_1006283308038_2025-11-10.tsv
+✔️  OK → iMusics_TikTok_1006302731107_2025-11-11.tsv.gz possui o correspondente iMusics_TikTok_1006302731107_2025-11-11.tsv
+✔️  OK → iMusics_TikTok_1006316441755_2025-11-12.tsv.gz possui o correspondente iMusics_TikTok_1006316441755_2025-11-12.tsv
+✔️  OK → iMusics_TikTok_1006551114255_2025-12-02.tsv.gz possui o correspondente iMusics_TikTok_1006551114255_2025-12-02.tsv
+✔️  OK → iMusics_TikTok_1006564448775_2025-12-03.tsv.gz possui o correspondente iMusics_TikTok_1006564448775_2025-12-03.tsv
+✔️  OK → iMusics_TikTok_1006624982085_2025-12-09.tsv.gz possui o correspondente iMusics_TikTok_1006624982085_2025-12-09.tsv
+✔️  OK → iMusics_TikTok_1006636501758_2025-12-10.tsv.gz possui o correspondente iMusics_TikTok_1006636501758_2025-12-10.tsv
+✔️  OK → iMusics_Youtube_1006198302986_2025-11-03.tsv.gz possui o correspondente iMusics_Youtube_1006198302986_2025-11-03.tsv
+✔️  OK → iMusics_Youtube_1006219370994_2025-11-04.tsv.gz possui o correspondente iMusics_Youtube_1006219370994_2025-11-04.tsv
+✔️  OK → iMusics_Youtube_1006303214081_2025-11-10.tsv.gz possui o correspondente iMusics_Youtube_1006303214081_2025-11-10.tsv
+✔️  OK → iMusics_Youtube_1006317027365_2025-11-11.tsv.gz possui o correspondente iMusics_Youtube_1006317027365_2025-11-11.tsv
+✔️  OK → iMusics_Youtube_1006337033824_2025-11-12.tsv.gz possui o correspondente iMusics_Youtube_1006337033824_2025-11-12.tsv
+✔️  OK → iMusics_Youtube_1006565117545_2025-12-02.tsv.gz possui o correspondente iMusics_Youtube_1006565117545_2025-12-02.tsv
+✔️  OK → iMusics_Youtube_1006580149321_2025-12-03.tsv.gz possui o correspondente iMusics_Youtube_1006580149321_2025-12-03.tsv
+✔️  OK → iMusics_iTunes_1006188813004_2025-11-03.tsv.gz possui o correspondente iMusics_iTunes_1006188813004_2025-11-03.tsv
+✔️  OK → iMusics_iTunes_1006214310039_2025-11-04.tsv.gz possui o correspondente iMusics_iTunes_1006214310039_2025-11-04.tsv
+✔️  OK → iMusics_iTunes_1006294715957_2025-11-10.tsv.gz possui o correspondente iMusics_iTunes_1006294715957_2025-11-10.tsv
+✔️  OK → iMusics_iTunes_1006310898844_2025-11-11.tsv.gz possui o correspondente iMusics_iTunes_1006310898844_2025-11-11.tsv
+✔️  OK → iMusics_iTunes_1006324392533_2025-11-12.tsv.gz possui o correspondente iMusics_iTunes_1006324392533_2025-11-12.tsv
+✔️  OK → iMusics_iTunes_1006559012296_2025-12-02.tsv.gz possui o correspondente iMusics_iTunes_1006559012296_2025-12-02.tsv
+✔️  OK → iMusics_iTunes_1006574043721_2025-12-03.tsv.gz possui o correspondente iMusics_iTunes_1006574043721_2025-12-03.tsv
+✔️  OK → iMusics_iTunes_1006632723597_2025-12-09.tsv.gz possui o correspondente iMusics_iTunes_1006632723597_2025-12-09.tsv
+✔️  OK → iMusics_iTunes_1006643501700_2025-12-10.tsv.gz possui o correspondente iMusics_iTunes_1006643501700_2025-12-10.tsv
+
+📄 Total de arquivos .tsv.gz encontrados: 70
+⚠️ Total de erros: 0
+
+────────────────────────────────────────────
+🕵️‍♂ PASSO 5: Validando arquivos /tmp ↔ S3 (somente arquivos presentes no /tmp)
+📌 Prefix real detectado no S3 → tao-im-symphonia-dev-files/analytics-trends/fuga/
+📂 /tmp → 70 arquivos .tsv.gz encontrados
+📂 S3   → 345 arquivos .tsv.gz encontrados
+
+➡ Validando arquivo: iMusics_Amazon_1006568990989_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4105841 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006626586568_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1801362 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006580149321_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4689786 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006638507524_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4178655 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006197249160_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3067397 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006216713902_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (33498 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006178151460_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3081473 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006568129497_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1985477 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006203071007_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (197994 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006561279541_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (33514 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006298290931_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (24472 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006644112002_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (314304450 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006189466908_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (313751414 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006633445419_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (296175572 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006311713048_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (324557745 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006305376757_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3193132 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006627525908_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3982568 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006338739477_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (207003 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006553426669_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3917402 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006317027365_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4556208 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006304642941_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1998881 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006198302986_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4527433 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006188813004_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (352306 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006634594476_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (30863 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006205600509_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3097793 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006559875591_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (324273656 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006181630623_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1903823 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006576380543_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (28288 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006624982085_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3077303 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006581094935_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (235119 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006337033824_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4638323 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006302731107_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3063950 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006552639334_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1920744 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006285570781_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1845984 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006310898844_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (355994 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006313413139_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (26398 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006643501700_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (342224 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006325568658_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (341228220 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006191619861_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (32207 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006565117545_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4626746 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006183294323_2025-11-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (2942480 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006304643949_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (200161 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006303214081_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4419246 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006551114255_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3096898 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006648333913_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (229741 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006574043721_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (366072 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006636501758_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3103846 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006286651710_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3021691 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006318593479_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (2103602 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006283308038_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3060200 bytes)
+
+➡ Validando arquivo: iMusics_Youtube_1006219370994_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (4623357 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006214310039_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (363356 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006645137087_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (31364 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006637701457_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (219966 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006220650487_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (198979 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006215174108_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (330044455 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006296016047_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (306288936 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006324392533_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (361450 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006568130956_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (229063 bytes)
+
+➡ Validando arquivo: iMusics_SoundCloud_1006318594446_2025-11-11.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (195798 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006294715957_2025-11-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (358684 bytes)
+
+➡ Validando arquivo: iMusics_Spotify_1006574839913_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (346364655 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006564448775_2025-12-03.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3115394 bytes)
+
+➡ Validando arquivo: iMusics_Pandora_1006328807614_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (25599 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006637699775_2025-12-10.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (1855769 bytes)
+
+➡ Validando arquivo: iMusics_TikTok_1006316441755_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3063924 bytes)
+
+➡ Validando arquivo: iMusics_Amazon_1006319032262_2025-11-12.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (3226467 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006632723597_2025-12-09.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (348136 bytes)
+
+➡ Validando arquivo: iMusics_Deezer_1006203068675_2025-11-04.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (2052109 bytes)
+
+➡ Validando arquivo: iMusics_iTunes_1006559012296_2025-12-02.tsv.gz
+   ✔ OK → arquivo encontrado e tamanho igual (355680 bytes)
+
+⚠️ Total de erros: 0
+
+
+📘 HISTÓRICO DO PROCESSO
+ → Buscando dados de analytics em FUGA Trends | 10%
+ → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | 15%
+ → Processando arquivo 16/16: iMusics_Deezer_1006552639334_2025-12-02.tsv | 25%
+ → Processo completado com sucesso | 100%

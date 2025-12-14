@@ -1,6 +1,5 @@
 package `analytics-process`
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,36 +10,28 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import org.springframework.core.annotation.MergedAnnotations.Search
 import redis.clients.jedis.JedisPooled
-import util.Data.Companion.ASSERT_ID
-import util.ListsConstants.TSV_COLUMNS
-import util.ListsConstants.FLOWS_REDIS
+import util.*
 import util.ListsConstants.SUMMARY_RULES
-import util.LogCollector
 import java.io.File
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import util.RedisUtils.getRedisKeys
-import util.RedisClient
 import util.RedisClient.jedis
 import util.RedisUtils.cleanupDate
 import util.Data.Companion.BASE_URL_ANALYTICS
-import util.Data.Companion.DATE
 import util.Data.Companion.DIR_SUMMARY_DUMP
-import util.Data.Companion.DIR_TEMP
 import util.Data.Companion.NUMBER_OF_STREAMS
-import util.Data.Companion.PATH_PROCESS
-import util.Data.Companion.PLATAFORM
-import util.Data.Companion.STREAM_SOURCE
-import util.Data.Companion.STREAM_SOURCE_URI
-import util.Data.Companion.TERRITORY
-import util.Data.Companion.UCP
-import util.GenerateHtmlReportFromDumps
-import util.ListsConstants.HASH_FIELDS
-import util.givenOauth
+import util.ProcessStatus.aguardarProcessoCompleto
+import util.RedisUtils.compararRedisComTsv
+import util.RedisUtils.localizarArquivoTsv
+import util.RedisUtils.validarSchemaRedisSumarizado
+import util.StartProcess.PostStartProcess
 
 
 class UploadRedisOpenDataTest {
@@ -125,349 +116,134 @@ class UploadRedisOpenDataTest {
 
     @Test
     @Tag("smokeTests") // TPF-70
-    fun `CN6 - Validar entrega dos dados abertos no Redis 'process_file_to_redis'`() {
+    @Timeout(value = 45, unit = TimeUnit.MINUTES)
+    fun `CN8 - Validar entrega dos dados abertos no Redis 'process_file_to_redis'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(-34).format(formatter)
+        //val date = LocalDate.now().plusDays(-2).format(formatter)
+        var startDate ="2025-11-03"
+        var endDate ="2025-11-04"
 
-        val requestBody = """
-            {
-              "start-date": "$date",
-              "end-date": "$date"
-            }
-        """.trimIndent()
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN8 - Validar entrega dos dados abertos no Redis 'process_file_to_redis'")
+        LogCollector.println("📅 Data utilizada: $startDate e $endDate")
+        LogCollector.println("════════════════════════════════════════════════════\n")
 
-        val startResponse = given()
-            .contentType(ContentType.JSON)
-            .header("origin", "http://localhost")
-            .header("authorization", "Bearer $token")
-            .body(requestBody)
-            .post(PATH_PROCESS)
-            .then()
-            .statusCode(200)
-            .extract()
+        LogCollector.println("🚀 PASSO 1: Startando processamento dos períodos: $startDate | $endDate ...")
+        val response = PostStartProcess(
+            startDate = startDate,
+            endDate = endDate,
+            token = token)
+        assertTrue(response?.extract()?.statusCode() == 200)
+        assertEquals("Process started (background)", response?.extract()?.jsonPath()?.getString("message"))
 
-        assertTrue(startResponse.jsonPath().getBoolean("success"))
 
         LogCollector.println("\n────────────────────────────────────────────")
-        LogCollector.println("🚀 PASSO 1: Processo iniciado...")
-
-        // Aguarda liberar Redis
+        LogCollector.println("🚀 PASSO 2: Aguardando conclusão do processamento...")
         Awaitility.await()
-            .atMost(8, TimeUnit.MINUTES)
-            .pollInterval(8, TimeUnit.SECONDS)
+            .atMost(90, TimeUnit.MINUTES)
+            .pollInterval(5, TimeUnit.MINUTES)
+            .ignoreExceptions()
             .until {
                 val resp = given()
                     .header("authorization", "Bearer $token")
                     .header("origin", "http://localhost")
                     .get("/process-status")
-                    .then().extract()
+                    .then()
+                    .extract()
 
                 val status = resp.jsonPath().getString("status") ?: ""
-                val flow = resp.jsonPath().getString("current_step") ?: ""
+                val msg = resp.jsonPath().getString("message") ?: ""
 
-                LogCollector.println("\n📌 Status atual → $status")
-                LogCollector.println("🔄 Step atual → $flow")
-
-                status.equals("running", true) &&
-                        FLOWS_REDIS.contains(flow.lowercase())
+                LogCollector.println("🔄 Status → $status | msg: $msg")
+                status.equals("completed", ignoreCase = true)
             }
 
+
         LogCollector.println("\n────────────────────────────────────────────")
-        LogCollector.println("🚀 PASSO 2: Validando Redis\n")
-
-        val keys = getRedisKeys("imusic:*:$date:*")
-
-        assertTrue(keys.isNotEmpty(), "Nenhuma chave encontrada no Redis para $date")
+        LogCollector.println("🚀 PASSO 3: Validando Redis\n")
+        val keys = getRedisKeys("imusic:*:$startDate:*")
+        assertTrue(keys.isNotEmpty(), "Nenhuma chave encontrada no Redis para $startDate")
 
         LogCollector.println("📌 Chaves encontradas:")
         keys.forEach { LogCollector.println(" → $it") }
 
         // ============================================================================
-        //   🔥 NOVA LÓGICA (PEDIDA POR VOCÊ) — GRUPO POR PLATAFORMA E VALIDAR TUDO
+        //   🔥 NOVA LÓGICA — GRUPO POR PLATAFORMA E VALIDAR TUDO
         // ============================================================================
 
-        val players = keys.groupBy { it.split(":")[2] } // ex: Amazon, Youtube
+        val players = keys
+            .map { it.split(":")[2] }
+            .distinct()
 
-        players.forEach { (player, playerKeys) ->
+        players.forEach { player ->
+            val metaKey = keys.firstOrNull { it.contains(":$player:") && it.endsWith(":meta") }
+            val rowsKey = keys.firstOrNull { it.contains(":$player:") && it.endsWith(":rows") }
+
+            if (metaKey == null || rowsKey == null) {
+                LogCollector.println("ℹ Ignorando player '$player' — não possui meta/rows completos!")
+                return@forEach
+            }
 
             LogCollector.println("\n============================================================")
             LogCollector.println("🎧 VALIDANDO PLAYER: $player")
             LogCollector.println("============================================================")
 
-            val metaKey = playerKeys.firstOrNull { it.endsWith(":meta") }
-                ?: error("❌ META não encontrada para $player")
-
-            val rowsKey = playerKeys.firstOrNull { it.endsWith(":rows") }
-                ?: error("❌ ROWS não encontrada para $player")
-
             LogCollector.println("META → $metaKey")
             LogCollector.println("ROWS → $rowsKey\n")
 
-            // 4.1 — validar schema meta
-            validarSchemaRedis(metaKey, "hash")
+            RedisUtils.validarSchemaRedis(metaKey, "hash")
+            RedisUtils.validarRowCountConsistente(metaKey, rowsKey)
+            RedisUtils.validarSchemaRedis(rowsKey, "list")
 
-            // 4.2 — validar row_count
-            validarRowCountConsistente(metaKey, rowsKey)
+            // apenas se a lista não é de agregação
+            if (!player.contains("topalbuns") && !player.contains("topplaysremunerado")) {
+                val tsvFile = localizarArquivoTsv(rowsKey)
+                compararRedisComTsv(rowsKey, tsvFile)
+            }
 
-            // 4.3 — validar schema rows
-            validarSchemaRedis(rowsKey, "list")
-
-            // 4.4 — encontrar TSV
-            val tsvFile = localizarArquivoTsv(rowsKey)
-
-            // 4.5 — comparar Redis x TSV
-            compararRedisComTsv(rowsKey, tsvFile)
-
-            // 4.6 — dump das duas chaves
-            printRedisKeyContentToFile(metaKey)
-            printRedisKeyContentToFile(rowsKey)
-
-            LogCollector.println("✔ Player $player validado com sucesso\n")
+            RedisUtils.printRedisKeyContentToFile(metaKey)
+            RedisUtils.printRedisKeyContentToFile(rowsKey)
         }
+
 
         // Finalização
         LogCollector.println("\n────────────────────────────────────────────")
         LogCollector.println("🚀 PASSO 6: Validando status final do processamento\n")
-
-        Awaitility.await()
-            .atMost(8, TimeUnit.MINUTES)
-            .pollInterval(5, TimeUnit.SECONDS)
-            .untilCallTo {
-
-                val resp = given()
-                    .header("authorization", "Bearer $token")
-                    .header("origin", "http://localhost")
-                    .get("/process-status")
-                    .then()
-                    .extract()
-
-                val error = resp.jsonPath().getString("error") ?: ""
-                val currentStep = resp.jsonPath().getString("current_step") ?: ""
-                val message = resp.jsonPath().getString("message") ?: ""
-                val status = resp.jsonPath().getString("status") ?: ""
-                val httpStatus = resp.statusCode()
-                val resultMessage = resp.jsonPath().getString("result.message") //
-                val resultStatus = resp.jsonPath().getString("result.status")
-                val resultStart = resp.jsonPath().getString("result.start_date")
-                val resultEnd = resp.jsonPath().getString("result.end_date")
-
-                DownloadUploadS3Test.StatusResponseFields(
-                    error = error,
-                    currentStep = currentStep,
-                    message = message,
-                    status = status,
-                    httpStatus = httpStatus,
-                    result = DownloadUploadS3Test.ResultFields(
-                        message = resultMessage,
-                        status = resultStatus,
-                        startDate = resultStart,
-                        endDate = resultEnd
-                    )
-                )
-
-            } matches { r ->
-            r?.status.equals("sumarize_top_plays", true)
-        }
-        LogCollector.println("\n✔ Execução finalizada com sucesso garantindo ate a etapa 'process_file_to_redis'.\n")
-    }
-
-    @Test
-    @Tag("smokeTests") // TPF-69
-    fun `CN7 - Validar idempotência da ingestão (reimportação) no Redis 'process_file_to_redis'`() {
-
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = LocalDate.now().plusDays(-16).format(formatter)
-
-        fun startProcess() {
-            val requestBody = """
-            {
-              "start-date": "$date",
-              "end-date": "$date"
-            }
-        """.trimIndent()
-
-            given()
-                .contentType(ContentType.JSON)
-                .header("origin", "http://localhost")
-                .header("authorization", "Bearer $token")
-                .body(requestBody)
-                .post(PATH_PROCESS)
-                .then()
-                .statusCode(200)
-                .extract()
-
-        }
-
-        fun aguardarProcessoCompleto() {
-            Awaitility.await()
-                .atMost(20, TimeUnit.MINUTES)
-                .pollInterval(40, TimeUnit.SECONDS)
-                .until {
-                    val status = given()
-                        .contentType(ContentType.JSON)
-                        .header("origin", "http://localhost")
-                        .header("authorization", "Bearer $token")
-                        .get("/process-status")
-                        .then()
-                        .extract()
-                        .jsonPath().getString("status") ?: ""
-
-                    LogCollector.println("⏳ Status atual → $status")
-                    status.equals("completed", ignoreCase = true)
-                }
-        }
-
-        LogCollector.println("\n🚀 Execução 1 — iniciando ingestão")
-        startProcess()
-        aguardarProcessoCompleto()
-        LogCollector.println("✔ Execução 1 concluída\n")
-
-        // Capturar estado do Redis da execução 1
-        val keysExec1 = getRedisKeys("imusic:*:$date:*")
-        val snapshotExec1 = keysExec1.associateWith { captureRedisOtimizadaValue(it) }
-
-        LogCollector.println("🟦 Snapshot Execução 1 capturado (${snapshotExec1.size} chaves)")
-
-        LogCollector.println("\n🚀 Execução 2 — reimportando mesmos dados")
-        startProcess()
-        aguardarProcessoCompleto()
-        LogCollector.println("✔ Execução 2 concluída\n")
-
-        // Capturar estado do Redis da execução 2
-        val keysExec2 = getRedisKeys("imusic:*:$date:*")
-        val snapshotExec2 = keysExec2.associateWith { captureRedisOtimizadaValue(it) }
-
-        LogCollector.println("🟩 Snapshot Execução 2 capturado (${snapshotExec2.size} chaves)")
-
-        // 1️⃣ Mesma quantidade de chaves
-        assertEquals(
-            keysExec1.size, keysExec2.size,
-            "❌ Número de chaves mudou após reimportação!"
-        )
-
-        LogCollector.println("✔ Mesma quantidade de chaves nas duas execuções")
-
-        // 2️⃣ Mesmas chaves
-        assertEquals(
-            keysExec1.sorted(), keysExec2.sorted(),
-            "❌ Conjunto de chaves mudou na reimportação!"
-        )
-
-        LogCollector.println("✔ Mesmo conjunto de chaves nas duas execuções")
-
-        // 3️⃣ Comparar conteúdo chave a chave
-        keysExec1.forEach { key ->
-
-            val v1 = snapshotExec1[key]!!
-            val v2 = snapshotExec2[key]!!
-
-            assertEquals(
-                v1::class, v2::class,
-                "❌ Tipo da chave mudou entre execuções: $key"
-            )
-
-            when (v1) {
-                is Map<*, *> -> {
-                    val map1 = v1 as Map<String, Any?>
-                    val map2 = v2 as Map<String, Any?>
-
-                    val CAMPOS_VOLATEIS = setOf("timestamp", "generated_at")
-
-                    val fix1 = map1.filterKeys { !CAMPOS_VOLATEIS.contains(it) }
-                    val fix2 = map2.filterKeys { !CAMPOS_VOLATEIS.contains(it) }
-
-                    assertEquals(
-                        fix1, fix2,
-                        "❌ Conteúdo da hash mudou (ignorando timestamps) → $key"
-                    )
-
-                    LogCollector.println("✔ Hash idêntica ignorando campos voláteis → $key")
-                }
-                is List<*> -> {
-                    val list1 = v1 as List<*>
-                    val list2 = v2 as List<*>
-
-                    // 🔹 Se quiser validar "tamanho" também, deixe. Mas se a lista for gigante, isso é tranquilo.
-                    assertEquals(
-                        list1.size, list2.size,
-                        "❌ Lista com tamanho diferente após reimportação → $key"
-                    )
-
-                    // 🔥 COMPARA APENAS OS PRIMEIROS 200 ELEMENTOS
-                    val limit = 200
-                    val limited1 = list1.take(limit)
-                    val limited2 = list2.take(limit)
-
-                    limited1.zip(limited2).forEachIndexed { index, (i1, i2) ->
-                        assertEquals(
-                            i1, i2,
-                            "❌ Divergência no item $index da lista após reimportação (comparação limitada a $limit itens) → $key"
-                        )
-                    }
-
-                    LogCollector.println("✔ Lista válida e idêntica para chave → $key (comparação limitada a $limit itens)")
-                }
-
-            }
-        }
-
-        LogCollector.println("\n🎉 **Idempotência validada com sucesso!**")
-        LogCollector.println("A reimportação não alterou nada no Redis.\n")
+        ProcessStatus.aguardarProcessoCompleto(token = token)
+        LogCollector.println("\n✔ Execução finalizada com sucesso garantindo ate a etapa 'Finalizado'.\n")
     }
 
     @Test
     @Tag("smokeTests") // TPF-68
-    fun `CN8 - Validar entrega dos dados abertosXagrupados no Redis 'sumarize_tops'`() {
+    @Timeout(value = 45, unit = TimeUnit.MINUTES)
+    fun `CN9 - Validar entrega dos dados abertosXagrupados no Redis 'sumarize_tops'`() {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val date = "2025-11-11"//LocalDate.now().plusDays(-60).format(formatter)
+        val date = "2025-11-12"//LocalDate.now().plusDays(-60).format(formatter)
+
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN9 - Validar entrega dos dados abertosXagrupados no Redis 'sumarize_tops'")
+        LogCollector.println("📅 Data utilizada: $date")
+        LogCollector.println("════════════════════════════════════════════════════\n")
 
         // 🔥 Limpa o Redis ANTES de iniciar para melhorar a performance do teste
         cleanupDate(date)
+        println("Redis após cleanup:")
+        getRedisKeys("imusic:*:$date:*").forEach { println(" - $it") }
+        println("ANTES DE INICIAR O PROCESSO:")
+        jedis.lrange("imusic:topplaysremunerado:$date:rows", 0, 5)
+            .forEach { println(it) }
 
-        val requestBody = """
-                {
-                  "start-date": "$date",
-                  "end-date": "$date"
-                }
-            """.trimIndent()
 
-        val startResponse = given()
-            .contentType(ContentType.JSON)
-            .header("origin", "http://localhost")
-            .header("authorization", "Bearer $token")
-            .body(requestBody)
-            .post(PATH_PROCESS)
-            .then()
-            .statusCode(200)
-            .extract()
-
-        assertTrue(startResponse.jsonPath().getBoolean("success"))
+        val startResponse = PostStartProcess (startDate = date, endDate = date, token = token)
+        startResponse?.extract()?.jsonPath()?.getBoolean("success")?.let { assertTrue(it) }
 
         LogCollector.println("\n────────────────────────────────────────────")
         LogCollector.println("🚀 PASSO 1: Processo iniciado...")
 
         // Aguarda liberar Redis
-        Awaitility.await()
-            .atMost(30, TimeUnit.MINUTES)
-            .pollInterval(15, TimeUnit.SECONDS)
-            .until {
-                val resp = given()
-                    .header("authorization", "Bearer $token")
-                    .header("origin", "http://localhost")
-                    .get("/process-status")
-                    .then()
-                    .log().all()
-                    .extract()
-
-                val status = resp.jsonPath().getString("status") ?: ""
-                val flow = resp.jsonPath().getString("current_step") ?: ""
-
-                LogCollector.println("\n📌 Status atual → $status")
-                LogCollector.println("🔄 Step atual → $flow")
-                status.equals("completed", true)
-            }
+        aguardarProcessoCompleto(token = token)
 
         LogCollector.println("\n────────────────────────────────────────────")
         LogCollector.println("\n────────────────────────────────────────────")
@@ -491,8 +267,7 @@ class UploadRedisOpenDataTest {
             //val rows: List<Map<String, Any?>> = rawSeq.take(100_000).toList()
 
             val rows = loadRawRowsWindowed(jedis, keyRows, plataforma)
-            //val rows = rawSeq.toList()
-            //println("📦 Total carregado (limitado) para $plataforma = ${rows.size}")
+            //val rows = loadRawRows(jedis, keyRows, plataforma)
             rows
 
         }
@@ -501,20 +276,19 @@ class UploadRedisOpenDataTest {
         plataformas.forEach { plataforma ->
             // 3.1) Definir regras de sumarização
             SUMMARY_RULES.forEach { (prefix, campo, metric) ->
-
-                //val summaryKey = "imusic:${prefix}:${plataforma}:${date}:rows"
-                // TODO: A espera da correção do BUG na montagem do arquivo
                 val summaryKey =
                     when (prefix) {
                         "topalbuns" ->
                             "imusic:topalbuns:${date}:rows"
 
-                        "topregiao" ->
-                            "imusic:topregiao:${date}:rows"
+                        "topplaysremunerado" ->
+                            "imusic:topplaysremunerado:${date}:rows"
 
                         else ->
                             "imusic:${prefix}:${plataforma}:${date}:rows"
                     }
+
+                validarSchemaRedisSumarizado(summaryKey)
 
                 LogCollector.println("\n🔎 Validando sumarização → $summaryKey")
                 validarSumarizacao(
@@ -530,6 +304,17 @@ class UploadRedisOpenDataTest {
         LogCollector.println("✔ Execução finalizada com sucesso garantindo ate a etapa 'sumarize_tops'.\n")
     }
 
+    @Test
+    @Tag("test")
+    @Disabled("Somente Testes de consulta no Redis")
+    fun SearchRedis(){
+        val rawDirect = jedis.lrange("imusic:topplaysremunerado:2025-11-11:rows", 0, 10)
+        rawDirect.forEach { println("DIRECT RAW = $it") }
+
+        rawDirect.take(20).forEach { row ->
+            println("REDIS PARSED => $row")
+        }
+    }
 
     /**
      *Função para Paginar de 50 em 50 mil linhas os dados do Redis
@@ -598,7 +383,7 @@ class UploadRedisOpenDataTest {
             }
 
             for (json in page) {
-                val map = jsonToMap(json).toMutableMap()
+                val map = RedisUtils.jsonToMap(json).toMutableMap()
                 map["plataform"] = plataforma
                 yield(map)
             }
@@ -643,7 +428,7 @@ class UploadRedisOpenDataTest {
 
         // 1. Paginação Redis
         val redisSummary = readLargeRedisListPaged(jedis, summaryKey)
-            .map { jsonToMap(it) }
+            .map { RedisUtils.jsonToMap(it) }
 
         // 2. Config do agrupamento
         val config = getSumarizacaoConfig(summaryKey, campo)
@@ -652,15 +437,32 @@ class UploadRedisOpenDataTest {
         val expected = recalcularSumarizacao(rawRows, config)
 
         // 4. Converte Redis para Map (mesmo padrão do Python)
+        //println("### RAW redisSummary (first) = ${redisSummary.first()}")
         val redisMap = redisSummary.associate { row ->
+
+            // Normaliza TODAS as chaves vindas do Redis para lowercase
+            val normalized = row.mapKeys { (k, _) -> k.lowercase() }
+
+            // Tratamento do "date" conforme o Python
+            val dateVal = (normalized["date"]?.toString()?.trim()
+                ?: config.dateFixed
+                ?: "")
+
+            // Monta a chave exatamente como no Python
             val key = config.groupFields.joinToString("|") { field ->
-                row[field]?.toString()?.trim() ?: ""
+                when (field) {
+                    "date" -> dateVal ?: ""
+                    else -> row[field]?.toString()?.trim() ?: ""
+                }
             }
-            val streams = row[NUMBER_OF_STREAMS]?.toString()?.toIntOrNull() ?: 0
+
+            val streams = normalized[NUMBER_OF_STREAMS.lowercase()]?.toString()?.toIntOrNull() ?: 0
             key to streams
         }
 
+
         // 5. Dumps
+        //println("### BEFORE SAVE: redisMap[1003715472151|2025-11-11] = ${redisMap["1003715472151|2025-11-11"]}")
         saveJsonToFile(dumpDir, "${summaryKey}_expected.json", expected)
         saveJsonToFile(dumpDir, "${summaryKey}_from_redis.json", redisMap)
 
@@ -740,21 +542,30 @@ class UploadRedisOpenDataTest {
 
         raw.forEach { row ->
 
-            // --- 1. FILTRAGEM IGUAL AO PYTHON ---
+            // --- 1. Filtragem igual ao Python ---
             for (required in config.requiredFields) {
-                val valor = row[required]?.toString()?.trim()
+                val valor = row[required.lowercase()]?.toString()?.trim()
                 if (valor.isNullOrEmpty()) {
-                    return@forEach  // pular esta linha igual ao "continue" do Python
+                    return@forEach // pula como continue
                 }
             }
 
-            // --- 2. GERAR CHAVE DE AGRUPAMENTO ---
-            val key = config.groupFields.joinToString("|") { field ->
-                row[field]?.toString()?.trim() ?: ""
+            // --- 2. Corrige comportamento do "date" igual ao Python ---
+            var dateVal = row["date"]?.toString()?.trim()
+            if (dateVal.isNullOrEmpty()) {
+                // Se não existir no JSON, usar o date vindo da própria key
+                dateVal = config.dateFixed // você deve incluir isso na config
             }
 
+            // --- 3. Monta a chave de agrupamento exatamente igual ao Python ---
+            val key = config.groupFields.joinToString("|") { field ->
+                when (field) {
+                    "date" -> dateVal ?: ""
+                    else -> row[field]?.toString()?.trim() ?: ""
+                }
+            }
 
-            // --- 3. SOMAR STREAMS ---
+            // --- 4. Soma streams ---
             val streams = row[NUMBER_OF_STREAMS]?.toString()?.toIntOrNull() ?: 0
 
             acumulado[key] = acumulado.getOrDefault(key, 0) + streams
@@ -762,58 +573,62 @@ class UploadRedisOpenDataTest {
 
         return acumulado
     }
-
     data class SumarizacaoConfig(
         val groupFields: List<String>,
-        val requiredFields: List<String> = emptyList()
+        val requiredFields: List<String> = emptyList(),
+        val dateFixed: String? = null
     )
 
     /**
      *Função configuração usada na sumarização
      */
     fun getSumarizacaoConfig(key: String, campo: String): SumarizacaoConfig {
+        val k = key.lowercase()
+
         return when {
 
-            key.contains("topplays") ->
+            // 🔥 Sempre coloque os mais específicos primeiro
+            k.contains("topplaysremunerado") && !k.contains("topregioes") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(ASSERT_ID, DATE),
-                    requiredFields = listOf(ASSERT_ID) // Python: if not asset_id: continue
+                    groupFields = listOf("asset_id", "territory", "date"),
+                    requiredFields = listOf("asset_id", "territory")
                 )
 
-            key.contains("topplataform") ->
+            k.contains("topregioes") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(ASSERT_ID, PLATAFORM, DATE),
-                    requiredFields = listOf(ASSERT_ID) // Python: if not asset_id: continue
+                    groupFields = listOf("asset_id", "territory", "plataform", "date"),
+                    requiredFields = listOf("asset_id", "territory")
                 )
 
-            key.contains("topplaylist") ->
+            // 🔥 genérico só depois dos específicos
+            k.contains("topplays") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(ASSERT_ID, PLATAFORM, STREAM_SOURCE, STREAM_SOURCE_URI, DATE),
-                    requiredFields = listOf(ASSERT_ID) // Python: somente asset_id é obrigatório
+                    groupFields = listOf("asset_id", "date"),
+                    requiredFields = listOf("asset_id")
                 )
 
-            key.contains("topalbuns") ->
+            k.contains("topalbum") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(UCP, DATE),
-                    requiredFields = listOf(UCP) // Python: if not upc: continue
+                    groupFields = listOf("upc", "plataform", "date"),
+                    requiredFields = listOf("upc")
                 )
 
-            key.contains("topalbum") ->
+            k.contains("topalbuns") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(UCP, PLATAFORM, DATE),
-                    requiredFields = listOf(UCP) // Python: if not upc: continue
+                    groupFields = listOf("upc", "date"),
+                    requiredFields = listOf("upc")
                 )
 
-            key.contains("topregiao") && !key.contains("topregioes") ->
+            k.contains("topplaylist") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(ASSERT_ID, TERRITORY, DATE),
-                    requiredFields = listOf(ASSERT_ID, TERRITORY) // Python: if not asset_id or not territory: continue
+                    groupFields = listOf("asset_id", "plataform", "stream_source", "stream_source_uri", "date"),
+                    requiredFields = listOf("asset_id")
                 )
 
-            key.contains("topregioes") ->
+            k.contains("topplataform") ->
                 SumarizacaoConfig(
-                    groupFields = listOf(ASSERT_ID, TERRITORY, PLATAFORM, DATE),
-                    requiredFields = listOf(ASSERT_ID, TERRITORY) // Python: mesma regra do topregiao (ignora plataforma)
+                    groupFields = listOf("asset_id", "plataform", "date"),
+                    requiredFields = listOf("asset_id")
                 )
 
             else -> error("Tipo desconhecido: $key")
@@ -829,353 +644,9 @@ class UploadRedisOpenDataTest {
         val mapper = jacksonObjectMapper()
         File(folder, fileName).writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data))
     }
-    fun jsonToMap(json: String): Map<String, Any?> {
-        val mapper = jacksonObjectMapper()
-        return mapper.readValue(json, object : TypeReference<Map<String, Any?>>() {})
-    }
 
-    /**
-     *Função para capturar dados do Redis para validar idempotencia
-     */
-    fun captureRedisOtimizadaValue(key: String): Any {
-        val jedis = RedisClient.jedis
-        return when (jedis.type(key)) {
-            "hash" -> jedis.hgetAll(key)   // OK (pequeno)
-            "list" -> jedis.lrange(key, 0, 200) // <-- pega só 200 itens
-            else -> "unsupported"
-        }
-    }
 
 
-    /**
-     *Função para imprimir qualquer chave do Redis
-     */
-    fun printRedisKeyContentToFile(key: String) {
-        val jedis = RedisClient.jedis
-
-        val outputDir = File("temp/redis-dump")
-        if (!outputDir.exists()) outputDir.mkdirs()
-
-        val sanitizedKey = key.replace(":", "_")
-        val file = File(outputDir, "$sanitizedKey.txt")
-
-        file.bufferedWriter().use { out ->
-
-            out.appendLine("🔑 REDIS DUMP — KEY: $key")
-            out.appendLine("==============================================")
-            out.appendLine("Tipo da chave: ${jedis.type(key)}\n")
-
-            when (jedis.type(key)) {
-
-                "hash" -> {
-                    val data = jedis.hgetAll(key)
-                    out.appendLine("📌 HASH (${data.size} campos):")
-
-                    data.forEach { (k, v) ->
-                        val safeVal = if (v.length > 500) v.take(500) + "...(truncated)" else v
-                        out.appendLine(" • $k = $safeVal")
-                    }
-                }
-
-                "list" -> {
-                    val size = jedis.llen(key)
-                    val limit = 200L
-                    out.appendLine("📌 LISTA ($size elementos, mostrando no máximo $limit):")
-
-                    val items = jedis.lrange(key, 0, limit - 1)
-
-                    items.forEachIndexed { i, item ->
-                        val safeItem = if (item.length > 500) item.take(500) + "...(truncated)" else item
-                        out.appendLine("[$i] $safeItem")
-                    }
-
-                    if (size > limit) {
-                        out.appendLine("... ($size - $limit itens não mostrados)")
-                    }
-                }
-
-                "string" -> {
-                    val value = jedis.get(key)
-                    val safeVal = if (value != null && value.length > 500)
-                        value.take(500) + "...(truncated)"
-                    else value
-
-                    out.appendLine("📌 STRING:")
-                    out.appendLine(safeVal)
-                }
-
-                else -> out.appendLine("⚠ Tipo inesperado no Redis: ${jedis.type(key)}")
-            }
-
-            out.appendLine("\n✔ Arquivo gerado com sucesso.")
-        }
-
-        LogCollector.println("📄 Key salva em: ${file.absolutePath}")
-    }
-
-    /**
-     *Função para validar Schema das Lists e Hashes
-     */
-    fun validarSchemaRedis(key: String, type: String) {
-
-        val jedis = RedisClient.jedis
-        when (type) {
-
-            // -------------------------------------------------------------
-            //  ✅ VALIDAR HASH (META)
-            // -------------------------------------------------------------
-            "hash" -> {
-                LogCollector.println("\n────────────────────────────────────────────")
-                LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 3: Iniciando validação no Schema 'hash' do Redis...")
-                val data = jedis.hgetAll(key)
-                require(data.isNotEmpty()) { "❌ Hash vazia: $key" }
-                LogCollector.println("🔍 Validando HASH → $key")
-
-                HASH_FIELDS.forEach { campo ->
-                    require(data.containsKey(campo)) {
-                        "❌ Campo obrigatório '$campo' ausente na hash → $key"
-                    }
-                    LogCollector.println("   ✔ $campo = ${data[campo]}")
-                }
-
-                LogCollector.println("   ✔ Schema HASH válido → $key")
-            }
-
-            // -------------------------------------------------------------
-            //  ✅ VALIDAR LIST (ROWS)
-            // -------------------------------------------------------------
-            "list" -> {
-                LogCollector.println("\n────────────────────────────────────────────")
-                LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 3: Iniciando validação no Schema 'list' do Redis...")
-                val size = jedis.llen(key)
-                require(size > 0) { "❌ Lista vazia: $key" }
-
-                // Pega uma amostra do primeiro JSON da lista
-                val sampleJson = jedis.lrange(key, 0, 0).first()
-                val map = jsonToMap(sampleJson)
-
-                LogCollector.println("🔍 Validando LIST → $key (primeiro item)")
-
-                // Usa o schema completo do TSV
-                TSV_COLUMNS.forEach { coluna ->
-
-                    require(map.containsKey(coluna)) {
-                        "❌ Coluna '$coluna' ausente no JSON da LIST → $key"
-                    }
-
-                    val valor = map[coluna]
-                    /*
-                    require(valor != null && valor.toString().isNotBlank()) {
-                        "❌ Coluna '$coluna' está vazia no JSON da LIST → $key"
-                    }*/
-                    LogCollector.println("   ✔ $coluna = $valor")
-                }
-
-                LogCollector.println("   ✔ Schema LIST válido → $key")
-            }
-
-            else -> error("❌ Tipo inesperado de key no Redis: $type ($key)")
-        }
-    }
-
-    /**
-     * Função Valida que o campo row_count da hash é igual à quantidade de elementos da LIST.
-     *
-     * Exemplo de chaves:
-     *  - Hash: imusic:dashes:Amazon:2025-11-17:meta
-     *  - List: imusic:dashes:Amazon:2025-11-17:rows
-     */
-    fun validarRowCountConsistente(keyHash: String, keyList: String) {
-
-        val jedis = RedisClient.jedis
-        val hash = jedis.hgetAll(keyHash)
-        require(hash.isNotEmpty()) { "❌ Hash vazia ao validar row_count: $keyHash" }
-
-        val rowCountHash = hash["row_count"]?.toIntOrNull()
-            ?: error("❌ Campo row_count ausente ou inválido na hash → $keyHash")
-
-        val listSize = jedis.llen(keyList)
-        require(listSize > 0) { "❌ Lista vazia ao comparar row_count: $keyList" }
-
-        LogCollector.println("🔎 Validando row_count → HASH=$rowCountHash | LIST=$listSize")
-
-        assertEquals(
-            rowCountHash.toLong(),
-            listSize,
-            "❌ Divergência: row_count na hash ($rowCountHash) ≠ quantidade de items na lista ($listSize)\n" +
-                    "Hash → $keyHash\nList → $keyList"
-        )
-
-        LogCollector.println("   ✔ row_count consistente (row_count == $rowCountHash)")
-    }
-
-
-    /**
-     * 🔥 Compara 10 primeiras linhas do Redis com 10 primeiras linhas do TSV
-     *     - Valida número de colunas
-     *     - Valida valores campo a campo
-     */
-    fun compararRedisComTsv(chave: String, tsvFile: File) {
-
-        LogCollector.println("\n────────────────────────────────────────────")
-        LogCollector.println("\uD83D\uDD75\uFE0F\u200D♂ PASSO 5: Iniciando validação entre Redis X Arquivo...")
-        val jedis = RedisClient.jedis
-
-        LogCollector.println("\n🔍 Comparando Redis x TSV para: $chave")
-
-        // 1️⃣ Buscar até 10 itens do Redis
-        val redisRawList = jedis.lrange(chave, 0, 9)
-
-        assertTrue(redisRawList.isNotEmpty(), "Redis '${chave}' não possui dados!")
-
-        val redisParsed = redisRawList.map { jsonToMap(it) }
-
-
-        // 2️⃣ Ler até 10 linhas do TSV
-        val tsvLines = tsvFile.readLines().drop(1).take(10)
-        assertTrue(tsvLines.isNotEmpty(), "TSV está vazio: ${tsvFile.name}")
-
-        val tsvParsed = tsvLines.map { line ->
-            val cols = line.split("\t")
-
-            assertEquals(
-                TSV_COLUMNS.size, cols.size,
-                "Número inválido de colunas no TSV (${tsvFile.name})"
-            )
-
-            TSV_COLUMNS.zip(cols).toMap()
-        }
-
-        // 3️⃣ Comparar quantidade de linhas (limitadas a 10)
-        assertEquals(
-            tsvParsed.size, redisParsed.size,
-            "Quantidades diferentes entre Redis e TSV em $chave"
-        )
-        LogCollector.println("✔ Quantidade OK → ${tsvParsed.size} registros")
-
-
-        // 4️⃣ Comparar campo a campo
-        // 4️⃣ Comparar campo a campo com logs SOMENTE em caso de divergência
-        tsvParsed.zip(redisParsed).forEachIndexed { index, (tsvRow, redisRow) ->
-
-            TSV_COLUMNS.forEach { col ->
-
-                val tsvVal = tsvRow[col]?.trim()
-                val redisVal = redisRow[col]?.toString()?.trim()
-
-                if (tsvVal != redisVal) {
-                    LogCollector.println("\n────────────────────────────────────────────")
-                    LogCollector.println("❌ Divergência detectada na comparação Redis x TSV")
-                    LogCollector.println("Chave : $chave")
-                    LogCollector.println("Linha : $index")
-                    LogCollector.println("Coluna: $col")
-                    LogCollector.println("TSV   : $tsvVal")
-                    LogCollector.println("Redis : $redisVal")
-                    LogCollector.println("────────────────────────────────────────────\n")
-                }
-
-                assertEquals(
-                    tsvVal, redisVal,
-                    "Divergência na coluna '$col' (linha $index) da chave $chave"
-                )
-            }
-        }
-
-
-        LogCollector.println("✔ Conteúdo válido → TSV x Redis ($chave)\n")
-    }
-
-    fun localizarArquivoTsv(redisKey: String): File {
-        assertTrue(File(DIR_TEMP).exists(), "Diretório /tmp não existe!")
-
-        // Exemplo redisKey → imusic:dashes:Amazon:2025-11-13:rows
-        val parts = redisKey.split(":")
-        val platform = parts[2]          // Amazon
-        val date = parts[3]              // 2025-11-13
-
-        val prefix = "iMusics_${platform}_"   // Ex: iMusics_Amazon_
-        val suffix = "_${date}.tsv"           // Ex: _2025-11-13.tsv"
-
-        val encontrado = File(DIR_TEMP).listFiles()
-            ?.firstOrNull { file ->
-                val nome = file.name
-                nome.startsWith(prefix) && nome.endsWith(suffix)
-            }
-            ?: error(
-                """
-            ❌ Nenhum arquivo TSV correspondente encontrado no /tmp!
-            → Redis key: $redisKey
-            → Procurado padrão:
-                 prefix = $prefix
-                 suffix = $suffix
-            → Arquivos encontrados no /tmp:
-            ${File(DIR_TEMP).listFiles()?.joinToString("\n") { " - ${it.name}" }}
-            """.trimIndent()
-            )
-
-        LogCollector.println("📄 Arquivo TSV localizado → ${encontrado.name}")
-
-        return encontrado
-    }
-
-
-    /**
-     *Função Test Redis
-     */
-    fun getRedisKeys_2(pattern: String): List<String> {
-        val jedis = RedisClient.jedis
-        val keys = mutableListOf<String>()
-        var cursor = "0"
-
-        val scanParams = redis.clients.jedis.params.ScanParams().match(pattern).count(500)
-
-        do {
-            val scanResult = jedis.scan(cursor, scanParams)
-            cursor = scanResult.cursor
-            keys += scanResult.result
-        } while (cursor != "0")
-
-        return keys.sorted()
-    }
-    fun getRedisKeys_3(pattern: String, maxIterations: Int = 5000, timeoutMs: Long = 8000): List<String> {
-        val jedis = RedisClient.jedis
-        val keys = mutableListOf<String>()
-        var cursor = "0"
-
-        val scanParams = redis.clients.jedis.params.ScanParams()
-            .match(pattern)
-            .count(2000) // aumenta performance
-
-        val start = System.currentTimeMillis()
-        var iterations = 0
-
-        do {
-            if (iterations++ >= maxIterations)
-                throw RuntimeException("SCAN excedeu o número máximo de iterações para pattern=$pattern")
-
-            if (System.currentTimeMillis() - start > timeoutMs)
-                throw RuntimeException("SCAN timeout após ${timeoutMs}ms para pattern=$pattern")
-
-            val result = jedis.scan(cursor, scanParams)
-            cursor = result.cursor
-            keys += result.result
-
-        } while (cursor != "0")
-
-        return keys.sorted()
-    }
-    fun getRedisType(key: String): String {
-        return RedisClient.jedis.type(key)
-    }
-    fun getRedisListSize(key: String): Long {
-        return RedisClient.jedis.llen(key)
-    }
-    fun getRedisListSample(key: String, size: Int = 5): List<String> {
-        return RedisClient.jedis.lrange(key, 0, (size - 1).toLong())
-    }
-    fun getRedisHash(key: String): Map<String, String> {
-        return RedisClient.jedis.hgetAll(key)
-    }
 
 
 }

@@ -1,0 +1,201 @@
+
+════════════════════════════════════════════════════
+🧪 CN11 - Validar reprocessamento maior 5 dias garantindo idempotência da ingestão no Redis 'process_file_to_redis'
+📅 Data utilizada: 2025-12-05
+════════════════════════════════════════════════════
+
+🚀 PASSO 1: Startando processamento dos períodos: 2025-12-05 | 2025-12-05 ...
+
+🚀 Execução 1 — iniciando ingestão
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Sumarizando top albuns no Redis | ⏳ Progresso → 45% 
+⏳ Status atual → completed | ⏳ Mensagem → Processo completado com sucesso | ⏳ Progresso → 100% 
+✔ Execução 1 concluída
+
+✔ Validação com sucesso de timestamp 'started_at' menor que 'completed_at'
+
+🟦 Snapshot Execução 1 capturado (16 chaves)
+
+🚀 Execução 2 — reimportando mesmos dados
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Buscando dados de analytics em FUGA Trends | ⏳ Progresso → 10% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → running | ⏳ Mensagem → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | ⏳ Progresso → 15% 
+⏳ Status atual → completed | ⏳ Mensagem → Processo completado com sucesso | ⏳ Progresso → 100% 
+✔ Execução 2 concluída
+
+✔ Validação com sucesso de timestamp 'started_at' menor que 'completed_at'
+
+🟩 Snapshot Execução 2 capturado (16 chaves)
+✔ Mesma quantidade de chaves nas duas execuções
+✔ Mesmo conjunto de chaves nas duas execuções
+✔ Hash idêntica ignorando campos voláteis → imusic:dashes:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:dashes:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topalbum:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topalbum:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topalbuns:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topalbuns:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topplataform:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topplataform:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topplaylist:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topplaylist:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topplays:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topplays:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topplaysremunerado:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topplaysremunerado:2025-12-05:rows (comparação limitada a 200 itens)
+✔ Hash idêntica ignorando campos voláteis → imusic:topregioes:Deezer:2025-12-05:meta
+✔ Lista válida e idêntica para chave → imusic:topregioes:Deezer:2025-12-05:rows (comparação limitada a 200 itens)
+
+🎉 **Idempotência validada com sucesso!**
+A reimportação não alterou nada no Redis.
+
+
+📘 HISTÓRICO DO PROCESSO
+ → Buscando dados de analytics em FUGA Trends | 10%
+ → Executando a esteira de processamento dos arquivos (descompressao, upload para S3) | 15%
+ → Sumarizando top albuns no Redis | 45%
+ → Processo completado com sucesso | 100%

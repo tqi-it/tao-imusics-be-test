@@ -1,0 +1,55 @@
+
+════════════════════════════════════════════════════
+🧪 CN2 – Validar ingestão sem arquivos para baixar
+📅 Data utilizada: 2025-12-12
+════════════════════════════════════════════════════
+
+🟦 PASSO 1: Iniciando processamento via API POST /start-process...
+➡️  HTTP Status recebido: 200
+➡️  Campo success: true
+
+🟦 PASSO 2: Aguardando backend processar (Awaitility)
+
+🔄 Consultando /process-status ...
+📥 Resposta recebida:
+   ▪ error: 
+   ▪ current_step: download_fuga_trends
+   ▪ message: Buscando dados de analytics em FUGA Trends
+   ▪ status: running
+   ▪ http code: 200
+📦 result:
+   ▪ result.message = null
+   ▪ result.status  = null
+   ▪ result.start   = null
+   ▪ result.end     = null
+
+🟩 PASSO 3: Validando condições finais...
+🔎 Validações:
+   ▪ error vazio? -> true
+   ▪ status == 'completed'? -> false
+   ▪ current_step == 'Finalizado'? -> false
+   ▪ result.message esperado? -> false
+❌ TESTE REPROVADO – alguma condição não foi satisfeita!
+🔄 Consultando /process-status ...
+📥 Resposta recebida:
+   ▪ error: 
+   ▪ current_step: Finalizado
+   ▪ message: Processo completado com sucesso
+   ▪ status: completed
+   ▪ http code: 200
+📦 result:
+   ▪ result.message = FUGA não tem dados de analytics para o período solicitado
+   ▪ result.status  = success
+   ▪ result.start   = 2025-12-12
+   ▪ result.end     = 2025-12-12
+
+🟩 PASSO 3: Validando condições finais...
+🔎 Validações:
+   ▪ error vazio? -> true
+   ▪ status == 'completed'? -> true
+   ▪ current_step == 'Finalizado'? -> true
+   ▪ result.message esperado? -> true
+🎉 TESTE APROVADO – condições finais válidas!
+
+🏁 CN2 FINALIZADO
+

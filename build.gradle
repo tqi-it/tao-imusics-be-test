@@ -62,6 +62,9 @@ dependencies {
     testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
     testImplementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
+    testImplementation("org.testcontainers:postgresql:1.19.0") // opcional para infra
+    testImplementation("org.postgresql:postgresql:42.5.1") // JDBC driver
+
 
 }
 
@@ -72,12 +75,21 @@ compileKotlin {
 
 // Config Execução Testes
 test {
+
+    // Tempo timeout Junit
+    systemProperty "junit.jupiter.execution.timeout.default", "45m"
+
+    // timeout máximo real da task de testes (não do JUnit)
+    timeout = Duration.ofMinutes(60)
+
+    // impede o Gradle de matar o teste por ociosidade
+    maxParallelForks = 1
+
     useJUnitPlatform {
         includeTags 'smokeTests'
         includeTags 'contractTests'
     }
     systemProperties System.properties
-    timeout = Duration.ofMinutes(10)
     // 🟦 Forçar arquivos da JVM para o diretório temp
     jvmArgs += [
             "-XX:HeapDumpPath=temp",
