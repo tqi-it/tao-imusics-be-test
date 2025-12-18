@@ -459,5 +459,131 @@ object RedisUtils {
 
 
 
+
+
+    /**
+     * Novas funcoes para validar redis X endpoints
+     */
+
+    fun somarTotalItemsRedisPorMes(
+        prefix: String,
+        ano: Int,
+        mes: Int
+    ): Long {
+
+        val jedis = RedisClient.jedis
+        val mesFormatado = "%04d-%02d".format(ano, mes)
+
+        val pattern = "$prefix:*:$mesFormatado-*:meta"
+        val keys = jedis.keys(pattern)
+
+        require(keys.isNotEmpty()) {
+            "❌ Nenhuma chave META encontrada no Redis para $mesFormatado"
+        }
+
+        LogCollector.println("📦 Encontradas ${keys.size} metas no Redis ($mesFormatado)")
+
+        return keys.sumOf { key ->
+            jedis.hget(key, "total_items")?.toLong() ?: 0L
+        }
+    }
+
+    fun garantirRedisComDadosParaAlgumPlayer(
+        data: String,
+        prefix: String = "imusic:topplays",
+        minItens: Int = 1
+    ): Boolean {
+
+        val jedis = RedisClient.jedis
+        var encontrouDados = false
+
+        LogCollector.println("🔎 Verificando dados no Redis para o dia $data")
+
+        ListsConstants.PLAYERS.forEach { player ->
+
+            val key = "$prefix:$player:$data:rows"
+
+            if (!jedis.exists(key)) {
+                LogCollector.println("   ❌ [$player] chave não existe")
+                return@forEach
+            }
+
+            val size = jedis.llen(key)
+
+            if (size >= minItens) {
+                LogCollector.println("   ✔ [$player] possui dados ($size itens)")
+                encontrouDados = true
+            } else {
+                LogCollector.println("   ❌ [$player] chave vazia")
+            }
+        }
+
+        if (encontrouDados) {
+            LogCollector.println("✅ Redis contém dados para pelo menos um player em $data")
+        } else {
+            LogCollector.println("❌ Nenhum player possui dados no Redis para $data")
+        }
+
+        return encontrouDados
+    }
+
+    fun garantirRedisComDados(key: String): Boolean {
+        val jedis = RedisClient.jedis
+
+        if (!jedis.exists(key)) {
+            LogCollector.println("❌ Redis → chave NÃO encontrada: $key")
+            return false
+        }
+
+        val type = jedis.type(key)
+        if (type != "list") {
+            LogCollector.println("❌ Redis → tipo inválido: $key | esperado=list | encontrado=$type")
+            return false
+        }
+
+        val size = jedis.llen(key)
+        if (size <= 0) {
+            LogCollector.println("❌ Redis → lista vazia: $key")
+            return false
+        }
+
+        LogCollector.println("✅ Redis OK → $key | tipo=list | itens=$size")
+        return true
+    }
+    fun somarTotaisDoMesRedis(prefix: String, ano: Int, mes: Int): Long {
+        val jedis = RedisClient.jedis
+        val pattern = "$prefix:*:$ano-${mes.toString().padStart(2, '0')}-*:meta"
+
+        val keys = RedisUtils.getRedisKeys(pattern)
+        require(keys.isNotEmpty()) { "❌ Nenhuma chave meta encontrada para $ano-$mes" }
+
+        return keys.sumOf { key ->
+            jedis.hget(key, "total_items")?.toLongOrNull() ?: 0L
+        }
+    }
+    fun validarItemContraRedis(
+        itemApi: Map<String, Any>,
+        sampleDay: String
+    ) {
+        val assetId = itemApi["asset_id"]?.toString()
+            ?: error("asset_id ausente no item da API")
+
+        val redisKey = "imusic:topplays:$sampleDay:rows"
+        val redisSample = RedisClient.jedis.lrange(redisKey, 0, 200)
+
+        val encontrado = redisSample.any {
+            it.contains("\"asset_id\":\"$assetId\"")
+        }
+
+        require(encontrado) {
+            "❌ asset_id $assetId retornado pela API não encontrado no Redis"
+        }
+
+        LogCollector.println("✔ asset_id $assetId validado contra Redis")
+    }
+
+
+
+
 }
 

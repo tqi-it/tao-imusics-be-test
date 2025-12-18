@@ -12,6 +12,7 @@ gradlew
 .temp/
 temp/redis-dump/
 temp/summary-dump/
+temp/test-results/
 docs/
 .env
 *.env

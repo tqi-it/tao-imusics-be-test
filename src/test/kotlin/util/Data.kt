@@ -17,6 +17,20 @@ class Data {
 
         // Endpoints
         const val PATH_ANALYTICS_TOP_PLAYS_WL = "/analytics/top-plays-wl"
+        const val PATH_ANALYTICS_TOP_PLATAFORMAS = "/analytics/plataformas"
+        const val PATH_ANALYTICS_TOP_PLATAFORMA = "/analytics/plataforma"
+        const val PATH_ANALYTICS_TOP_PLAYLISTS = "/analytics/top-playlists"
+        const val PATH_ANALYTICS_TOP_PLAYLIST = "/analytics/top-playlist"
+        const val PATH_ANALYTICS_TOP_ALBUNS = "/analytics/top-albuns"
+        const val PATH_ANALYTICS_TOP_ALBUM = "/analytics/top-album"
+        const val PATH_ANALYTICS_TOP_MUSICAS= "/analytics/top-musicas"
+        const val PATH_ANALYTICS_TOP_MUSICA= "/analytics/top-musica"
+        const val PATH_ANALYTICS_TOP_ALBUM_MUSICA= "/analytics/top-album-musica"
+        const val PATH_ANALYTICS_TOP_ALBUM_PLATAFORMAS= "/analytics/top-album-plataformas"
+        const val PATH_ANALYTICS_TOP_PLAYS_SEMANA= "/analytics/top-plays-semana"
+        const val PATH_ANALYTICS_TOP_REGIOES= "/analytics/top-regioes"
+        const val PATH_ANALYTICS_TOP_PLAYS_REMUNERADOS= "/analytics/plays-remunerados"
+        const val PATH_ANALYTICS_TOTAL_PLAYS_PERIODO= "/analytics/total-plays-periodo"
 
         // Campos Redis
         const val ASSERT_ID = "asset_id"
@@ -30,7 +44,7 @@ class Data {
         const val STREAM_SOURCE_URI = "stream_source_uri"
 
         // Users
-        const val USER_LOGIN = "superadmin@taomusic.com.br" // superadmin@taomusic.com.br | equipetropado7music2023@gmail.com
+        const val USER_LOGIN = "superadmin@taomusic.com.br" // superadmin@taomusic.com.br | equipetropado7music2023@gmail.com | brena@taomusic.com.br"
         const val PASS_LOGIN = "tao001" // tao001 | uJb7RgenrKrtuocqL2dqXoHTR24hGfaizzzTjHVvK5
 
 

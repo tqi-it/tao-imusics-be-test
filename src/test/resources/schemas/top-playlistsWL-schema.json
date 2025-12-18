@@ -65,7 +65,7 @@
     },
     "pagina": {
       "type": "integer",
-      "minimum": 1
+      "minimum": 0
     },
     "qde_por_pagina": {
       "type": "integer",

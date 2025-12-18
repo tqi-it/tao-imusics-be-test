@@ -5,6 +5,18 @@ object ListsConstants {
     // 🔎 Regras de sumarização (antigo Triple)
         // Spotify|Youtube|Deezer|Amazon|Pandora|SoundCloud|iTunes|TikTok|
 
+    val PLAYERS = listOf(
+        "Spotify",
+        "Youtube",
+        "Deezer",
+        "Amazon",
+        "Pandora",
+        "SoundCloud",
+        "iTunes",
+        "TikTok"
+    )
+
+
     /**
      * 1. ✔ Dados brutos: Gerado pelo próprio teste, usando os rawRows carregados do Redis
             * imusic:dashes:<plataforma>:<date>:rows
