@@ -31,6 +31,7 @@ import util.ProcessStatus.aguardarProcessoCompleto
 import util.RedisUtils.compararRedisComTsv
 import util.RedisUtils.localizarArquivoTsv
 import util.RedisUtils.validarSchemaRedisSumarizado
+import util.StartProcess.PostStartAnalytics
 import util.StartProcess.PostStartProcess
 
 
@@ -210,7 +211,91 @@ class UploadRedisOpenDataTest {
         // Finalização
         LogCollector.println("\n────────────────────────────────────────────")
         LogCollector.println("🚀 PASSO 6: Validando status final do processamento\n")
-        ProcessStatus.aguardarProcessoCompleto(token = token)
+        aguardarProcessoCompleto(token = token)
+        LogCollector.println("\n✔ Execução finalizada com sucesso garantindo ate a etapa 'Finalizado'.\n")
+    }
+
+    @Test
+    @Tag("smokeTests") // TPF-70
+    @Timeout(value = 45, unit = TimeUnit.MINUTES)
+    fun `CN8-2 - Validar entrega dos dados abertos no Redis 'process_file_to_redis' sem a sumarização`() {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        //val date = LocalDate.now().plusDays(-2).format(formatter)
+        var startDate ="2025-11-03"
+        var endDate ="2025-11-04"
+
+        LogCollector.println("\n════════════════════════════════════════════════════")
+        LogCollector.println("🧪 CN8-2 - Validar entrega dos dados abertos no Redis 'process_file_to_redis' sem a sumarização`")
+        LogCollector.println("📅 Data utilizada: $startDate e $endDate")
+        LogCollector.println("════════════════════════════════════════════════════\n")
+
+        LogCollector.println("🚀 PASSO 1: Startando processamento dos períodos: $startDate | $endDate ...")
+        val response = PostStartAnalytics(
+            startDate = startDate,
+            endDate = endDate,
+            token = token,
+            analytics = true)
+        assertTrue(response?.extract()?.statusCode() == 200)
+        assertEquals("Process started (background)", response?.extract()?.jsonPath()?.getString("message"))
+
+
+        LogCollector.println("\n────────────────────────────────────────────")
+        LogCollector.println("🚀 PASSO 2: Aguardando conclusão do processamento...")
+        aguardarProcessoCompleto(token = token)
+
+
+        LogCollector.println("\n────────────────────────────────────────────")
+        LogCollector.println("🚀 PASSO 3: Validando Redis\n")
+        val keys = getRedisKeys("imusic:*:$startDate:*")
+        assertTrue(keys.isNotEmpty(), "Nenhuma chave encontrada no Redis para $startDate")
+
+        LogCollector.println("📌 Chaves encontradas:")
+        keys.forEach { LogCollector.println(" → $it") }
+
+        // ============================================================================
+        //   🔥 NOVA LÓGICA — GRUPO POR PLATAFORMA E VALIDAR TUDO
+        // ============================================================================
+
+        val players = keys
+            .map { it.split(":")[2] }
+            .distinct()
+
+        players.forEach { player ->
+            val metaKey = keys.firstOrNull { it.contains(":$player:") && it.endsWith(":meta") }
+            val rowsKey = keys.firstOrNull { it.contains(":$player:") && it.endsWith(":rows") }
+
+            if (metaKey == null || rowsKey == null) {
+                LogCollector.println("ℹ Ignorando player '$player' — não possui meta/rows completos!")
+                return@forEach
+            }
+
+            LogCollector.println("\n============================================================")
+            LogCollector.println("🎧 VALIDANDO PLAYER: $player")
+            LogCollector.println("============================================================")
+
+            LogCollector.println("META → $metaKey")
+            LogCollector.println("ROWS → $rowsKey\n")
+
+            RedisUtils.validarSchemaRedis(metaKey, "hash")
+            RedisUtils.validarRowCountConsistente(metaKey, rowsKey)
+            RedisUtils.validarSchemaRedis(rowsKey, "list")
+
+            // apenas se a lista não é de agregação
+            if (!player.contains("topalbuns") && !player.contains("topplaysremunerado")) {
+                val tsvFile = localizarArquivoTsv(rowsKey)
+                compararRedisComTsv(rowsKey, tsvFile)
+            }
+
+            RedisUtils.printRedisKeyContentToFile(metaKey)
+            RedisUtils.printRedisKeyContentToFile(rowsKey)
+        }
+
+
+        // Finalização
+        LogCollector.println("\n────────────────────────────────────────────")
+        LogCollector.println("🚀 PASSO 6: Validando status final do processamento\n")
+        aguardarProcessoCompleto(token = token)
         LogCollector.println("\n✔ Execução finalizada com sucesso garantindo ate a etapa 'Finalizado'.\n")
     }
 

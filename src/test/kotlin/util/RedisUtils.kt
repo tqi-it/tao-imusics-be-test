@@ -3,7 +3,9 @@ package util
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.json.JSONObject
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import redis.clients.jedis.params.ScanParams
 import util.ListsConstants.SCHEMA_SUMARIZADO
 import util.ListsConstants.TSV_COLUMNS
@@ -465,124 +467,338 @@ object RedisUtils {
      * Novas funcoes para validar redis X endpoints
      */
 
-    fun somarTotalItemsRedisPorMes(
+    fun garantirRedisComDados(
         prefix: String,
-        ano: Int,
-        mes: Int
-    ): Long {
-
-        val jedis = RedisClient.jedis
-        val mesFormatado = "%04d-%02d".format(ano, mes)
-
-        val pattern = "$prefix:*:$mesFormatado-*:meta"
-        val keys = jedis.keys(pattern)
-
-        require(keys.isNotEmpty()) {
-            "❌ Nenhuma chave META encontrada no Redis para $mesFormatado"
-        }
-
-        LogCollector.println("📦 Encontradas ${keys.size} metas no Redis ($mesFormatado)")
-
-        return keys.sumOf { key ->
-            jedis.hget(key, "total_items")?.toLong() ?: 0L
-        }
-    }
-
-    fun garantirRedisComDadosParaAlgumPlayer(
         data: String,
-        prefix: String = "imusic:topplays",
+        tipo: String, // "rows" ou "meta"
         minItens: Int = 1
     ): Boolean {
 
         val jedis = RedisClient.jedis
-        var encontrouDados = false
+        val key = "$prefix:$data:$tipo"
 
-        LogCollector.println("🔎 Verificando dados no Redis para o dia $data")
-
-        ListsConstants.PLAYERS.forEach { player ->
-
-            val key = "$prefix:$player:$data:rows"
-
-            if (!jedis.exists(key)) {
-                LogCollector.println("   ❌ [$player] chave não existe")
-                return@forEach
-            }
-
-            val size = jedis.llen(key)
-
-            if (size >= minItens) {
-                LogCollector.println("   ✔ [$player] possui dados ($size itens)")
-                encontrouDados = true
-            } else {
-                LogCollector.println("   ❌ [$player] chave vazia")
-            }
-        }
-
-        if (encontrouDados) {
-            LogCollector.println("✅ Redis contém dados para pelo menos um player em $data")
-        } else {
-            LogCollector.println("❌ Nenhum player possui dados no Redis para $data")
-        }
-
-        return encontrouDados
-    }
-
-    fun garantirRedisComDados(key: String): Boolean {
-        val jedis = RedisClient.jedis
+        LogCollector.println("🔎 Verificando Redis → $key")
 
         if (!jedis.exists(key)) {
-            LogCollector.println("❌ Redis → chave NÃO encontrada: $key")
+            LogCollector.println("❌ Chave não existe")
             return false
         }
 
-        val type = jedis.type(key)
-        if (type != "list") {
-            LogCollector.println("❌ Redis → tipo inválido: $key | esperado=list | encontrado=$type")
-            return false
+        val possuiDados = when (tipo) {
+            "rows" -> jedis.llen(key) >= minItens
+            "meta" -> jedis.hlen(key) >= minItens
+            else -> error("Tipo inválido: $tipo")
         }
 
-        val size = jedis.llen(key)
-        if (size <= 0) {
-            LogCollector.println("❌ Redis → lista vazia: $key")
-            return false
+        if (possuiDados) {
+            LogCollector.println("✔ Redis contém dados em $key")
+        } else {
+            LogCollector.println("❌ Redis vazio em $key")
         }
 
-        LogCollector.println("✅ Redis OK → $key | tipo=list | itens=$size")
-        return true
+        return possuiDados
     }
-    fun somarTotaisDoMesRedis(prefix: String, ano: Int, mes: Int): Long {
+
+    fun obterTotalItemsRedis(
+        prefix: String,
+        data: String
+    ): Long {
+
+        val key = "$prefix:$data:meta"
+        val total = RedisClient.jedis.hget(key, "total_items")
+            ?: error("Campo total_items não encontrado em $key")
+
+        LogCollector.println("📦 Redis total_items = $total")
+        return total.toLong()
+    }
+
+    fun somarPlaysRedis(
+        prefix: String,
+        data: String
+    ): Long {
+
         val jedis = RedisClient.jedis
-        val pattern = "$prefix:*:$ano-${mes.toString().padStart(2, '0')}-*:meta"
+        val key = "$prefix:$data:rows"
 
-        val keys = RedisUtils.getRedisKeys(pattern)
-        require(keys.isNotEmpty()) { "❌ Nenhuma chave meta encontrada para $ano-$mes" }
+        require(jedis.exists(key)) {
+            "❌ Chave Redis não existe: $key"
+        }
 
-        return keys.sumOf { key ->
-            jedis.hget(key, "total_items")?.toLongOrNull() ?: 0L
+        val total = jedis.lrange(key, 0, -1).sumOf { row ->
+            val json = JSONObject(row)
+            json.optLong("soma_plays", 0L)
+        }
+
+        LogCollector.println("➕ Redis soma soma_plays = $total")
+        return total
+    }
+
+    data class TopPlaysPostgresResumo(
+        val tipo: String,
+        val somaPlays: Long,
+        val plataforma: String,
+        val dataReferencia: String
+    )
+
+    fun obterResumoTopPlaysPostgresPorDia(
+        data: String
+    ): TopPlaysPostgresResumo {
+
+        val sql = """
+        SELECT 
+            'top_play' AS tipo,
+             sum(plays) AS soma_plays,
+            'plataforma' AS plataforma,
+             data_referencia AS data_ref
+        FROM top_plays
+        WHERE CAST(data_referencia AS date) = DATE '$data'
+        GROUP BY data_ref
+    """.trimIndent()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                if (rs.next()) {
+                    val result = TopPlaysPostgresResumo(
+                        tipo = rs.getString(1),
+                        somaPlays = rs.getLong(2),
+                        plataforma = rs.getString(3),
+                        dataReferencia = rs.getDate(4).toString()
+                    )
+
+                    LogCollector.println("🐘 Postgres resumo: $result")
+                    return result
+                }
+            }
+        }
+
+        error("❌ Nenhum resultado encontrado no Postgres para $data")
+    }
+
+    fun obterResumoTopRemuneradoPostgresPorDia(
+        data: String
+    ): TopPlaysPostgresResumo {
+
+        val sql = """
+        select 
+            'top_play_remunerado'
+            ,sum(plays),
+            'plataforma',
+            data_referencia
+        from top_play_remunerado tpr
+        where data_referencia = '$data'
+        group by data_referencia
+    """.trimIndent()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                if (rs.next()) {
+                    val result = TopPlaysPostgresResumo(
+                        tipo = rs.getString(1),
+                        somaPlays = rs.getLong(2),
+                        plataforma = rs.getString(3),
+                        dataReferencia = rs.getDate(4).toString()
+                    )
+
+                    LogCollector.println("🐘 Postgres resumo: $result")
+                    return result
+                }
+            }
+        }
+
+        error("❌ Nenhum resultado encontrado no Postgres para $data")
+    }
+
+    fun obterResumoTopPlataformaPostgresPorDia(
+        data: String
+    ): TopPlaysPostgresResumo {
+
+        val sql = """
+        select 
+            'top_plataforma',
+            sum(plays),
+            plataforma,
+            data_referencia
+        from TOP_PLATAFORMAS
+        where data_referencia = '$data'
+        group by data_referencia, plataforma
+    """.trimIndent()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                if (rs.next()) {
+                    val result = TopPlaysPostgresResumo(
+                        tipo = rs.getString(1),
+                        somaPlays = rs.getLong(2),
+                        plataforma = rs.getString(3),
+                        dataReferencia = rs.getDate(4).toString()
+                    )
+
+                    LogCollector.println("🐘 Postgres resumo: $result")
+                    return result
+                }
+            }
+        }
+
+        error("❌ Nenhum resultado encontrado no Postgres para $data")
+    }
+
+    fun obterResumoTopRegiaoPlataformaPostgresPorDia(
+        data: String
+    ): TopPlaysPostgresResumo {
+
+        val sql = """
+        select 
+            'top_regiao_plataformas',
+            sum(plays),
+            plataforma,
+            data_referencia
+		from top_regiao_plataformas trp
+	    where data_referencia = '$data'
+        group by data_referencia,plataforma
+    """.trimIndent()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                if (rs.next()) {
+                    val result = TopPlaysPostgresResumo(
+                        tipo = rs.getString(1),
+                        somaPlays = rs.getLong(2),
+                        plataforma = rs.getString(3),
+                        dataReferencia = rs.getDate(4).toString()
+                    )
+
+                    LogCollector.println("🐘 Postgres resumo: $result")
+                    return result
+                }
+            }
+        }
+
+        error("❌ Nenhum resultado encontrado no Postgres para $data")
+    }
+
+    fun obterResumoTopPlayListsPostgresPorDia(
+        data: String
+    ): TopPlaysPostgresResumo {
+
+        val sql = """
+        select 
+            'top_playlists',
+            sum(plays),
+            plataforma,
+            data_referencia
+        from top_playlists tp
+		where data_referencia = '$data'
+		group by data_referencia,plataforma
+    """.trimIndent()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                if (rs.next()) {
+                    val result = TopPlaysPostgresResumo(
+                        tipo = rs.getString(1),
+                        somaPlays = rs.getLong(2),
+                        plataforma = rs.getString(3),
+                        dataReferencia = rs.getDate(4).toString()
+                    )
+
+                    LogCollector.println("🐘 Postgres resumo: $result")
+                    return result
+                }
+            }
+        }
+
+        error("❌ Nenhum resultado encontrado no Postgres para $data")
+    }
+
+
+    data class RedisTopPlayRow(
+        val assetId: String,
+        val plays: Long,
+        val date: String
+    )
+
+    fun lerRowsRedis(
+        prefix: String,
+        data: String
+    ): List<RedisTopPlayRow> {
+
+        val key = "$prefix:$data:rows"
+
+        return RedisClient.jedis.lrange(key, 0, -1).map {
+            val json = JSONObject(it)
+            RedisTopPlayRow(
+                assetId = json.getString("asset_id"),
+                plays = json.getLong("number_of_streams"),
+                date = json.getString("date")
+            )
         }
     }
-    fun validarItemContraRedis(
-        itemApi: Map<String, Any>,
-        sampleDay: String
+
+    fun buscarRowsPostgresPorAssets(
+        assetIds: List<String>,
+        data: String
+    ): Map<String, Long> {
+
+        val ids = assetIds.joinToString(",") { "'$it'" }
+
+        val sql = """
+        SELECT 
+            faixa_musical_id,
+            SUM(qtd_total_plays) AS total
+        FROM top_plays
+        WHERE faixa_musical_id IN ($ids)
+          AND CAST(data_referencia AS date) = DATE '$data'
+        GROUP BY faixa_musical_id
+            """.trimIndent()
+
+        val result = mutableMapOf<String, Long>()
+
+        PostgresHelper.getConnection().use { conn ->
+            conn.createStatement().use { st ->
+                val rs = st.executeQuery(sql)
+                while (rs.next()) {
+                    result[rs.getString("faixa_musical_id")] =
+                        rs.getLong("total")
+                }
+            }
+        }
+
+        return result
+    }
+
+    fun validarRowsRedisVsPostgres(
+        redisRows: List<RedisTopPlayRow>,
+        data: String,
+        sample: Boolean = true,
+        sampleSize: Int = 10
     ) {
-        val assetId = itemApi["asset_id"]?.toString()
-            ?: error("asset_id ausente no item da API")
 
-        val redisKey = "imusic:topplays:$sampleDay:rows"
-        val redisSample = RedisClient.jedis.lrange(redisKey, 0, 200)
+        val rowsParaValidar =
+            if (sample) redisRows.take(sampleSize) else redisRows
 
-        val encontrado = redisSample.any {
-            it.contains("\"asset_id\":\"$assetId\"")
+        val postgresMap = buscarRowsPostgresPorAssets(
+            rowsParaValidar.map { it.assetId },
+            data
+        )
+
+        rowsParaValidar.forEach { redis ->
+            val pgPlays = postgresMap[redis.assetId]
+                ?: error("Asset ${redis.assetId} não encontrado no Postgres")
+
+            assertEquals(
+                pgPlays,
+                redis.plays,
+                "❌ Divergência de plays para asset ${redis.assetId}"
+            )
+
+            LogCollector.println("✔ Asset ${redis.assetId} validado")
         }
-
-        require(encontrado) {
-            "❌ asset_id $assetId retornado pela API não encontrado no Redis"
-        }
-
-        LogCollector.println("✔ asset_id $assetId validado contra Redis")
     }
-
-
 
 
 }

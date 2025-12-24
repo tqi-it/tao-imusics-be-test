@@ -1,14 +1,12 @@
 package util
 
+import util.Data.Companion.pgPass
+import util.Data.Companion.pgUrl
+import util.Data.Companion.pgUser
 import java.sql.Connection
 import java.sql.DriverManager
 
 object PostgresHelper {
-
-    val pgUrl = System.getProperty("pg.url", "jdbc:postgresql://localhost:5432/tao")
-    val pgUser = System.getProperty("pg.user", "postgres")
-    val pgPass = System.getProperty("pg.password", "postgres")
-    val jwt = System.getProperty("test.jwt", "")
 
     fun getConnection(): Connection {
         return DriverManager.getConnection(pgUrl, pgUser, pgPass)
@@ -25,6 +23,43 @@ object PostgresHelper {
         }
         return 0L
     }
+
+    fun contarTopPlaysNoPostgresPorMes(
+        ano: Int,
+        mes: Int
+    ): Long {
+
+        val sql = """
+        SELECT COUNT(1)
+        FROM top_plays
+        WHERE EXTRACT(YEAR FROM reference_date) = $ano
+          AND EXTRACT(MONTH FROM reference_date) = $mes
+    """.trimIndent()
+        val total = querySingleLong(sql)
+        LogCollector.println("🐘 Postgres → Total registros $mes/$ano: $total")
+        return total
+    }
+
+    fun somarPlaysNoPostgresPorMes(
+        ano: Int,
+        mes: Int
+    ): Long {
+
+        val sql = """
+        SELECT COALESCE(SUM(plays), 0)
+        FROM top_plays
+        WHERE EXTRACT(YEAR FROM reference_date) = $ano
+          AND EXTRACT(MONTH FROM reference_date) = $mes
+    """.trimIndent()
+
+        val total = PostgresHelper.querySingleLong(sql)
+
+        LogCollector.println("🐘 Postgres → Soma plays $mes/$ano: $total")
+
+        return total
+    }
+
+
 
 
 
